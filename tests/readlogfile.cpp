@@ -1,4 +1,3 @@
-#include "rtpexternaltransmitter.h"
 #include "rtperrors.h"
 #include "rtpsession.h"
 #include "rtpsessionparams.h"

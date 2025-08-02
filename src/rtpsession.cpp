@@ -4,7 +4,6 @@
 #include "rtpudpv4transmitter.h"
 #include "rtpudpv6transmitter.h"
 #include "rtptcptransmitter.h"
-#include "rtpexternaltransmitter.h"
 #include "rtpsessionparams.h"
 #include "rtpdefines.h"
 #include "rtprawpacket.h"
@@ -101,9 +100,6 @@ int RTPSession::Create(const RTPSessionParams &sessparams,const RTPTransmissionP
 		rtptrans = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMITTER) RTPUDPv6Transmitter(GetMemoryManager());
 		break;
 #endif // RTP_SUPPORT_IPV6
-	case RTPTransmitter::ExternalProto:
-		rtptrans = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMITTER) RTPExternalTransmitter(GetMemoryManager());
-		break;
 	case RTPTransmitter::UserDefinedProto:
 		rtptrans = NewUserDefinedTransmitter();
 		if (rtptrans == 0)

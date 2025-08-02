@@ -47,7 +47,6 @@ set (HEADERS
 	rtpudpv4transmitter.h
 	rtpudpv6transmitter.h  
 	rtpbyteaddress.h
-	rtpexternaltransmitter.h
 	rtpsocketutil.h
 	rtpabortdescriptors.h
 	rtpselect.h
@@ -90,7 +89,6 @@ set(SOURCES
 	rtpudpv4transmitter.cpp
 	rtpudpv6transmitter.cpp 
 	rtpbyteaddress.cpp
-	rtpexternaltransmitter.cpp
 	rtpabortdescriptors.cpp
 	rtptcpaddress.cpp
 	rtptcptransmitter.cpp
