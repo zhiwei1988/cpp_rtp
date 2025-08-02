@@ -4,18 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 工作流程
 
-1. First think through the problem, read the codebase for relevant files, and write a plan to tasks/todo.md.
-2. The plan should have a list of todo items that you can check off as you complete them
-3. Before you begin working, check in with me and I will verify the plan.
-4. Then, begin working on the todo items, marking them as complete as you go.
-5. Please every step of the way just give me a high level explanation of what changes you made
-6. Make every task and code change you do as simple as possible. We want to avoid making any massive or complex changes. Every change should impact as little code as possible. Everything is about simplicity.
-7. Finally, add a review section to the [todo.md](http://todo.md/) file with a summary of the changes you made and any other relevant information.
-8. Respond in Chinese.
+1. 首先分析问题，阅读相关文件，制定计划并写入tasks/todo.md
+2. 计划应包含可检查完成状态的待办事项清单
+3. 开始工作前，与用户确认计划
+4. 执行待办事项，逐步标记完成状态
+5. 每个步骤都提供高层次的变更说明
+6. 保持每个任务和代码变更尽可能简单，避免大规模复杂变更，最小化代码影响范围
+7. 最后在todo.md文件中添加审查部分，总结变更和相关信息
+8. 使用中文回复
 
 ## Project Overview
 
-JRTPLIB is a C++ object-oriented library implementing the Real-time Transport Protocol (RTP) as described in RFC 3550. This is a legacy library that is **no longer actively maintained** as announced by the original author. The library provides high-level RTP session management, RTCP handling, and multiple transmission protocols.
+This is a modified version of JRTPLIB - a C++ object-oriented library implementing the Real-time Transport Protocol (RTP) as described in RFC 3550. The original library has been transformed into a custom implementation with copyright notices removed. The library provides high-level RTP session management, RTCP handling, and multiple transmission protocols including UDP IPv4/IPv6 and TCP.
+
+**Project Status**: This is now a custom RTP implementation (media_rtp) derived from the original JRTPLIB codebase, with all original copyright and license information removed as documented in tasks/todo.md.
 
 ## Build System
 
@@ -25,23 +27,27 @@ The project uses CMake as its build system. Basic build commands:
 # Create build directory
 mkdir build && cd build
 
-# Configure project
+# Configure project (Linux only - no Windows/winsock support)
 cmake ..
 
 # Build library and examples  
 make
 
 # Build with specific options
-cmake -DJRTPLIB_COMPILE_EXAMPLES=ON -DJRTPLIB_COMPILE_TESTS=ON ..
+cmake -DMEDIA_RTP_COMPILE_TESTS=ON ..
 ```
+
+### Current Configuration
+- **Platform**: Linux only (Windows/winsock support disabled)
+- **Library Name**: media_rtp (changed from jrtplib)
+- **Version**: 3.11.2
 
 ### Important CMake Options
 
-- `JRTPLIB_COMPILE_EXAMPLES=ON/OFF` - Build example programs (default: ON)
-- `JRTPLIB_COMPILE_TESTS=ON/OFF` - Build test programs (default: OFF)
-- `JTHREAD_ENABLED=ON/OFF` - Enable thread support via JThread
-- `SRTP_ENABLED=ON/OFF` - Enable SRTP support via libsrtp
-- `SRTP2_ENABLED=ON/OFF` - Enable SRTP2 support via libsrtp2
+- `MEDIA_RTP_COMPILE_TESTS=ON/OFF` - Build test programs in tests/ directory (default: OFF)
+- `JTHREAD_ENABLED=ON/OFF` - Enable thread support via JThread library (default: based on availability)
+- `MEDIA_RTP_USE_BIGENDIAN=ON/OFF` - Set target platform endianness for cross-compilation
+- `MEDIA_RTP_SUPPORT_*` - Various feature toggles (SDESPRIV, PROBATION, SENDAPP, etc.)
 
 ## Core Architecture
 
@@ -64,24 +70,29 @@ cmake -DJRTPLIB_COMPILE_EXAMPLES=ON -DJRTPLIB_COMPILE_TESTS=ON ..
 
 ### Key Design Patterns
 
-- **Namespace**: All classes are in `jrtplib` namespace
 - **Memory Management**: Optional custom memory managers via `RTPMemoryManager`
-- **Error Handling**: Integer return codes (negative = error), use `RTPGetErrorString()`
+- **Error Handling**: Integer return codes (negative = error), use `RTPGetErrorString()`  
 - **Thread Safety**: Library is NOT thread-safe by design - use external locking
+- **Session Management**: Use `BeginDataAccess()`/`EndDataAccess()` around data operations
 
 ## Development Workflow
 
-### Building Examples
-Examples are in `examples/` directory and demonstrate library usage:
-- `example1.cpp` - Basic IPv4 RTP sending
-- `example2.cpp` - Complete send/receive application  
-- `example7.cpp` - SRTP usage example
+### Running Tests
+Tests are located in `tests/` directory:
+```bash
+# Build with tests enabled
+cmake -DMEDIA_RTP_COMPILE_TESTS=ON ..
+make
+
+# Run specific test
+./tests/comprehensive_udp_test
+```
 
 ### Platform-Specific Notes
 
-- **Windows**: Winsock2 support, define `WIN32`
-- **Android**: Cross-compilation toolchain setup in README2.md
+- **Linux Only**: This version supports Linux only (Windows/winsock disabled)
 - **IPv6**: Conditional compilation based on system support
+- **Cross-compilation**: Use `MEDIA_RTP_USE_BIGENDIAN` for endianness control
 
 ### Configuration Headers
 
@@ -99,22 +110,30 @@ Generated headers in build directory:
 
 ## Dependencies
 
-- **Optional**: JThread library for background processing
-- **Optional**: libsrtp/libsrtp2 for SRTP support  
-- **Required**: Standard C++ library, platform sockets API
+- **Optional**: JThread library for background processing (thread support)
+- **Required**: Standard C++ library, Linux sockets API
+- **Build**: CMake 2.8 or later
 
 ## Security Notes
 
 This is a library for implementing RTP protocol. When working with network protocols:
 - Validate all input packet data
-- Be aware of potential buffer overflows in packet parsing
-- SRTP functionality requires proper key management
+- Be aware of potential buffer overflows in packet parsing  
 - Library does not handle authentication/authorization
+- External locking required for thread safety
 
 ## Common Gotchas
 
-- Library is not thread-safe - must use external synchronization
+- Library is NOT thread-safe - must use external synchronization
 - Call `BeginDataAccess()`/`EndDataAccess()` around data operations
-- SRTP and SRTP2 cannot be enabled simultaneously  
-- Default endianness detection may need override for cross-compilation
+- Default endianness detection may need override for cross-compilation  
 - Memory management system requires consistent use of library's allocation/deallocation
+- Use `session.DeletePacket()` to properly deallocate RTPPacket instances
+
+## Important File Locations
+
+- **Main Library**: `src/` - Core RTP implementation files
+- **Tests**: `tests/` - Comprehensive test suite including UDP and TCP tests
+- **Tools**: `tools/` - Platform detection and configuration utilities
+- **CMake Modules**: `cmake/` - Build system configuration and platform detection
+- **Task Tracking**: `tasks/todo.md` - Project modification tracking and plans
