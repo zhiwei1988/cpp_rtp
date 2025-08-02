@@ -8,9 +8,7 @@
 #endif // RTP_SUPPORT_NETINET_IN
 #include <string.h>
 
-#ifdef RTPDEBUG
-	#include <stdio.h>
-#endif // RTPDEBUG
+
 
 
 
@@ -284,29 +282,5 @@ int RTPPacket::BuildPacket(uint8_t payloadtype,const void *payloaddata,size_t pa
 	return 0;
 }
 
-#ifdef RTPDEBUG	
-void RTPPacket::Dump()
-{
-	int i;
-	
-	printf("Payload type:                %d\n",(int)GetPayloadType());
-	printf("Extended sequence number:    0x%08x\n",GetExtendedSequenceNumber());
-	printf("Timestamp:                   0x%08x\n",GetTimestamp());
-	printf("SSRC:                        0x%08x\n",GetSSRC());
-	printf("Marker:                      %s\n",HasMarker()?"yes":"no");
-	printf("CSRC count:                  %d\n",GetCSRCCount());
-	for (i = 0 ; i < GetCSRCCount() ; i++)
-		printf("    CSRC[%02d]:                0x%08x\n",i,GetCSRC(i));
-	printf("Payload:                     %s\n",GetPayloadData());
-	printf("Payload length:              %d\n",GetPayloadLength());
-	printf("Packet length:               %d\n",GetPacketLength());
-	printf("Extension:                   %s\n",HasExtension()?"yes":"no");
-	if (HasExtension())
-	{
-		printf("    Extension ID:            0x%04x\n",GetExtensionID());
-		printf("    Extension data:          %s\n",GetExtensionData());
-		printf("    Extension length:        %d\n",GetExtensionLength());
-	}
-}
-#endif // RTPDEBUG
+
 

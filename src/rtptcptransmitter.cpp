@@ -10,9 +10,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <vector>
-#ifdef RTPDEBUG
-	#include <iostream>
-#endif // RTPDEBUG
+
 
 #include <iostream>
 
@@ -725,12 +723,7 @@ int RTPTCPTransmitter::PollSocket(SocketType sock, SocketData &sdata)
 	return 0;
 }
 
-#ifdef RTPDEBUG
-void RTPTCPTransmitter::Dump()
-{
-	// TODO
-}
-#endif // RTPDEBUG
+
 
 int RTPTCPTransmitter::SendRTPRTCPData(const void *data, size_t len)
 {

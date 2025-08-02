@@ -1,9 +1,6 @@
 #include "rtpbyteaddress.h"
 #include "rtpmemorymanager.h"
-#ifdef RTPDEBUG
-	#include "rtpinternalutils.h" 
-	#include <stdio.h>
-#endif // RTPDEBUG
+
 
 bool RTPByteAddress::IsSameAddress(const RTPAddress *addr) const
 {
@@ -47,24 +44,5 @@ RTPAddress *RTPByteAddress::CreateCopy(RTPMemoryManager *mgr) const
 	return a;
 }
 
-#ifdef RTPDEBUG
-std::string RTPByteAddress::GetAddressString() const
-{
-	char str[16];
-	std::string s;
 
-	for (int i = 0 ; i < addresslength ; i++)
-	{
-		RTP_SNPRINTF(str, 16, "%02X", (int)hostaddress[i]);
-		s += std::string(str);
-	}
-	s += std::string(":");
-
-	RTP_SNPRINTF(str, 16, "%d",(int)port);
-	s += std::string(str);
-
-	return s;
-}
-
-#endif // RTPDEBUG
 

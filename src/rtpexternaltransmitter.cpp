@@ -8,9 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef RTPDEBUG
-	#include <iostream>
-#endif // RTPDEBUG
+
 
 
 
@@ -700,25 +698,5 @@ void RTPExternalTransmitter::InjectRTPorRTCP(const void *data, size_t len, const
 
 }
 
-#ifdef RTPDEBUG
-void RTPExternalTransmitter::Dump()
-{
-	if (!init)
-		std::cout << "Not initialized" << std::endl;
-	else
-	{
-		MAINMUTEX_LOCK
-	
-		if (!created)
-			std::cout << "Not created" << std::endl;
-		else
-		{
-			std::cout << "Number of raw packets in queue: " << rawpacketlist.size() << std::endl;
-			std::cout << "Maximum allowed packet size:    " << maxpacksize << std::endl;
-		}
-		
-		MAINMUTEX_UNLOCK
-	}
-}
-#endif // RTPDEBUG
+
 

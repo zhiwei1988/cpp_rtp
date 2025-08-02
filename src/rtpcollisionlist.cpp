@@ -1,9 +1,7 @@
 #include "rtpcollisionlist.h"
 #include "rtperrors.h"
 #include "rtpmemorymanager.h"
-#ifdef RTPDEBUG
-	#include <iostream>
-#endif // RTPDEBUG
+
 
 
 
@@ -79,13 +77,5 @@ void RTPCollisionList::Timeout(const RTPTime &currenttime,const RTPTime &timeout
 	}
 }
 
-#ifdef RTPDEBUG
-void RTPCollisionList::Dump()
-{
-	std::list<AddressAndTime>::const_iterator it;
-	
-	for (it = addresslist.begin() ; it != addresslist.end() ; it++)
-		std::cout << "Address: " << ((*it).addr)->GetAddressString() << "\tTime: " << (*it).recvtime.GetSeconds() << std::endl;
-}
-#endif // RTPDEBUG
+
 

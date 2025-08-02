@@ -25,9 +25,7 @@
 	#include <winbase.h>
 #endif // WIN32
 
-#ifdef RTPDEBUG
-	#include <iostream>
-#endif // RTPDEBUG
+
 
 
 
@@ -1666,19 +1664,5 @@ int RTPSession::SendRTCPData(const void *data, size_t len)
 	return status;
 }
 
-#ifdef RTPDEBUG
-void RTPSession::DumpSources()
-{
-	BeginDataAccess();
-	std::cout << "----------------------------------------------------------------" << std::endl;
-	sources.Dump();
-	EndDataAccess();
-}
 
-void RTPSession::DumpTransmitter()
-{
-	if (created)
-		rtptrans->Dump();
-}
-#endif // RTPDEBUG
 

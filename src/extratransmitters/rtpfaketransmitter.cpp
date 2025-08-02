@@ -17,9 +17,7 @@
 
 #define RTPIOCTL								ioctl
 
-#ifdef RTPDEBUG
-	#include <iostream>
-#endif // RTPDEBUG
+
 
 
 
@@ -135,18 +133,6 @@ int RTPFakeTransmitter::Create(size_t maximumpacketsize,const RTPTransmissionPar
 			MAINMUTEX_UNLOCK
 			return status;
 		}
-#ifdef RTPDEBUG
-		std::cout << "Found these local IP addresses:" << std::endl;
-		
-		std::list<uint32_t>::const_iterator it;
-
-		for (it = localIPs.begin() ; it != localIPs.end() ; it++)
-		{
-			RTPIPv4Address a(*it);
-
-			std::cout << a.GetAddressString() << std::endl;
-		}
-#endif // RTPDEBUG
 	}
 
 //#ifdef RTP_SUPPORT_IPV4MULTICAST
@@ -1352,120 +1338,4 @@ void RTPFakeTransmitter::AddLoopbackAddress()
 		localIPs.push_back(loopbackaddr);
 }
 
-#ifdef RTPDEBUG
-void RTPFakeTransmitter::Dump()
-{
-	if (!init)
-		std::cout << "Not initialized" << std::endl;
-	else
-	{
-		MAINMUTEX_LOCK
-	
-		if (!created)
-			std::cout << "Not created" << std::endl;
-		else
-		{
-			char str[16];
-			uint32_t ip;
-			std::list<uint32_t>::const_iterator it;
-			
-			std::cout << "Portbase:                       " << params->GetPortbase() << std::endl;
-			std::cout << "Local IP addresses:" << std::endl;
-			for (it = localIPs.begin() ; it != localIPs.end() ; it++)
-			{
-				ip = (*it);
-				snprintf(str,16,"%d.%d.%d.%d",(int)((ip>>24)&0xFF),(int)((ip>>16)&0xFF),(int)((ip>>8)&0xFF),(int)(ip&0xFF));
-				std::cout << "    " << str << std::endl;
-			}
-//			std::cout << "Multicast TTL:                  " << (int)multicastTTL << std::endl;
-			std::cout << "Receive mode:                   ";
-			switch (receivemode)
-			{
-			case RTPTransmitter::AcceptAll:
-				std::cout << "Accept all";
-				break;
-			case RTPTransmitter::AcceptSome:
-				std::cout << "Accept some";
-				break;
-			case RTPTransmitter::IgnoreSome:
-				std::cout << "Ignore some";
-			}
-			std::cout << std::endl;
-			if (receivemode != RTPTransmitter::AcceptAll)
-			{
-				acceptignoreinfo.GotoFirstElement();
-				while(acceptignoreinfo.HasCurrentElement())
-				{
-					ip = acceptignoreinfo.GetCurrentKey();
-					snprintf(str,16,"%d.%d.%d.%d",(int)((ip>>24)&0xFF),(int)((ip>>16)&0xFF),(int)((ip>>8)&0xFF),(int)(ip&0xFF));
-					PortInfo *pinfo = acceptignoreinfo.GetCurrentElement();
-					std::cout << "    " << str << ": ";
-					if (pinfo->all)
-					{
-						std::cout << "All ports";
-						if (!pinfo->portlist.empty())
-							std::cout << ", except ";
-					}
-					
-					std::list<uint16_t>::const_iterator it;
-					
-					for (it = pinfo->portlist.begin() ; it != pinfo->portlist.end() ; )
-					{
-						std::cout << (*it);
-						it++;
-						if (it != pinfo->portlist.end())
-							std::cout << ", ";
-					}
-					std::cout << std::endl;
-				}
-			}
-			
-			std::cout << "Local host name:                ";
-			if (localhostname == 0)
-				std::cout << "Not set";
-			else
-				std::cout << localhostname;
-			std::cout << std::endl;
-
-			std::cout << "List of destinations:           ";
-			destinations.GotoFirstElement();
-			if (destinations.HasCurrentElement())
-			{
-				std::cout << std::endl;
-				do
-				{
-					std::cout << "    " << destinations.GetCurrentElement().GetDestinationString() << std::endl;
-					destinations.GotoNextElement();
-				} while (destinations.HasCurrentElement());
-			}
-			else
-				std::cout << "Empty" << std::endl;
-		
-			std::cout << "Supports multicasting:          " << ((supportsmulticasting)?"Yes":"No") << std::endl;
-#ifdef RTP_SUPPORT_IPV4MULTICAST
-/*			std::cout << "List of multicast groups:       ";
-			multicastgroups.GotoFirstElement();
-			if (multicastgroups.HasCurrentElement())
-			{
-				std::cout << std::endl;
-				do
-				{
-					ip = multicastgroups.GetCurrentElement();
-					snprintf(str,16,"%d.%d.%d.%d",(int)((ip>>24)&0xFF),(int)((ip>>16)&0xFF),(int)((ip>>8)&0xFF),(int)(ip&0xFF));
-					std::cout << "    " << str << std::endl;
-					multicastgroups.GotoNextElement();
-				} while (multicastgroups.HasCurrentElement());
-			}
-			else
-				std::cout << "Empty" << std::endl;*/
-#endif // RTP_SUPPORT_IPV4MULTICAST
-			
-			std::cout << "Number of raw packets in queue: " << rawpacketlist.size() << std::endl;
-			std::cout << "Maximum allowed packet size:    " << maxpacksize << std::endl;
-		}
-		
-		MAINMUTEX_UNLOCK
-	}
-}
-#endif // RTPDEBUG
 

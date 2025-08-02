@@ -903,24 +903,6 @@ void RTPSources::Timeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 		}
 	}
 	
-#ifdef RTPDEBUG
-	if (newtotalcount != totalcount)
-	{
-		std::cout << "New total count " << newtotalcount << " doesnt match old total count " << totalcount << std::endl;
-		SafeCountTotal();
-	}
-	if (newsendercount != sendercount)
-	{
-		std::cout << "New sender count " << newsendercount << " doesnt match old sender count " << sendercount << std::endl;
-		SafeCountSenders();
-	}
-	if (newactivecount != activecount)
-	{
-		std::cout << "New active count " << newactivecount << " doesnt match old active count " << activecount << std::endl;
-		SafeCountActive();
-	}
-#endif // RTPDEBUG
-	
 	totalcount = newtotalcount; // just to play it safe
 	sendercount = newsendercount;
 	activecount = newactivecount;
@@ -958,23 +940,7 @@ void RTPSources::SenderTimeout(const RTPTime &curtime,const RTPTime &timeoutdela
 		sourcelist.GotoNextElement();
 	}
 	
-#ifdef RTPDEBUG
-	if (newtotalcount != totalcount)
-	{
-		std::cout << "New total count " << newtotalcount << " doesnt match old total count " << totalcount << std::endl;
-		SafeCountTotal();
-	}
-	if (newsendercount != sendercount)
-	{
-		std::cout << "New sender count " << newsendercount << " doesnt match old sender count " << sendercount << std::endl;
-		SafeCountSenders();
-	}
-	if (newactivecount != activecount)
-	{
-		std::cout << "New active count " << newactivecount << " doesnt match old active count " << activecount << std::endl;
-		SafeCountActive();
-	}
-#endif // RTPDEBUG
+
 	
 	totalcount = newtotalcount; // just to play it safe
 	sendercount = newsendercount;
@@ -1031,23 +997,7 @@ void RTPSources::BYETimeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 		}
 	}
 	
-#ifdef RTPDEBUG
-	if (newtotalcount != totalcount)
-	{
-		std::cout << "New total count " << newtotalcount << " doesnt match old total count " << totalcount << std::endl;
-		SafeCountTotal();
-	}
-	if (newsendercount != sendercount)
-	{
-		std::cout << "New sender count " << newsendercount << " doesnt match old sender count " << sendercount << std::endl;
-		SafeCountSenders();
-	}
-	if (newactivecount != activecount)
-	{
-		std::cout << "New active count " << newactivecount << " doesnt match old active count " << activecount << std::endl;
-		SafeCountActive();
-	}
-#endif // RTPDEBUG
+
 	
 	totalcount = newtotalcount; // just to play it safe
 	sendercount = newsendercount;
@@ -1088,23 +1038,7 @@ void RTPSources::NoteTimeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 		sourcelist.GotoNextElement();
 	}
 	
-#ifdef RTPDEBUG
-	if (newtotalcount != totalcount)
-	{
-		std::cout << "New total count " << newtotalcount << " doesnt match old total count " << totalcount << std::endl;
-		SafeCountTotal();
-	}
-	if (newsendercount != sendercount)
-	{
-		std::cout << "New sender count " << newsendercount << " doesnt match old sender count " << sendercount << std::endl;
-		SafeCountSenders();
-	}
-	if (newactivecount != activecount)
-	{
-		std::cout << "New active count " << newactivecount << " doesnt match old active count " << activecount << std::endl;
-		SafeCountActive();
-	}
-#endif // RTPDEBUG
+
 	
 	totalcount = newtotalcount; // just to play it safe
 	sendercount = newsendercount;
@@ -1220,96 +1154,12 @@ void RTPSources::MultipleTimeouts(const RTPTime &curtime,const RTPTime &senderti
 		}
 	}	
 	
-#ifdef RTPDEBUG
-	if (newtotalcount != totalcount)
-	{
-		SafeCountTotal();
-		std::cout << "New total count " << newtotalcount << " doesnt match old total count " << totalcount << std::endl;
-	}
-	if (newsendercount != sendercount)
-	{
-		SafeCountSenders();
-		std::cout << "New sender count " << newsendercount << " doesnt match old sender count " << sendercount << std::endl;
-	}
-	if (newactivecount != activecount)
-	{
-		std::cout << "New active count " << newactivecount << " doesnt match old active count " << activecount << std::endl;
-		SafeCountActive();
-	}
-#endif // RTPDEBUG
-	
 	totalcount = newtotalcount; // just to play it safe
 	sendercount = newsendercount;
 	activecount = newactivecount;
 }
 
-#ifdef RTPDEBUG
-void RTPSources::Dump()
-{
-	std::cout << "Total count:  " << totalcount << std::endl;
-	std::cout << "Sender count: " << sendercount << std::endl;
-	std::cout << "Active count: " << activecount << std::endl;
-	if (GotoFirstSource())
-	{
-		do
-		{
-			RTPSourceData *s;
-			s = GetCurrentSourceInfo();
-			s->Dump();
-			std::cout << std::endl;
-		} while (GotoNextSource());
-	}
-}
 
-void RTPSources::SafeCountTotal()
-{
-	int count = 0;
-	
-	if (GotoFirstSource())
-	{
-		do
-		{
-			count++;	
-		} while (GotoNextSource());
-	}
-	std::cout << "Actual total count: " << count << std::endl;
-}
-
-void RTPSources::SafeCountSenders()
-{
-	int count = 0;
-	
-	if (GotoFirstSource())
-	{
-		do
-		{
-			RTPSourceData *s;
-			s = GetCurrentSourceInfo();
-			if (s->IsSender())
-				count++;	
-		} while (GotoNextSource());
-	}
-	std::cout << "Actual sender count: " << count << std::endl;
-}
-
-void RTPSources::SafeCountActive()
-{
-	int count = 0;
-	
-	if (GotoFirstSource())
-	{
-		do
-		{
-			RTPSourceData *s;
-			s = GetCurrentSourceInfo();
-			if (s->IsActive())
-				count++;	
-		} while (GotoNextSource());
-	}
-	std::cout << "Actual active count: " << count << std::endl;
-}
-
-#endif // RTPDEBUG
 
 bool RTPSources::CheckCollision(RTPInternalSourceData *srcdat,const RTPAddress *senderaddress,bool isrtp)
 {

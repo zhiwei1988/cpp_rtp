@@ -1,8 +1,5 @@
 #include "rtcpsdespacket.h"
-#ifdef RTPDEBUG
-	#include <iostream>
-	#include <string.h>
-#endif // RTPDEBUG
+
 
 
 
@@ -107,91 +104,5 @@ RTCPSDESPacket::RTCPSDESPacket(uint8_t *data,size_t datalength)
 	knownformat = true;
 }
 
-#ifdef RTPDEBUG
-void RTCPSDESPacket::Dump()
-{
-	RTCPPacket::Dump();
-	if (!IsKnownFormat())
-	{
-		std::cout << "    Unknown format" << std::endl;
-		return;
-	}
-	if (!GotoFirstChunk())
-	{
-		std::cout << "    No chunks present" << std::endl;
-		return;
-	}
-	
-	do
-	{
-		std::cout << "    SDES Chunk for SSRC:    " << GetChunkSSRC() << std::endl;
-		if (!GotoFirstItem())
-			std::cout << "        No items found" << std::endl; 
-		else
-		{
-			do
-			{
-				std::cout << "        ";
-				switch (GetItemType())
-				{
-				case None:
-					std::cout << "None    ";
-					break;
-				case CNAME:
-					std::cout << "CNAME   ";
-					break;
-				case NAME:
-					std::cout << "NAME    ";
-					break;
-				case EMAIL:
-					std::cout << "EMAIL   ";
-					break;
-				case PHONE:
-					std::cout << "PHONE   ";
-					break;
-				case LOC:
-					std::cout << "LOC     ";
-					break;
-				case TOOL:
-					std::cout << "TOOL    ";
-					break;
-				case NOTE:
-					std::cout << "NOTE    ";
-					break;
-				case PRIV:
-					std::cout << "PRIV    ";
-					break;
-				case Unknown:
-				default:
-					std::cout << "Unknown ";
-				}
-				
-				std::cout << "Length: " << GetItemLength() << std::endl;
 
-				if (GetItemType() != PRIV)
-				{
-					char str[1024];
-					memcpy(str,GetItemData(),GetItemLength());
-					str[GetItemLength()] = 0;
-					std::cout << "                Value:  " << str << std::endl;
-				}
-#ifdef RTP_SUPPORT_SDESPRIV
-				else // PRIV item
-				{
-					char str[1024];
-					memcpy(str,GetPRIVPrefixData(),GetPRIVPrefixLength());
-					str[GetPRIVPrefixLength()] = 0;
-					std::cout << "                Prefix: " << str << std::endl;
-					std::cout << "                Length: " << GetPRIVPrefixLength() << std::endl;
-					memcpy(str,GetPRIVValueData(),GetPRIVValueLength());
-					str[GetPRIVValueLength()] = 0;
-					std::cout << "                Value:  " << str << std::endl;
-					std::cout << "                Length: " << GetPRIVValueLength() << std::endl;
-				}
-#endif // RTP_SUPPORT_SDESPRIV
-			} while (GotoNextItem());
-		}
-	} while (GotoNextChunk());
-}
-#endif // RTPDEBUG
 

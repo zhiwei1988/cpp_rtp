@@ -1,9 +1,5 @@
 #include "rtcpapppacket.h"
-#ifdef RTPDEBUG
-	#include <string.h>
-	#include <iostream>
-	#include <string>
-#endif // RTPDEBUG
+
 
 
 
@@ -33,24 +29,5 @@ RTCPAPPPacket::RTCPAPPPacket(uint8_t *data,size_t datalength)
 	knownformat = true;
 }
 
-#ifdef RTPDEBUG
-void RTCPAPPPacket::Dump()
-{
-	RTCPPacket::Dump();
-	if (!IsKnownFormat())
-	{
-		std::cout << "    Unknown format!" << std::endl;
-	}
-	else
-	{
-		std::cout << "    SSRC:   " << GetSSRC() << std::endl;
-		
-		char str[5];
-		memcpy(str,GetName(),4);
-		str[4] = 0;
-		std::cout << "    Name:   " << std::string(str).c_str() << std::endl;
-		std::cout << "    Length: " << GetAPPDataLength() << std::endl;
-	}
-}
-#endif // RTPDEBUG
+
 

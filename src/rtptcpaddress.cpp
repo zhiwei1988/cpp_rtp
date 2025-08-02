@@ -30,11 +30,5 @@ RTPAddress *RTPTCPAddress::CreateCopy(RTPMemoryManager *mgr) const
 	return a;
 }
 
-#ifdef RTPDEBUG
-std::string RTPTCPAddress::GetAddressString() const
-{
-	// TODO
-	return "RTPTCPAddress::GetAddressString: TODO";
-}
-#endif // RTPDEBUG
+
 

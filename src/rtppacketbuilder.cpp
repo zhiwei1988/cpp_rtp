@@ -4,9 +4,7 @@
 #include "rtpsources.h"
 #include <time.h>
 #include <stdlib.h>
-#ifdef RTPDEBUG
-	#include <iostream>
-#endif // RTPDEBUG
+
 
 
 

@@ -1,7 +1,5 @@
 #include "rtcprrpacket.h"
-#ifdef RTPDEBUG
-	#include <iostream>
-#endif // RTPDEBUG
+
 
 
 
@@ -34,30 +32,5 @@ RTCPRRPacket::RTCPRRPacket(uint8_t *data,size_t datalength)
 	knownformat = true;
 }
 
-#ifdef RTPDEBUG
-void RTCPRRPacket::Dump()
-{
-	RTCPPacket::Dump();
-	if (!IsKnownFormat())
-		std::cout << "    Unknown format" << std::endl;
-	else
-	{
-		int num = GetReceptionReportCount();
-		int i;
 
-		std::cout << "    SSRC of sender:     " << GetSenderSSRC() << std::endl;
-		for (i = 0 ; i < num ; i++)
-		{
-			std::cout << "    Report block " << i << std::endl;
-			std::cout << "        SSRC:           " << GetSSRC(i) << std::endl;
-			std::cout << "        Fraction lost:  " << (uint32_t)GetFractionLost(i) << std::endl;
-			std::cout << "        Packets lost:   " << GetLostPacketCount(i) << std::endl;
-			std::cout << "        Seq. nr.:       " << GetExtendedHighestSequenceNumber(i) << std::endl;
-			std::cout << "        Jitter:         " << GetJitter(i) << std::endl;
-			std::cout << "        LSR:            " << GetLSR(i) << std::endl;
-			std::cout << "        DLSR:           " << GetDLSR(i) << std::endl;
-		}
-	}	
-}
-#endif // RTPDEBUG
 
