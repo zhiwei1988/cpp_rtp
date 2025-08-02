@@ -100,11 +100,6 @@ int RTPSession::Create(const RTPSessionParams &sessparams,const RTPTransmissionP
 		rtptrans = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMITTER) RTPUDPv6Transmitter(GetMemoryManager());
 		break;
 #endif // RTP_SUPPORT_IPV6
-	case RTPTransmitter::UserDefinedProto:
-		rtptrans = NewUserDefinedTransmitter();
-		if (rtptrans == 0)
-			return ERR_RTP_SESSION_USERDEFINEDTRANSMITTERNULL;
-		break;
 	case RTPTransmitter::TCPProto:
 		rtptrans = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMITTER) RTPTCPTransmitter(GetMemoryManager());
 		break;

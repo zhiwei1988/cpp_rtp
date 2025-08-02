@@ -416,15 +416,6 @@ public:
 
 
 protected:
-	/** Allocate a user defined transmitter.
-	 *  In case you specified in the Create function that you want to use a
-	 *  user defined transmitter, you should override this function. The RTPTransmitter 
-	 *  instance returned by this function will then be used to send and receive RTP and 
-	 *  RTCP packets. Note that when the session is destroyed, this RTPTransmitter 
-	 *  instance will be destroyed as well.
- 	 */
-	virtual RTPTransmitter *NewUserDefinedTransmitter();
-	
 	/** Is called when an incoming RTP packet is about to be processed. 
 	 *  Is called when an incoming RTP packet is about to be processed. This is _not_
 	 *  a good function to process an RTP packet in, in case you want to avoid iterating
@@ -611,7 +602,6 @@ private:
 	friend class RTCPSessionPacketBuilder;
 };
 
-inline RTPTransmitter *RTPSession::NewUserDefinedTransmitter()                                          { return 0; }
 inline void RTPSession::OnRTPPacket(RTPPacket *, const RTPTime &, const RTPAddress *)                   { }
 inline void RTPSession::OnRTCPCompoundPacket(RTCPCompoundPacket *, const RTPTime &, const RTPAddress *) { }
 inline void RTPSession::OnSSRCCollision(RTPSourceData *, const RTPAddress *, bool )                     { }

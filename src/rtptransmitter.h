@@ -35,8 +35,7 @@ public:
 	{ 
 		IPv4UDPProto, /**< Specifies the internal UDP over IPv4 transmitter. */
 		IPv6UDPProto, /**< Specifies the internal UDP over IPv6 transmitter. */
-		TCPProto, /**< Specifies the internal TCP transmitter. */
-		UserDefinedProto  /**< Specifies a user defined, external transmitter. */
+		TCPProto /**< Specifies the internal TCP transmitter. */
 	};
 
 	/** Three kind of receive modes can be specified. */
