@@ -19,7 +19,7 @@
 	#include <stdlib.h>
 #endif // WIN32
 
-#include "rtpdebug.h"
+
 
 uint32_t RTPRandom::PickSeed()
 {

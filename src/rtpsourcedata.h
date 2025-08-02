@@ -388,9 +388,7 @@ public:
 	bool SDES_GetPrivateValue(uint8_t *prefix,size_t prefixlen,uint8_t **value,size_t *valuelen) const 		{ return SDESinf.GetPrivateValue(prefix,prefixlen,value,valuelen); }
 #endif // RTP_SUPPORT_SDESPRIV
 
-#ifdef RTPDEBUG
-	virtual void Dump();
-#endif // RTPDEBUG
+
 protected:
 	std::list<RTPPacket *> packetlist;
 

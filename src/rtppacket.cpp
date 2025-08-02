@@ -12,7 +12,7 @@
 	#include <stdio.h>
 #endif // RTPDEBUG
 
-#include "rtpdebug.h"
+
 
 void RTPPacket::Clear()
 {

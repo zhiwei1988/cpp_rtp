@@ -250,12 +250,7 @@ public:
 
 	/** Returns the number of members which have been validated and which haven't sent a BYE packet yet. */
 	int GetActiveMemberCount() const								{ return activecount; } 
-#ifdef RTPDEBUG
-	void Dump();
-	void SafeCountTotal();
-	void SafeCountSenders();
-	void SafeCountActive();
-#endif // RTPDEBUG
+
 protected:
 	/** Is called when an RTP packet is about to be processed. */
 	virtual void OnRTPPacket(RTPPacket *pack,const RTPTime &receivetime, const RTPAddress *senderaddress);

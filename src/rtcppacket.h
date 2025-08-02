@@ -43,9 +43,7 @@ public:
 	/** Returns the length of this RTCP packet. */
 	size_t GetPacketLength() const						{ return datalen; }
 
-#ifdef RTPDEBUG
-	virtual void Dump();
-#endif // RTPDEBUG
+
 protected:
 	uint8_t *data;
 	size_t datalen;

@@ -11,7 +11,7 @@
 	#include <string>
 #endif // RTPDEBUG
 
-#include "rtpdebug.h"
+
 
 #define ACCEPTPACKETCODE									\
 		*accept = true;									\

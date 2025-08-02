@@ -13,11 +13,7 @@
 #include "rtcprrpacket.h"
 #include "rtptransmitter.h"
 
-#ifdef RTPDEBUG
-	#include <iostream>
-#endif // RTPDEBUG
 
-#include "rtpdebug.h"
 
 RTPSources::RTPSources(ProbationType probtype,RTPMemoryManager *mgr) : RTPMemoryObject(mgr),sourcelist(mgr,RTPMEM_TYPE_CLASS_SOURCETABLEHASHELEMENT)
 {

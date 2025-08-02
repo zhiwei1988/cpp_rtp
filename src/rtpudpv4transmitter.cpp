@@ -16,7 +16,7 @@
 
 #include <iostream>
 
-#include "rtpdebug.h"
+
 
 #define RTPUDPV4TRANS_MAXPACKSIZE							65535
 #define RTPUDPV4TRANS_IFREQBUFSIZE							8192

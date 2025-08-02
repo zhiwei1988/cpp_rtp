@@ -106,9 +106,7 @@ public:
 	
 	/** Returns the length of the header extension data. */
 	size_t GetExtensionLength() const													{ return extensionlength; }
-#ifdef RTPDEBUG
-	void Dump();
-#endif // RTPDEBUG
+
 
 	/** Returns the time at which this packet was received.
 	 *  When an RTPPacket instance is created from an RTPRawPacket instance, the raw packet's 

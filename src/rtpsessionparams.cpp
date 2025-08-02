@@ -3,7 +3,7 @@
 #include "rtpdefines.h"
 #include "rtperrors.h"
 
-#include "rtpdebug.h"
+
 
 RTPSessionParams::RTPSessionParams() : mininterval(0,0)
 {

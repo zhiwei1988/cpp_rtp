@@ -8,7 +8,7 @@
 	#include <iostream>
 #endif // RTPDEBUG
 
-#include "rtpdebug.h"
+
 
 RTPPacketBuilder::RTPPacketBuilder(RTPRandom &r,RTPMemoryManager *mgr) : RTPMemoryObject(mgr),rtprnd(r),lastwallclocktime(0,0)
 {

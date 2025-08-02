@@ -13,7 +13,7 @@
 // Windows Server 2003, and later, so we'll do a run-time check to see if we can
 // use it (it won't work on Windows 2000 SP4 for example).
 
-#include "rtpdebug.h"
+
 
 #ifndef RTP_HAVE_RAND_S
 

@@ -107,9 +107,7 @@ public:
 	uint8_t *GetPRIVValueData();
 #endif // RTP_SUPPORT_SDESPRIV
 
-#ifdef RTPDEBUG
-	void Dump();
-#endif // RTPDEBUG
+
 private:
 	uint8_t *currentchunk;
 	int curchunknum;

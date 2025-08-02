@@ -16,7 +16,6 @@ set (HEADERS
 	rtpaddress.h
 	rtpcollisionlist.h
 	${PROJECT_BINARY_DIR}/src/rtpconfig.h
-	rtpdebug.h
 	rtpdefines.h
 	rtperrors.h
 	rtphashtable.h
@@ -72,7 +71,6 @@ set(SOURCES
 	rtcpsdespacket.cpp
 	rtcpsrpacket.cpp
 	rtpcollisionlist.cpp
-	rtpdebug.cpp
 	rtperrors.cpp
 	rtpinternalsourcedata.cpp
 	rtpipv4address.cpp

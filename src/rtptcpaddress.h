@@ -38,9 +38,7 @@ public:
 	// Note that these functions are only used for received packets
 	bool IsSameAddress(const RTPAddress *addr) const;
 	bool IsFromSameHost(const RTPAddress *addr) const;
-#ifdef RTPDEBUG
-	std::string GetAddressString() const;
-#endif // RTPDEBUG
+
 private:
 	SocketType m_socket;
 };

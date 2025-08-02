@@ -21,7 +21,7 @@
 	#include <iostream>
 #endif // RTPDEBUG
 
-#include "rtpdebug.h"
+
 
 #define RTPFAKETRANS_MAXPACKSIZE							65535
 #define RTPFAKETRANS_IFREQBUFSIZE							8192

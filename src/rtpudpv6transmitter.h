@@ -230,9 +230,7 @@ public:
 	
 	bool NewDataAvailable();
 	RTPRawPacket *GetNextPacket();
-#ifdef RTPDEBUG
-	void Dump();
-#endif // RTPDEBUG
+
 private:
 	int CreateLocalIPList();
 	bool GetLocalIPList_Interfaces();

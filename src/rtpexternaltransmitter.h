@@ -146,9 +146,7 @@ public:
 	
 	bool NewDataAvailable();
 	RTPRawPacket *GetNextPacket();
-#ifdef RTPDEBUG
-	void Dump();
-#endif // RTPDEBUG
+
 
 	void InjectRTP(const void *data, size_t len, const RTPAddress &a);
 	void InjectRTCP(const void *data, size_t len, const RTPAddress &a);

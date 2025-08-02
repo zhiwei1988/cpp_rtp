@@ -88,9 +88,7 @@ public:
 	 */
 	uint32_t GetDLSR(int index) const;
 
-#ifdef RTPDEBUG
-	void Dump();
-#endif // RTPDEBUG
+
 private:
 	RTCPReceiverReport *GotoReport(int index) const;
 };

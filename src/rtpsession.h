@@ -416,10 +416,7 @@ public:
 	/** Sets the SDES note item for the local participant to the value \c s with length \c len. */
 	int SetLocalNote(const void *s,size_t len);
 
-#ifdef RTPDEBUG
-	void DumpSources();
-	void DumpTransmitter();
-#endif // RTPDEBUG
+
 protected:
 	/** Allocate a user defined transmitter.
 	 *  In case you specified in the Create function that you want to use a

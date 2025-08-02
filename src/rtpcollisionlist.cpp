@@ -5,7 +5,7 @@
 	#include <iostream>
 #endif // RTPDEBUG
 
-#include "rtpdebug.h"
+
 
 RTPCollisionList::RTPCollisionList(RTPMemoryManager *mgr) : RTPMemoryObject(mgr)
 {

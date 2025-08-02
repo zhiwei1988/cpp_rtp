@@ -180,9 +180,7 @@ public:
 	/** Returns the raw data of a received RTP packet (received during the Poll function) 
 	 *  in an RTPRawPacket instance. */
 	virtual RTPRawPacket *GetNextPacket() = 0;
-#ifdef RTPDEBUG
-	virtual void Dump() = 0;
-#endif // RTPDEBUG
+
 };
 
 /** Base class for transmission parameters.

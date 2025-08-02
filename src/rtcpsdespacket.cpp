@@ -4,7 +4,7 @@
 	#include <string.h>
 #endif // RTPDEBUG
 
-#include "rtpdebug.h"
+
 
 RTCPSDESPacket::RTCPSDESPacket(uint8_t *data,size_t datalength)
 	: RTCPPacket(SDES,data,datalength)

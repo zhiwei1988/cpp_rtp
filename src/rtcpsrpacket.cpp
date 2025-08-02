@@ -1,9 +1,5 @@
 #include "rtcpsrpacket.h"
-#ifdef RTPDEBUG
-	#include <iostream>
-#endif // RTPDEBUG
 
-#include "rtpdebug.h"
 
 RTCPSRPacket::RTCPSRPacket(uint8_t *data,size_t datalength)
 	: RTCPPacket(SR,data,datalength)

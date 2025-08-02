@@ -8,7 +8,7 @@
 	#include <stdio.h>
 #endif // RTPDEBUG
 
-#include "rtpdebug.h"
+
 
 RTPAddress *RTPIPv6Address::CreateCopy(RTPMemoryManager *mgr) const
 {

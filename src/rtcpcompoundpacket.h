@@ -54,9 +54,7 @@ public:
 	 */
 	RTCPPacket *GetNextPacket()								{ if (rtcppackit == rtcppacklist.end()) return 0; RTCPPacket *p = *rtcppackit; rtcppackit++; return p; }
 
-#ifdef RTPDEBUG
-	void Dump();	
-#endif // RTPDEBUG
+
 protected:
 	void ClearPacketList();
 	int ParseData(uint8_t *packet, size_t len);

@@ -5,7 +5,7 @@
 	#include <stdio.h>
 #endif // RTPDEBUG
 
-#include "rtpdebug.h"
+
 
 bool RTPIPv4Address::IsSameAddress(const RTPAddress *addr) const
 {

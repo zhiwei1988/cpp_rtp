@@ -47,9 +47,7 @@ public:
 	 */
 	virtual bool IsFromSameHost(const RTPAddress *addr) const  = 0;
 
-#ifdef RTPDEBUG
-	virtual std::string GetAddressString() const = 0;
-#endif // RTPDEBUG
+
 	
 	virtual ~RTPAddress()						{ }
 protected:

@@ -102,9 +102,6 @@ Installation notes
 
     - `RTP_SUPPORT_RTCPUNKNOWN`: If set, sending of unknown RTCP packets is 
       enabled.
-
-    - `RTPDEBUG`: Enables some memory tracking functions and some debug 
-      routines.
     
 Cross-compilation of JThread & JRTPLIB for Android
 --------------------------------------------------

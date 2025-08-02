@@ -9,9 +9,7 @@
 #include "rtperrors.h"
 #include "rtpmemoryobject.h"
 
-#ifdef RTPDEBUG
-#include <iostream>
-#endif // RTPDEBUG
+
 
 //template<class Element,int GetIndex(const Element &k),int hashsize>
 template<class Element,class GetIndex,int hashsize>
@@ -36,9 +34,7 @@ public:
 	int AddElement(const Element &elem);
 	int DeleteElement(const Element &elem);
 
-#ifdef RTPDEBUG
-	void Dump();
-#endif // RTPDEBUG
+
 private:
 	class HashElement
 	{
@@ -46,9 +42,7 @@ private:
 		HashElement(const Element &e,int index):element(e) { hashprev = 0; hashnext = 0; listnext = 0; listprev = 0; hashindex = index; }
 		int GetHashIndex() 						{ return hashindex; }
 		Element &GetElement()						{ return element; }
-#ifdef RTPDEBUG
-		void Dump()							{ std::cout << "\tHash index " << hashindex << " | Element " << element << std::endl; }
-#endif // RTPDEBUG
+
 	private:
 		int hashindex;
 		Element element;
@@ -277,32 +271,7 @@ inline int RTPHashTable<Element,GetIndex,hashsize>::DeleteElement(const Element 
 	return DeleteCurrentElement();
 }
 
-#ifdef RTPDEBUG
-template<class Element,class GetIndex,int hashsize>
-inline void RTPHashTable<Element,GetIndex,hashsize>::Dump()
-{
-	HashElement *e;
-	
-	std::cout << "DUMPING TABLE CONTENTS:" << std::endl;
-	for (int i = 0 ; i < hashsize ; i++)
-	{
-		e = table[i];
-		while (e != 0)
-		{
-			e->Dump();
-			e = e->hashnext;
-		}
-	}
-	
-	std::cout << "DUMPING LIST CONTENTS:" << std::endl;
-	e = firsthashelem;
-	while (e != 0)
-	{
-		e->Dump();
-		e = e->listnext;
-	}
-}
-#endif // RTPDEBUG
+
 
 #endif // RTPHASHTABLE_H
 

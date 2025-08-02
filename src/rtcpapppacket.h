@@ -43,9 +43,7 @@ public:
 
 	/** Returns the length of the actual data. */
 	size_t GetAPPDataLength() const;
-#ifdef RTPDEBUG
-	void Dump();
-#endif // RTPDEBUG	
+	
 private:
 	size_t appdatalen;
 };

@@ -5,7 +5,7 @@
 	#include <string>
 #endif // RTPDEBUG
 
-#include "rtpdebug.h"
+
 
 RTCPAPPPacket::RTCPAPPPacket(uint8_t *data,size_t datalength)
 	: RTCPPacket(APP,data,datalength)

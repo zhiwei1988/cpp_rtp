@@ -6,7 +6,7 @@
 #include "rtcpcompoundpacketbuilder.h"
 #include "rtpmemorymanager.h"
 
-#include "rtpdebug.h"
+
 
 RTCPPacketBuilder::RTCPPacketBuilder(RTPSources &s,RTPPacketBuilder &pb,RTPMemoryManager *mgr)
 	: RTPMemoryObject(mgr),sources(s),rtppacketbuilder(pb),prevbuildtime(0,0),transmissiondelay(0,0),ownsdesinfo(mgr)

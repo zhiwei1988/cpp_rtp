@@ -9,7 +9,7 @@
 #include <time.h>
 #include <iostream>
 
-#include "rtpdebug.h"
+
 
 RTPPollThread::RTPPollThread(RTPSession &session,RTCPScheduler &sched):rtpsession(session),rtcpsched(sched)
 {

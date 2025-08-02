@@ -118,9 +118,7 @@ public:
 	
 	bool NewDataAvailable();
 	RTPRawPacket *GetNextPacket();
-#ifdef RTPDEBUG
-	void Dump();
-#endif // RTPDEBUG
+
 protected:
 	/** By overriding this function you can be notified of an error when sending over a socket. */
 	virtual void OnSendError(SocketType sock);

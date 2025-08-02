@@ -29,7 +29,7 @@
 	#include <iostream>
 #endif // RTPDEBUG
 
-#include "rtpdebug.h"
+
 
 #ifdef RTP_SUPPORT_THREAD
 	#define SOURCES_LOCK					{ if (needthreadsafety) sourcesmutex.Lock(); }

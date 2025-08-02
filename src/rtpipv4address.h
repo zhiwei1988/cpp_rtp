@@ -102,9 +102,7 @@ public:
 	// the rtcpsendport variable is not important and should be ignored.
 	bool IsSameAddress(const RTPAddress *addr) const;
 	bool IsFromSameHost(const RTPAddress *addr) const;
-#ifdef RTPDEBUG
-	std::string GetAddressString() const;
-#endif // RTPDEBUG
+
 private:
 	uint32_t ip;
 	uint16_t port;

@@ -16,7 +16,7 @@
 #include "rtpselect.h"
 #include <stdio.h>
 
-#include "rtpdebug.h"
+
 
 #define RTPUDPV6TRANS_MAXPACKSIZE							65535
 #define RTPUDPV6TRANS_IFREQBUFSIZE							8192

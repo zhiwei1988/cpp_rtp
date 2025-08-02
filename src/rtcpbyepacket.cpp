@@ -1,10 +1,4 @@
 #include "rtcpbyepacket.h"
-#ifdef RTPDEBUG
-	#include <iostream>
-	#include <string.h>
-#endif // RTPDEBUG
-
-#include "rtpdebug.h"
 
 RTCPBYEPacket::RTCPBYEPacket(uint8_t *data,size_t datalength)
 	: RTCPPacket(BYE,data,datalength)
@@ -40,28 +34,5 @@ RTCPBYEPacket::RTCPBYEPacket(uint8_t *data,size_t datalength)
 	knownformat = true;
 }
 
-#ifdef RTPDEBUG
-void RTCPBYEPacket::Dump()
-{
-	RTCPPacket::Dump();
-	if (!IsKnownFormat())
-	{
-		std::cout << "    Unknown format" << std::endl;
-		return;	
-	}
 
-	int num = GetSSRCCount();
-	int i;
-
-	for (i = 0 ; i < num ; i++)
-		std::cout << "    SSRC: " << GetSSRC(i) << std::endl;
-	if (HasReasonForLeaving())
-	{
-		char str[1024];
-		memcpy(str,GetReasonData(),GetReasonLength());
-		str[GetReasonLength()] = 0;
-		std::cout << "    Reason: " << str << std::endl;
-	}
-}
-#endif // RTPDEBUG
 

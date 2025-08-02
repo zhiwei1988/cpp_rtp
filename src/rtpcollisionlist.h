@@ -38,9 +38,7 @@ public:
 	 *  haven't been updated in the previous time interval specified by \c timeoutdelay.
 	 */
 	void Timeout(const RTPTime &currenttime,const RTPTime &timeoutdelay);
-#ifdef RTPDEBUG
-	void Dump();
-#endif // RTPDEBUG
+
 private:
 	class AddressAndTime
 	{

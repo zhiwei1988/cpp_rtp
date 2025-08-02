@@ -1,11 +1,6 @@
 #include "rtptcpaddress.h"
 #include "rtpmemorymanager.h"
-#ifdef RTPDEBUG
-	#include "rtpinternalutils.h" 
-	#include <stdio.h>
-#endif // RTPDEBUG
 
-#include "rtpdebug.h"
 
 bool RTPTCPAddress::IsSameAddress(const RTPAddress *addr) const
 {

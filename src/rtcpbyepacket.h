@@ -44,9 +44,7 @@ public:
 	/** Returns the actual reason for leaving data. */
 	uint8_t *GetReasonData();
 
-#ifdef RTPDEBUG
-	void Dump();
-#endif // RTPDEBUG
+
 private:
 	size_t reasonoffset;
 };

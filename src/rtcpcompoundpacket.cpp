@@ -13,7 +13,7 @@
 	#include <netinet/in.h>
 #endif // RTP_SUPPORT_NETINET_IN
 
-#include "rtpdebug.h"
+
 
 RTCPCompoundPacket::RTCPCompoundPacket(RTPRawPacket &rawpack, RTPMemoryManager *mgr) : RTPMemoryObject(mgr)
 {
@@ -179,16 +179,5 @@ void RTCPCompoundPacket::ClearPacketList()
 	rtcppackit = rtcppacklist.begin();
 }
 
-#ifdef RTPDEBUG
-void RTCPCompoundPacket::Dump()
-{
-	std::list<RTCPPacket *>::const_iterator it;
-	for (it = rtcppacklist.begin() ; it != rtcppacklist.end() ; it++)
-	{
-		RTCPPacket *p = *it;
 
-		p->Dump();
-	}
-}
-#endif // RTPDEBUG
 
