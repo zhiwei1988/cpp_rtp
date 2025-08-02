@@ -8,7 +8,7 @@
 
 RTPInternalSourceData::RTPInternalSourceData(uint32_t ssrc,RTPSources::ProbationType probtype,RTPMemoryManager *mgr):RTPSourceData(ssrc,mgr)
 {
-	MEDIA_RTP_UNUSED(probtype); // possibly unused
+	MEDIA_RTP_UNUSED(probtype); // 可能未使用
 #ifdef RTP_SUPPORT_PROBATION
 	probationtype = probtype;
 #endif // RTP_SUPPORT_PROBATION
@@ -18,7 +18,7 @@ RTPInternalSourceData::~RTPInternalSourceData()
 {
 }
 
-// The following function should delete rtppack if necessary
+	// 以下函数应在必要时删除 rtppack
 int RTPInternalSourceData::ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &receivetime,bool *stored,RTPSources *sources)
 {
 	bool accept,onprobation,applyprobation;
@@ -32,8 +32,8 @@ int RTPInternalSourceData::ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &re
 		tsunit = timestampunit;
 
 #ifdef RTP_SUPPORT_PROBATION
-	if (validated) 				// If the source is our own process, we can already be validated. No 
-		applyprobation = false;		// probation should be applied in that case.
+		if (validated) 				// 如果源是我们自己的进程，我们已经可以被验证。不
+		applyprobation = false;		// 应在该情况下应用察看期。
 	else
 	{
 		if (probationtype == RTPSources::NoProbation)
@@ -71,21 +71,21 @@ int RTPInternalSourceData::ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &re
 	validated = true;
 #endif // RTP_SUPPORT_PROBATION;
 	
-	if (validated && !ownssrc) // for own ssrc these variables depend on the outgoing packets, not on the incoming
+	if (validated && !ownssrc) // 对于自己的 ssrc，这些变量取决于传出数据包，而不是传入数据包
 		issender = true;
 	
 	bool isonprobation = !validated;
 	bool ispackethandled = false;
 
 	sources->OnValidatedRTPPacket(this, rtppack, isonprobation, &ispackethandled);
-	if (ispackethandled) // Packet is already handled in the callback, no need to store it in the list
+	if (ispackethandled) // 数据包已在回调中处理，无需存储在列表中
 	{
-		// Set 'stored' to true to avoid the packet being deallocated
+		// 将 'stored' 设置为 true 以避免数据包被释放
 		*stored = true;
 		return 0;
 	}
 
-	// Now, we can place the packet in the queue
+	// 现在，我们可以将数据包放入队列
 	
 	if (packetlist.empty())
 	{
@@ -94,11 +94,10 @@ int RTPInternalSourceData::ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &re
 		return 0;
 	}
 	
-	if (!validated) // still on probation
+	if (!validated) // 仍在察看期
 	{
-		// Make sure that we don't buffer too much packets to avoid wasting memory
-		// on a bad source. Delete the packet in the queue with the lowest sequence
-		// number.
+		// 确保我们不会缓冲太多数据包以避免在坏源上浪费内存
+		// 删除队列中序列号最低的数据包。
 		if (packetlist.size() == RTPINTERNALSOURCEDATA_MAXPROBATIONPACKETS)
 		{
 			RTPPacket *p = *(packetlist.begin());
@@ -107,7 +106,7 @@ int RTPInternalSourceData::ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &re
 		}
 	}
 
-	// find the right position to insert the packet
+			// 找到插入数据包的正确位置
 	
 	std::list<RTPPacket*>::iterator it,start;
 	bool done = false;
@@ -128,21 +127,21 @@ int RTPInternalSourceData::ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &re
 		{
 			if (it != start)
 				--it;
-			else // we're at the start of the list
+			else // 我们在列表的开头
 			{
 				*stored = true;
 				done = true;
 				packetlist.push_front(rtppack);
 			}
 		}
-		else if (seqnr < newseqnr) // insert after this packet
+		else if (seqnr < newseqnr) // 在此数据包后插入
 		{
 			++it;
 			packetlist.insert(it,rtppack);
 			done = true;
 			*stored = true;
 		}
-		else // they're equal !! Drop packet
+		else // 它们相等！！丢弃数据包
 		{
 			done = true;
 		}
@@ -164,15 +163,15 @@ int RTPInternalSourceData::ProcessSDESItem(uint8_t sdesid,const uint8_t *data,si
 			size_t curlen;
 			uint8_t *oldcname;
 			
-			// NOTE: we're going to make sure that the CNAME is only set once.
+			// 注意：我们将确保 CNAME 只设置一次。
 			oldcname = SDESinf.GetCNAME(&curlen);
 			if (curlen == 0)
 			{
-				// if CNAME is set, the source is validated
+				// 如果设置了 CNAME，则源已验证
 				SDESinf.SetCNAME(data,itemlen);
 				validated = true;
 			}
-			else // check if this CNAME is equal to the one that is already present
+			else // 检查此 CNAME 是否等于已存在的 CNAME
 			{
 				if (curlen != itemlen)
 					*cnamecollis = true;
@@ -189,7 +188,7 @@ int RTPInternalSourceData::ProcessSDESItem(uint8_t sdesid,const uint8_t *data,si
 			size_t oldlen;
 
             		SDESinf.GetName(&oldlen);
-			if (oldlen == 0) // Name not set
+			if (oldlen == 0) // 名称未设置
 				return SDESinf.SetName(data,itemlen);
 		}
 		break;
@@ -231,7 +230,7 @@ int RTPInternalSourceData::ProcessPrivateSDESItem(const uint8_t *prefix,size_t p
 	stats.SetLastMessageTime(receivetime);
 	status = SDESinf.SetPrivateValue(prefix,prefixlen,value,valuelen);
 	if (status == ERR_RTP_SDES_MAXPRIVITEMS)
-		return 0; // don't stop processing just because the number of items is full
+		return 0; // 不要仅仅因为项目数量已满就停止处理
 	return status;
 }
 

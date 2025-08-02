@@ -15,7 +15,7 @@ RTCPAPPPacket::RTCPAPPPacket(uint8_t *data,size_t datalength)
 	if (hdr->padding)
 	{
 		uint8_t padcount = data[datalength-1];
-		if ((padcount & 0x03) != 0) // not a multiple of four! (see rfc 3550 p 37)
+		if ((padcount & 0x03) != 0) // 不是 4 的倍数！（参见 rfc 3550 p 37）
 			return;
 		if (((size_t)padcount) >= len)
 			return;

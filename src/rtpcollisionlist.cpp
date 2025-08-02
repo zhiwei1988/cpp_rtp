@@ -67,7 +67,7 @@ void RTPCollisionList::Timeout(const RTPTime &currenttime,const RTPTime &timeout
 	it = addresslist.begin();
 	while(it != addresslist.end())
 	{
-		if ((*it).recvtime < checktime) // timeout
+		if ((*it).recvtime < checktime) // 超时
 		{
 			RTPDelete((*it).addr,GetMemoryManager());
 			it = addresslist.erase(it);	

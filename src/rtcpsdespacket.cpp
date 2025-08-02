@@ -17,7 +17,7 @@ RTCPSDESPacket::RTCPSDESPacket(uint8_t *data,size_t datalength)
 	if (hdr->padding)
 	{
 		uint8_t padcount = data[datalength-1];
-		if ((padcount & 0x03) != 0) // not a multiple of four! (see rfc 3550 p 37)
+		if ((padcount & 0x03) != 0) // 不是 4 的倍数！（参见 rfc 3550 p 37）
 			return;
 		if (((size_t)padcount) >= len)
 			return;
@@ -43,8 +43,8 @@ RTCPSDESPacket::RTCPSDESPacket(uint8_t *data,size_t datalength)
 		
 		while ((ssrccount > 0) && (len > 0))
 		{
-			if (len < (sizeof(uint32_t)*2)) // chunk must contain at least a SSRC identifier
-				return;                  // and a (possibly empty) item
+			if (len < (sizeof(uint32_t)*2)) // 块必须至少包含一个 SSRC 标识符
+				return;                  // 和一个（可能为空的）项
 			
 			len -= sizeof(uint32_t);
 			chunkoffset = sizeof(uint32_t);
@@ -52,11 +52,11 @@ RTCPSDESPacket::RTCPSDESPacket(uint8_t *data,size_t datalength)
 			bool done = false;
 			while (!done)
 			{
-				if (len < 1) // at least a zero byte (end of item list) should be there
+				if (len < 1) // 至少应该有一个零字节（项列表的末尾）
 					return;
 				
 				RTCPSDESHeader *sdeshdr = (RTCPSDESHeader *)(chunk+chunkoffset);
-				if (sdeshdr->sdesid == 0) // end of item list
+				if (sdeshdr->sdesid == 0) // 项列表结束
 				{
 					len--;
 					chunkoffset++;
@@ -94,7 +94,7 @@ RTCPSDESPacket::RTCPSDESPacket(uint8_t *data,size_t datalength)
 			chunk += chunkoffset;
 		}
 
-		// check for remaining bytes
+		// 检查剩余字节
 		if (len > 0)
 			return;
 		if (ssrccount > 0)

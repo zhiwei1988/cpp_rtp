@@ -17,7 +17,7 @@ RTPSessionParams::RTPSessionParams() : mininterval(0,0)
 	maxpacksize = RTP_DEFAULTPACKETSIZE;
 	receivemode = RTPTransmitter::AcceptAll;
 	acceptown = false;
-	owntsunit = -1; // The user will have to set it to the correct value himself
+	owntsunit = -1; // 用户必须自己将其设置为正确的值
 	resolvehostname = false;
 #ifdef RTP_SUPPORT_PROBATION
 	probationtype = RTPSources::ProbationStore;

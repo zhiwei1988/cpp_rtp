@@ -11,7 +11,7 @@ bool RTPTCPAddress::IsSameAddress(const RTPAddress *addr) const
 
 	const RTPTCPAddress *a = static_cast<const RTPTCPAddress *>(addr);
 
-	// We're using a socket to identify connections
+	// 我们使用套接字来识别连接
 	if (a->m_socket == m_socket)
 		return true;
 
@@ -25,7 +25,7 @@ bool RTPTCPAddress::IsFromSameHost(const RTPAddress *addr) const
 
 RTPAddress *RTPTCPAddress::CreateCopy(RTPMemoryManager *mgr) const
 {
-	MEDIA_RTP_UNUSED(mgr); // possibly unused
+	MEDIA_RTP_UNUSED(mgr); // 可能未使用
 	RTPTCPAddress *a = RTPNew(mgr,RTPMEM_TYPE_CLASS_RTPADDRESS) RTPTCPAddress(m_socket);
 	return a;
 }

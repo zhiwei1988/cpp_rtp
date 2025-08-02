@@ -95,7 +95,7 @@ int RTPAbortDescriptors::Init()
 		return ERR_RTP_ABORTDESC_CANTCREATEABORTDESCRIPTORS;
 	}
 
-	// okay, got the connection, close the listening socket
+	// 连接已建立，关闭监听套接字
 
 	RTPCLOSE(listensock);
 
@@ -170,7 +170,7 @@ int RTPAbortDescriptors::SendAbortSignal()
 
 	if (write(m_descriptors[1],"*",1))
 	{
-		// To get rid of __wur related compiler warnings
+		// 为了消除与 __wur 相关的编译器警告
 	}
 
 	return 0;
@@ -185,14 +185,14 @@ int RTPAbortDescriptors::ReadSignallingByte()
 
 	if (read(m_descriptors[0],buf,1))
 	{
-		// To get rid of __wur related compiler warnings
+		// 为了消除与 __wur 相关的编译器警告
 	}
 	return 0;
 }
 
 #endif // RTP_SOCKETTYPE_WINSOCK
 
-// Keep calling 'ReadSignallingByte' until there's no byte left
+// 持续调用 'ReadSignallingByte' 直到没有字节可读
 int RTPAbortDescriptors::ClearAbortSignal()
 {
 	if (!m_init)
@@ -203,7 +203,7 @@ int RTPAbortDescriptors::ClearAbortSignal()
 	{
 		int8_t isset = 0;
 
-		// Not used: struct timeval tv = { 0, 0 };
+		// 未使用: struct timeval tv = { 0, 0 };
 
 		int status = RTPSelect(&m_descriptors[0], &isset, 1, RTPTime(0));
 		if (status < 0)

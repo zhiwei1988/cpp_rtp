@@ -9,7 +9,7 @@
 
 RTPAddress *RTPIPv6Address::CreateCopy(RTPMemoryManager *mgr) const
 {
-	MEDIA_RTP_UNUSED(mgr); // possibly unused
+	MEDIA_RTP_UNUSED(mgr); // 可能未使用
 	RTPIPv6Address *newaddr = RTPNew(mgr,RTPMEM_TYPE_CLASS_RTPADDRESS) RTPIPv6Address(ip,port);
 	return newaddr;
 }

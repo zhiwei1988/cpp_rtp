@@ -40,14 +40,14 @@
 void RTPSourceStats::ProcessPacket(RTPPacket *pack,const RTPTime &receivetime,double tsunit,
                                    bool ownpacket,bool *accept,bool applyprobation,bool *onprobation)
 {
-	MEDIA_RTP_UNUSED(applyprobation); // possibly unused
+	MEDIA_RTP_UNUSED(applyprobation); // 可能未使用
 
-	// Note that the sequence number in the RTP packet is still just the
-	// 16 bit number contained in the RTP header
+	// 注意，RTP 数据包中的序列号仍然只是
+	// RTP 报头中包含的 16 位数字
 
 	*onprobation = false;
 	
-	if (!sentdata) // no valid packets received yet
+	if (!sentdata) // 尚未收到有效数据包
 	{
 #ifdef RTP_SUPPORT_PROBATION
 		if (applyprobation)
@@ -62,23 +62,23 @@ void RTPSourceStats::ProcessPacket(RTPPacket *pack,const RTPTime &receivetime,do
 				pseq = prevseqnr;
 				pseq++;
 				pseq2 = (uint32_t)pseq;
-				if (pseq2 == pack->GetExtendedSequenceNumber()) // ok, its the next expected packet
+				if (pseq2 == pack->GetExtendedSequenceNumber()) // 好的，这是下一个预期的数据包
 				{
 					prevseqnr = (uint16_t)pack->GetExtendedSequenceNumber();
 					probation--;	
-					if (probation == 0) // probation over
+					if (probation == 0) // 察看期结束
 						acceptpack = true;
 					else
 						*onprobation = true;
 				}
-				else // not next packet
+				else // 不是下一个数据包
 				{
 					probation = RTP_PROBATIONCOUNT;
 					prevseqnr = (uint16_t)pack->GetExtendedSequenceNumber();
 					*onprobation = true;
 				}
 			}
-			else // first packet received with this SSRC ID, start probation
+			else // 收到具有此 SSRC ID 的第一个数据包，开始察看
 			{
 				probation = RTP_PROBATIONCOUNT;
 				prevseqnr = (uint16_t)pack->GetExtendedSequenceNumber();	
@@ -95,22 +95,22 @@ void RTPSourceStats::ProcessPacket(RTPPacket *pack,const RTPTime &receivetime,do
 				lastmsgtime = receivetime;
 			}
 		}
-		else // No probation
+		else // 无察看期
 		{
 			ACCEPTPACKETCODE
 		}
-#else // No compiled-in probation support
+#else // 无编译期察看支持
 
 		ACCEPTPACKETCODE
 
 #endif // RTP_SUPPORT_PROBATION
 	}
-	else // already got packets
+	else // 已收到数据包
 	{
 		uint16_t maxseq16;
 		uint32_t extseqnr;
 
-		// Adjust max extended sequence number and set extende seq nr of packet
+		// 调整最大扩展序列号并设置数据包的扩展序列号
 
 		*accept = true;
 		packetsreceived++;
@@ -142,7 +142,7 @@ void RTPSourceStats::ProcessPacket(RTPPacket *pack,const RTPTime &receivetime,do
 
 		pack->SetExtendedSequenceNumber(extseqnr);
 
-		// Calculate jitter
+		// 计算抖动
 
 		if (tsunit > 0)
 		{
@@ -172,13 +172,13 @@ if (curts > prevtimestamp)
 {
 	uint32_t unsigneddiff = curts - prevtimestamp;
 
-	if (unsigneddiff < 0x10000000) // okay, curts realy is larger than prevtimestamp
+	if (unsigneddiff < 0x10000000) // 好的，curts 确实比 prevtimestamp 大
 		diffts2 = (double)unsigneddiff;
 	else
 	{
-		// wraparound occurred and curts is actually smaller than prevtimestamp
+		// 发生回绕，curts 实际上小于 prevtimestamp
 
-		unsigneddiff = -unsigneddiff; // to get the actual difference (in absolute value)
+		unsigneddiff = -unsigneddiff; // 获取实际差异（绝对值）
 		diffts2 = -((double)unsigneddiff);
 	}
 }
@@ -186,13 +186,13 @@ else if (curts < prevtimestamp)
 {
 	uint32_t unsigneddiff = prevtimestamp - curts;
 
-	if (unsigneddiff < 0x10000000) // okay, curts really is smaller than prevtimestamp
-		diffts2 = -((double)unsigneddiff); // negative since we actually need curts-prevtimestamp
+	if (unsigneddiff < 0x10000000) // 好的，curts 确实比 prevtimestamp 小
+		diffts2 = -((double)unsigneddiff); // 负数，因为我们实际上需要 curts-prevtimestamp
 	else
 	{
-		// wraparound occurred and curts is actually larger than prevtimestamp
+		// 发生回绕，curts 实际上大于 prevtimestamp
 
-		unsigneddiff = -unsigneddiff; // to get the actual difference (in absolute value)
+		unsigneddiff = -unsigneddiff; // 获取实际差异（绝对值）
 		diffts2 = (double)unsigneddiff;
 	}
 }
@@ -217,7 +217,7 @@ jitter = (uint32_t)djitter;
 		prevpacktime = receivetime;
 		prevtimestamp = pack->GetTimestamp();
 		lastmsgtime = prevpacktime;
-		if (!ownpacket) // for own packet, this value is set on an outgoing packet
+		if (!ownpacket) // 对于自己的数据包，此值在传出数据包上设置
 			lastrtptime = prevpacktime;
 	}
 }
@@ -258,13 +258,13 @@ double RTPSourceData::INF_GetEstimatedTimestampUnit() const
 	
 	RTPTime t1 = RTPTime(SRinf.GetNTPTimestamp());
 	RTPTime t2 = RTPTime(SRprevinf.GetNTPTimestamp());
-	if (t1.IsZero() || t2.IsZero()) // one of the times couldn't be calculated
+	if (t1.IsZero() || t2.IsZero()) // 其中一个时间无法计算
 		return -1.0;
 
 	if (t1 <= t2)
 		return -1.0;
 
-	t1 -= t2; // get the time difference
+	t1 -= t2; // 获取时间差
 	
 	uint32_t tsdiff = SRinf.GetRTPTimestamp()-SRprevinf.GetRTPTimestamp();
 	

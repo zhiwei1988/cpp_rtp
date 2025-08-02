@@ -17,7 +17,7 @@
 
 RTPSources::RTPSources(ProbationType probtype,RTPMemoryManager *mgr) : RTPMemoryObject(mgr),sourcelist(mgr,RTPMEM_TYPE_CLASS_SOURCETABLEHASHELEMENT)
 {
-	MEDIA_RTP_UNUSED(probtype); // possibly unused
+	MEDIA_RTP_UNUSED(probtype); // 可能未使用
 
 	totalcount = 0;
 	sendercount = 0;
@@ -69,14 +69,14 @@ int RTPSources::CreateOwnSSRC(uint32_t ssrc)
 	status = ObtainSourceDataInstance(ssrc,&owndata,&created);
 	if (status < 0)
 	{
-		owndata = 0; // just to make sure
+		owndata = 0; // 仅为确保
 		return status;
 	}
 	owndata->SetOwnSSRC();	
 	owndata->SetRTPDataAddress(0);
 	owndata->SetRTCPDataAddress(0);
 
-	// we've created a validated ssrc, so we should increase activecount
+	// 我们创建了一个经过验证的 ssrc，因此我们应该增加 activecount
 	activecount++;
 
 	OnNewSource(owndata);
@@ -135,11 +135,11 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack,RTPTransmitter *rtptrans[
 {
 	int status;
 	
-	if (rawpack->IsRTP()) // RTP packet
+	if (rawpack->IsRTP()) // RTP 数据包
 	{
 		RTPPacket *rtppack;
 		
-		// First, we'll see if the packet can be parsed
+		// 首先，我们将查看数据包是否可以解析
 		rtppack = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPPACKET) RTPPacket(*rawpack,GetMemoryManager());
 		if (rtppack == 0)
 			return ERR_RTP_OUTOFMEM;
@@ -157,7 +157,7 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack,RTPTransmitter *rtptrans[
 			}
 		}
 				
-		// Check if the packet was valid
+		// 检查数据包是否有效
 		if (rtppack != 0)
 		{
 			bool stored = false;
@@ -171,14 +171,14 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack,RTPTransmitter *rtptrans[
 					ownpacket = true;
 			}
 			
-			// Check if the packet is our own.
+			// 检查数据包是否是我们自己的。
 			if (ownpacket)
 			{
-				// Now it depends on the user's preference
-				// what to do with this packet:
+				// 现在取决于用户的偏好
+				// 如何处理此数据包：
 				if (acceptownpackets)
 				{
-					// sender addres for own packets has to be NULL!
+					// 自己的数据包的发送方地址必须为 NULL！
 					if ((status = ProcessRTPPacket(rtppack,rawpack->GetReceiveTime(),0,&stored)) < 0)
 					{
 						if (!stored)
@@ -200,7 +200,7 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack,RTPTransmitter *rtptrans[
 				RTPDelete(rtppack,GetMemoryManager());
 		}
 	}
-	else // RTCP packet
+	else // RTCP 数据包
 	{
 		RTCPCompoundPacket rtcpcomppack(*rawpack,GetMemoryManager());
 		bool valid = false;
@@ -225,18 +225,18 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack,RTPTransmitter *rtptrans[
 					ownpacket = true;
 			}
 
-			// First check if it's a packet of this session.
+			// 首先检查它是否是此会话的数据包。
 			if (ownpacket)
 			{
 				if (acceptownpackets)
 				{
-					// sender address for own packets has to be NULL
+					// 自己的数据包的发送方地址必须为 NULL
 					status = ProcessRTCPCompoundPacket(&rtcpcomppack,rawpack->GetReceiveTime(),0);
 					if (status < 0)
 						return status;
 				}
 			}
-			else // not our own packet
+			else // 不是我们自己的数据包
 			{
 				status = ProcessRTCPCompoundPacket(&rtcpcomppack,rawpack->GetReceiveTime(),rawpack->GetSenderAddress());
 				if (status < 0)
@@ -268,10 +268,10 @@ int RTPSources::ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &receivetime,c
 		if ((status = srcdat->SetRTPDataAddress(senderaddress)) < 0)
 			return status;
 	}
-	else // got a previously existing source
+	else // 获取了先前存在的源
 	{
 		if (CheckCollision(srcdat,senderaddress,true))
-			return 0; // ignore packet on collision
+			return 0; // 冲突时忽略数据包
 	}
 	
 	bool prevsender = srcdat->IsSender();
@@ -279,20 +279,19 @@ int RTPSources::ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &receivetime,c
 	
 	uint32_t CSRCs[RTP_MAXCSRCS];
 	int numCSRCs = rtppack->GetCSRCCount();
-	if (numCSRCs > RTP_MAXCSRCS) // shouldn't happen, but better to check than go out of bounds
+	if (numCSRCs > RTP_MAXCSRCS) // 不应该发生，但检查比越界好
 		numCSRCs = RTP_MAXCSRCS;
 
 	for (int i = 0 ; i < numCSRCs ; i++)
 		CSRCs[i] = rtppack->GetCSRC(i);
 
-	// The packet comes from a valid source, we can process it further now
-	// The following function should delete rtppack itself if something goes
-	// wrong
+	// 数据包来自有效源，我们现在可以进一步处理它
+	// 如果出现问题，以下函数应自行删除 rtppack
 	if ((status = srcdat->ProcessRTPPacket(rtppack,receivetime,stored,this)) < 0)
 		return status;
 
-	// NOTE: we cannot use 'rtppack' anymore since it may have been deleted in
-	//       OnValidatedRTPPacket
+	// 注意：我们不能再使用 'rtppack'，因为它可能已在
+	//       OnValidatedRTPPacket 中被删除
 
 	if (!prevsender && srcdat->IsSender())
 		sendercount++;
@@ -302,7 +301,7 @@ int RTPSources::ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &receivetime,c
 	if (created)
 		OnNewSource(srcdat);
 
-	if (srcdat->IsValidated()) // process the CSRCs
+	if (srcdat->IsValidated()) // 处理 CSRC
 	{
 		RTPInternalSourceData *csrcdat;
 		bool createdcsrc;
@@ -321,7 +320,7 @@ int RTPSources::ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &receivetime,c
 					activecount++;
 				OnNewSource(csrcdat);
 			}
-			else // already found an entry, possibly because of RTCP data
+			else // 已找到条目，可能是因为 RTCP 数据
 			{
 				if (!CheckCollision(csrcdat,senderaddress,true))
 					csrcdat->SetCSRC();
@@ -366,7 +365,7 @@ int RTPSources::ProcessRTCPCompoundPacket(RTCPCompoundPacket *rtcpcomppack,const
 						int num = p->GetReceptionReportCount();
 						for (i = 0 ; i < num ; i++)
 						{
-							if (p->GetSSRC(i) == ownssrc) // data is meant for us
+							if (p->GetSSRC(i) == ownssrc) // 数据是给我们的
 							{
 								gotinfo = true;
 								status = ProcessRTCPReportBlock(senderssrc,p->GetFractionLost(i),p->GetLostPacketCount(i),
@@ -629,7 +628,7 @@ int RTPSources::ProcessRTCPSenderInfo(uint32_t ssrc,const RTPNTPTime &ntptime,ui
 	
 	srcdat->ProcessSenderInfo(ntptime,rtptime,packetcount,octetcount,receivetime);
 	
-	// Call the callback
+	// 调用回调
 	if (created)
 		OnNewSource(srcdat);
 
@@ -654,7 +653,7 @@ int RTPSources::ProcessRTCPReportBlock(uint32_t ssrc,uint8_t fractionlost,int32_
 	
 	srcdat->ProcessReportBlock(fractionlost,lostpackets,exthighseqnr,jitter,lsr,dlsr,receivetime);
 
-	// Call the callback
+	// 调用回调
 	if (created)
 		OnNewSource(srcdat);
 
@@ -710,7 +709,7 @@ int RTPSources::ProcessSDESNormalItem(uint32_t ssrc,RTCPSDESPacket::ItemType t,s
 	if (!prevactive && srcdat->IsActive())
 		activecount++;
 	
-	// Call the callback
+	// 调用回调
 	if (created)
 		OnNewSource(srcdat);
 	if (cnamecollis)
@@ -738,7 +737,7 @@ int RTPSources::ProcessSDESPrivateItem(uint32_t ssrc,size_t prefixlen,const void
 		return 0;
 
 	status = srcdat->ProcessPrivateSDESItem((const uint8_t *)prefixdata,prefixlen,(const uint8_t *)valuedata,valuelen,receivetime);
-	// Call the callback
+	// 调用回调
 	if (created)
 		OnNewSource(srcdat);
 
@@ -772,7 +771,7 @@ int RTPSources::ProcessBYE(uint32_t ssrc,size_t reasonlength,const void *reasond
 	if (prevactive && !srcdat->IsActive())
 		activecount--;
 	
-	// Call the callback
+	// 调用回调
 	if (created)
 		OnNewSource(srcdat);
 	OnBYEPacket(srcdat);
@@ -784,7 +783,7 @@ int RTPSources::ObtainSourceDataInstance(uint32_t ssrc,RTPInternalSourceData **s
 	RTPInternalSourceData *srcdat2;
 	int status;
 	
-	if (sourcelist.GotoElement(ssrc) < 0) // No entry for this source
+	if (sourcelist.GotoElement(ssrc) < 0) // 此源无条目
 	{
 #ifdef RTP_SUPPORT_PROBATION
 		srcdat2 = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPINTERNALSOURCEDATA) RTPInternalSourceData(ssrc,probationtype,GetMemoryManager());
@@ -828,10 +827,10 @@ int RTPSources::GetRTCPSourceData(uint32_t ssrc,const RTPAddress *senderaddress,
 		if ((status = srcdat->SetRTCPDataAddress(senderaddress)) < 0)
 			return status;
 	}
-	else // got a previously existing source
+	else // 获取了先前存在的源
 	{
 		if (CheckCollision(srcdat,senderaddress,false))
-			return 0; // ignore packet on collision
+			return 0; // 冲突时忽略数据包
 	}
 	
 	*srcdat2 = srcdat;
@@ -852,10 +851,10 @@ int RTPSources::UpdateReceiveTime(uint32_t ssrc,const RTPTime &receivetime,const
 	if (srcdat == 0)
 		return 0;
 	
-	// We got valid SSRC info
+	// 我们获取了有效的 SSRC 信息
 	srcdat->UpdateMessageTime(receivetime);
 	
-	// Call the callback
+	// 调用回调
 	if (created)
 		OnNewSource(srcdat);
 
@@ -876,7 +875,7 @@ void RTPSources::Timeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 		RTPInternalSourceData *srcdat = sourcelist.GetCurrentElement();
 		RTPTime lastmsgtime = srcdat->INF_GetLastMessageTime();
 
-		// we don't want to time out ourselves
+		// 我们不想让自己超时
 		if ((srcdat != owndata) && (lastmsgtime < checktime)) // timeout
 		{
 			

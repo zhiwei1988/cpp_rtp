@@ -76,10 +76,10 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 	int numpadbytes;
 	RTPExtensionHeader *rtpextheader;
 	
-	if (!rawpack.IsRTP()) // If we didn't receive it on the RTP port, we'll ignore it
+	if (!rawpack.IsRTP()) // 如果我们没有在 RTP 端口上收到它，我们将忽略它
 		return ERR_RTP_PACKET_INVALIDPACKET;
 	
-	// The length should be at least the size of the RTP header
+	// 长度至少应为 RTP 报头的大小
 	packetlen = rawpack.GetDataLength();
 	if (packetlen < sizeof(RTPHeader))
 		return ERR_RTP_PACKET_INVALIDPACKET;
@@ -87,18 +87,18 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 	packetbytes = (uint8_t *)rawpack.GetData();
 	rtpheader = (RTPHeader *)packetbytes;
 	
-	// The version number should be correct
+	// 版本号应该正确
 	if (rtpheader->version != RTP_VERSION)
 		return ERR_RTP_PACKET_INVALIDPACKET;
 	
-	// We'll check if this is possibly a RTCP packet. For this to be possible
-	// the marker bit and payload type combined should be either an SR or RR
-	// identifier
+	// 我们将检查这是否可能是 RTCP 数据包。为此，
+	// 标记位和有效负载类型的组合应为 SR 或 RR
+	// 标识符
 	marker = (rtpheader->marker == 0)?false:true;
 	payloadtype = rtpheader->payloadtype;
 	if (marker)
 	{
-		if (payloadtype == (RTP_RTCPTYPE_SR & 127)) // don't check high bit (this was the marker!!)
+		if (payloadtype == (RTP_RTCPTYPE_SR & 127)) // 不检查高位（这是标记！！）
 			return ERR_RTP_PACKET_INVALIDPACKET;
 		if (payloadtype == (RTP_RTCPTYPE_RR & 127))
 			return ERR_RTP_PACKET_INVALIDPACKET;
@@ -107,9 +107,9 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 	csrccount = rtpheader->csrccount;
 	payloadoffset = sizeof(RTPHeader)+(int)(csrccount*sizeof(uint32_t));
 	
-	if (rtpheader->padding) // adjust payload length to take padding into account
+	if (rtpheader->padding) // 调整有效负载长度以考虑填充
 	{
-		numpadbytes = (int)packetbytes[packetlen-1]; // last byte contains number of padding bytes
+		numpadbytes = (int)packetbytes[packetlen-1]; // 最后一个字节包含填充字节数
 		if (numpadbytes <= 0)
 			return ERR_RTP_PACKET_INVALIDPACKET;
 	}
@@ -117,7 +117,7 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 		numpadbytes = 0;
 
 	hasextension = (rtpheader->extension == 0)?false:true;
-	if (hasextension) // got header extension
+	if (hasextension) // 有报头扩展
 	{
 		rtpextheader = (RTPExtensionHeader *)(packetbytes+payloadoffset);
 		payloadoffset += sizeof(RTPExtensionHeader);
@@ -134,8 +134,7 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 	if (payloadlength < 0)
 		return ERR_RTP_PACKET_INVALIDPACKET;
 
-	// Now, we've got a valid packet, so we can create a new instance of RTPPacket
-	// and fill in the members
+	// 现在，我们有了一个有效的数据包，因此我们可以创建 RTPPacket 的一个新实例并填充成员
 	
 	RTPPacket::hasextension = hasextension;
 	if (hasextension)
@@ -149,9 +148,9 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 	RTPPacket::numcsrcs = csrccount;
 	RTPPacket::payloadtype = payloadtype;
 	
-	// Note: we don't fill in the EXTENDED sequence number here, since we
-	// don't have information about the source here. We just fill in the low
-	// 16 bits
+	// 注意：我们在此处不填写扩展序列号，因为
+	// 我们在此处没有关于源的信息。我们只填写低
+	// 16 位
 	RTPPacket::extseqnr = (uint32_t)ntohs(rtpheader->sequencenumber);
 
 	RTPPacket::timestamp = ntohl(rtpheader->timestamp);
@@ -161,7 +160,7 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 	RTPPacket::packetlength = packetlen;
 	RTPPacket::payloadlength = payloadlength;
 
-	// We'll zero the data of the raw packet, since we're using it here now!
+	// 我们将原始数据包的数据清零，因为我们现在正在使用它！
 	rawpack.ZeroData();
 
 	return 0;
@@ -190,9 +189,9 @@ int RTPPacket::BuildPacket(uint8_t payloadtype,const void *payloaddata,size_t pa
 	if (numcsrcs > RTP_MAXCSRCS)
 		return ERR_RTP_PACKET_TOOMANYCSRCS;
 
-	if (payloadtype > 127) // high bit should not be used
+	if (payloadtype > 127) // 不应使用高位
 		return ERR_RTP_PACKET_BADPAYLOADTYPE;
-	if (payloadtype == 72 || payloadtype == 73) // could cause confusion with rtcp types
+	if (payloadtype == 72 || payloadtype == 73) // 可能与 rtcp 类型混淆
 		return ERR_RTP_PACKET_BADPAYLOADTYPE;
 	
 	packetlength = sizeof(RTPHeader);
@@ -210,7 +209,7 @@ int RTPPacket::BuildPacket(uint8_t payloadtype,const void *payloaddata,size_t pa
 		return ERR_RTP_PACKET_DATAEXCEEDSMAXSIZE;
 	}
 
-	// Ok, now we'll just fill in...
+	// 好的，现在我们开始填充...
 	
 	RTPHeader *rtphdr;
 	
@@ -253,7 +252,7 @@ int RTPPacket::BuildPacket(uint8_t payloadtype,const void *payloaddata,size_t pa
 	else
 		rtphdr->extension = 0;
 	rtphdr->csrccount = numcsrcs;
-	rtphdr->payloadtype = payloadtype&127; // make sure high bit isn't set
+	rtphdr->payloadtype = payloadtype&127; // 确保高位未设置
 	rtphdr->sequencenumber = htons(seqnr);
 	rtphdr->timestamp = htonl(timestamp);
 	rtphdr->ssrc = htonl(ssrc);

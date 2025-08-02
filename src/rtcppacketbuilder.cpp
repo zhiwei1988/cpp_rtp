@@ -105,7 +105,7 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 		uint32_t octetcount = rtppacketbuilder.GetPayloadOctetCount();
 		RTPTime diff = curtime;
 		diff -= rtppacktime;
-		diff += transmissiondelay; // the sample being sampled at this very instant will need a larger timestamp
+		diff += transmissiondelay; // 在此刻采样的样本将需要更大的时间戳
 		
 		uint32_t tsdiff = (uint32_t)((diff.GetDouble()/timestampunit)+0.5);
 		uint32_t rtptimestamp = rtppacktimestamp+tsdiff;
@@ -202,9 +202,9 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 				ClearAllSDESFlags();
 				if (!full && skipped > 0) 
 				{
-					// if the packet isn't full and we skipped some
-				        // sources that we already got in a previous packet,
-					// we can add some of them now
+							// 如果数据包未满且我们跳过了一些
+		// 在先前数据包中已经获取的源，
+		// 我们现在可以添加其中一些
 					
 					bool atendoflist;
 					 
@@ -217,7 +217,7 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 			}
 		}
 	}
-	else // previous sdes processing wasn't finished
+			else // 先前的 sdes 处理未完成
 	{
 		bool processedall;
 		int itemcount;
@@ -229,7 +229,7 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 			return status;
 		}
 
-		if (itemcount == 0) // Big problem: packet size is too small to let any progress happen
+		if (itemcount == 0) // 大问题：数据包大小太小，无法取得任何进展
 		{
 			RTPDelete(rtcpcomppack,GetMemoryManager());
 			return ERR_RTP_RTCPPACKETBUILDER_PACKETFILLEDTOOSOON;
@@ -241,8 +241,8 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 			ClearAllSDESFlags();
 			if (!full) 
 			{
-				// if the packet isn't full and we skipped some
-				// we can add some report blocks
+						// 如果数据包未满且我们跳过了一些
+		// 我们可以添加一些报告块
 				
 				int added,skipped;
 				bool atendoflist;
@@ -252,7 +252,7 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 					RTPDelete(rtcpcomppack,GetMemoryManager());
 					return status;
 				}
-				if (atendoflist) // filled in all possible sources
+				if (atendoflist) // 填充了所有可能的源
 					ClearAllSourceFlags();
 			}
 		}
@@ -323,7 +323,7 @@ int RTCPPacketBuilder::FillInReportBlocks(RTCPCompoundPacketBuilder *rtcpcomppac
 
 			if (shouldprocess)
 			{
-				if (srcdat->IsProcessedInRTCP()) // already covered this one
+				if (srcdat->IsProcessedInRTCP()) // 已经覆盖了这个
 				{
 					skippedcount++;
 				}
@@ -336,7 +336,7 @@ int RTCPPacketBuilder::FillInReportBlocks(RTCPCompoundPacketBuilder *rtcpcomppac
 					uint32_t expected = curseq-prevseq;
 					uint8_t fraclost;
 					
-					if (expected < num) // got duplicates
+					if (expected < num) // 收到重复项
 						fraclost = 0;
 					else
 					{
@@ -416,7 +416,7 @@ int RTCPPacketBuilder::FillInReportBlocks(RTCPCompoundPacketBuilder *rtcpcomppac
 	*skipped = skippedcount;
 	*full = filled;
 	
-	if (!atend) // search for available sources
+			if (!atend) // 搜索可用源
 	{
 		bool shouldprocess = false;
 		
@@ -474,8 +474,7 @@ int RTCPPacketBuilder::FillInSDES(RTCPCompoundPacketBuilder *rtcpcomppack,bool *
 	*processedall = false;
 	*added = 0;
 
-	// We don't need to add a SSRC for our own data, this is still set
-	// from adding the CNAME
+			// 我们不需要为自己的数据添加 SSRC，这仍然是从添加 CNAME 时设置的
 	if (doname)
 	{
 		if (!ownsdesinfo.ProcessedName())

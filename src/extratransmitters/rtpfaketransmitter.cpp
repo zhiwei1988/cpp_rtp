@@ -61,7 +61,7 @@ int RTPFakeTransmitter::Init(bool tsafe)
 	if (init)
 		return ERR_RTP_FAKETRANS_ALREADYINIT;
 
-    // bomb out if trying to use threads
+    // 如果尝试使用线程则直接报错
     if (tsafe)
         return ERR_RTP_NOTHREADSUPPORT;
 	
@@ -103,7 +103,7 @@ int RTPFakeTransmitter::Create(size_t maximumpacketsize,const RTPTransmissionPar
 		return ERR_RTP_FAKETRANS_ALREADYCREATED;
 	}
 	
-	// Obtain transmission parameters
+	// 获取传输参数
 	
 	if (transparams == 0)
 		params = RTPNew(GetMemoryManager(),RTPMEM_TYPE_OTHER) RTPFakeTransmissionParams;
@@ -114,17 +114,17 @@ int RTPFakeTransmitter::Create(size_t maximumpacketsize,const RTPTransmissionPar
 		params = (RTPFakeTransmissionParams *)transparams;
 	}
 
-	// Check if portbase is even
+			// 检查端口基数是否为偶数
 	//if (params->GetPortbase()%2 != 0)
 	//{
 	//	MAINMUTEX_UNLOCK
 	//	return ERR_RTP_FAKETRANS_PORTBASENOTEVEN;
 	//}
 
-	// Try to obtain local IP addresses
+	// 尝试获取本地 IP 地址
 
 	localIPs = params->GetLocalIPList();
-	if (localIPs.empty()) // User did not provide list of local IP addresses, calculate them
+	if (localIPs.empty()) // 用户未提供本地 IP 地址列表，计算它们
 	{
 		int status;
 		
@@ -140,7 +140,7 @@ int RTPFakeTransmitter::Create(size_t maximumpacketsize,const RTPTransmissionPar
 //		supportsmulticasting = true;
 //	else
 //		supportsmulticasting = false;
-//#else // no multicast support enabled
+//#else // 无多播支持
 	supportsmulticasting = false;
 //#endif // RTP_SUPPORT_IPV4MULTICAST
 
@@ -258,7 +258,7 @@ int RTPFakeTransmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 	
 		bool found  = false;
 		
-		if (!hostnames.empty())	// try to select the most appropriate hostname
+		if (!hostnames.empty())	// 尝试选择最合适的主机名
 		{
 			std::list<std::string>::const_iterator it;
 			
@@ -280,7 +280,7 @@ int RTPFakeTransmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 			}
 		}
 	
-		if (!found) // use an IP address
+		if (!found) // 使用 IP 地址
 		{
 			uint32_t ip;
 			int len;
@@ -306,7 +306,7 @@ int RTPFakeTransmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 	
 	if ((*bufferlength) < localhostnamelength)
 	{
-		*bufferlength = localhostnamelength; // tell the application the required size of the buffer
+		*bufferlength = localhostnamelength; // 告诉应用程序所需的缓冲区大小
 		MAINMUTEX_UNLOCK
 		return ERR_RTP_TRANS_BUFFERLENGTHTOOSMALL;
 	}
@@ -349,9 +349,9 @@ bool RTPFakeTransmitter::ComesFromThisTransmitter(const RTPAddress *addr)
 			v = false;
 		else
 		{
-			if (addr2->GetPort() == params->GetPortbase()) // check for RTP port
+			if (addr2->GetPort() == params->GetPortbase()) // 检查 RTP 端口
 				v = true;
-			else if (addr2->GetPort() == (params->GetPortbase()+1)) // check for RTCP port
+			else if (addr2->GetPort() == (params->GetPortbase()+1)) // 检查 RTCP 端口
 				v = true;
 			else 
 				v = false;
@@ -377,7 +377,7 @@ int RTPFakeTransmitter::Poll()
 		MAINMUTEX_UNLOCK
 		return ERR_RTP_FAKETRANS_NOTCREATED;
 	}
-	status = FakePoll(); // poll RTP socket
+	status = FakePoll(); // 轮询 RTP 套接字
     params->SetCurrentData(NULL);
 	MAINMUTEX_UNLOCK
 	return status;
@@ -412,7 +412,7 @@ int RTPFakeTransmitter::SendRTPData(const void *data,size_t len)
 	}
 
 	destinations.GotoFirstElement();
-    // send to each destination
+	// 发送到每个目标
 	while (destinations.HasCurrentElement())
 	{
         (*params->GetPacketReadyCB())(params->GetPacketReadyCBData(), (uint8_t*)data, len,
@@ -445,7 +445,7 @@ int RTPFakeTransmitter::SendRTCPData(const void *data,size_t len)
 	}
 
 	destinations.GotoFirstElement();
-    // send to each destination
+	// 发送到每个目标
 	while (destinations.HasCurrentElement())
 	{
         (*params->GetPacketReadyCB())(params->GetPacketReadyCBData(), (uint8_t*)data, len,
@@ -542,7 +542,7 @@ bool RTPFakeTransmitter::SupportsMulticasting()
 
 int RTPFakeTransmitter::JoinMulticastGroup(const RTPAddress &)
 {
-// hrrm wonder how will manage to get multicast info thru to the UDPSINK
+	// hrrm 想知道如何将多播信息传递给 UDPSINK
 /*	if (!init)
 		return ERR_RTP_FAKETRANS_NOTINIT;
 
@@ -662,7 +662,7 @@ void RTPFakeTransmitter::LeaveAllMulticastGroups()
 	MAINMUTEX_UNLOCK*/
 }
 
-#else // no multicast support
+#else // 无多播支持
 
 int RTPFakeTransmitter::JoinMulticastGroup(const RTPAddress &addr)
 {
@@ -921,7 +921,7 @@ RTPRawPacket *RTPFakeTransmitter::GetNextPacket()
 	return p;
 }
 
-// Here the private functions start...
+// 私有函数从这里开始...
 
 #ifdef RTP_SUPPORT_IPV4MULTICAST
 bool RTPFakeTransmitter::SetMulticastTTL(uint8_t)
@@ -965,20 +965,20 @@ int RTPFakeTransmitter::FakePoll()
     rtp = params->GetCurrentDataType();
     sourceaddr = params->GetCurrentDataAddr();
     sourceport = params->GetCurrentDataPort();
-    // lets make sure we got something
+    	// 让我们确保我们得到了什么
     if (data == NULL || data_len <= 0)
     {
         return 0;
     }
 
-    // let's make a RTPIPv4Address
+    	// 让我们创建一个 RTPIPv4Address
     RTPIPv4Address *addr = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPADDRESS) RTPIPv4Address(sourceaddr, sourceport);
     if (addr == 0)
     {
         return ERR_RTP_OUTOFMEM;
     }
 
-    // ok we got the src addr, now this should be the actual packet
+    	// 好的，我们得到了源地址，现在这应该是实际的数据包
     uint8_t *datacopy;
     datacopy = RTPNew(GetMemoryManager(),(rtp)?RTPMEM_TYPE_BUFFER_RECEIVEDRTPPACKET:RTPMEM_TYPE_BUFFER_RECEIVEDRTCPPACKET) uint8_t[data_len];
     if (datacopy == 0)
@@ -988,7 +988,7 @@ int RTPFakeTransmitter::FakePoll()
     }
     memcpy(datacopy, data, data_len);
 
-    // got data, process it
+    		// 获取到数据，处理它
     if (receivemode == RTPTransmitter::AcceptAll)
         acceptdata = true;
     else
@@ -996,7 +996,7 @@ int RTPFakeTransmitter::FakePoll()
 
     if (acceptdata)
     {
-        // adding packet to queue
+        		// 将数据包添加到队列
         RTPRawPacket *pack;
 
         pack = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPRAWPACKET) RTPRawPacket(datacopy,data_len,addr,curtime,rtp,GetMemoryManager());
@@ -1014,7 +1014,7 @@ int RTPFakeTransmitter::FakePoll()
 int RTPFakeTransmitter::ProcessAddAcceptIgnoreEntry(uint32_t ip,uint16_t port)
 {
 	acceptignoreinfo.GotoElement(ip);
-	if (acceptignoreinfo.HasCurrentElement()) // An entry for this IP address already exists
+	if (acceptignoreinfo.HasCurrentElement()) // 该 IP 地址的条目已存在
 	{
 		PortInfo *portinf = acceptignoreinfo.GetCurrentElement();
 		

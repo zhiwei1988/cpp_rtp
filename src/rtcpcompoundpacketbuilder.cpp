@@ -30,7 +30,7 @@ RTCPCompoundPacketBuilder::RTCPCompoundPacketBuilder(RTPMemoryManager *mgr) : RT
 RTCPCompoundPacketBuilder::~RTCPCompoundPacketBuilder()
 {
 	if (external)
-		compoundpacket = 0; // make sure RTCPCompoundPacket doesn't delete the external buffer
+		compoundpacket = 0; // 确保 RTCPCompoundPacket 不删除外部缓冲区
 	ClearBuildBuffers();
 }
 
@@ -136,8 +136,6 @@ int RTCPCompoundPacketBuilder::StartSenderReport(uint32_t senderssrc,const RTPNT
 	if (neededsize > sizeleft)
 		return ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT;
 	
-	// fill in some things
-
 	report.headerlength = sizeof(uint32_t)+sizeof(RTCPSenderReport);
 	report.isSR = true;	
 	
@@ -172,7 +170,7 @@ int RTCPCompoundPacketBuilder::StartReceiverReport(uint32_t senderssrc)
 	if (neededsize > sizeleft)
 		return ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT;
 	
-	// fill in some things
+	// 填充一些内容
 
 	report.headerlength = sizeof(uint32_t);
 	report.isSR = false;
@@ -557,7 +555,7 @@ int RTCPCompoundPacketBuilder::EndBuild()
 	uint8_t *curbuf = buf;
 	RTCPPacket *p;
 
-	// first, we'll add all report info
+	// 首先，我们将添加所有报告信息
 	
 	{
 		bool firstpacket = true;
@@ -600,7 +598,7 @@ int RTCPCompoundPacketBuilder::EndBuild()
 			hdr->length = htons((uint16_t)(numwords-1));
 			hdr->count = count;
 
-			// add entry in parent's list
+			// 在父级列表中添加条目
 			if (hdr->packettype == RTP_RTCPTYPE_SR)
 				p = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPSRPACKET) RTCPSRPacket(curbuf,offset);
 			else
@@ -620,7 +618,7 @@ int RTCPCompoundPacketBuilder::EndBuild()
 		} while (!done);
 	}
 		
-	// then, we'll add the sdes info
+	// 然后，我们将添加 sdes 信息
 
 	if (!sdes.sdessources.empty())
 	{
@@ -655,11 +653,11 @@ int RTCPCompoundPacketBuilder::EndBuild()
 					itemit++;
 				}
 
-				curbuf[offset] = 0; // end of item list;
+				curbuf[offset] = 0; // 项列表结束；
 				offset++;
 
 				size_t r = offset&0x03;
-				if (r != 0) // align to 32 bit boundary
+				if (r != 0) // 对齐到 32 位边界
 				{
 					size_t num = 4-r;
 					size_t i;
@@ -694,7 +692,7 @@ int RTCPCompoundPacketBuilder::EndBuild()
 		} while (!done);
 	}
 	
-	// adding the app data
+	// 添加应用程序数据
 	
 	{
 		std::list<Buffer>::const_iterator it;
@@ -719,7 +717,7 @@ int RTCPCompoundPacketBuilder::EndBuild()
 
 #ifdef RTP_SUPPORT_RTCPUNKNOWN
 
-	// adding the unknown data
+	// 添加未知数据
 	
 	{
 		std::list<Buffer>::const_iterator it;
@@ -744,7 +742,7 @@ int RTCPCompoundPacketBuilder::EndBuild()
 
 #endif // RTP_SUPPORT_RTCPUNKNOWN 
 
-	// adding bye packets
+	// 添加 bye 数据包
 	
 	{
 		std::list<Buffer>::const_iterator it;

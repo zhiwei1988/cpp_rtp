@@ -39,7 +39,7 @@ bool RTPByteAddress::IsFromSameHost(const RTPAddress *addr) const
 
 RTPAddress *RTPByteAddress::CreateCopy(RTPMemoryManager *mgr) const
 {
-	MEDIA_RTP_UNUSED(mgr); // possibly unused
+	MEDIA_RTP_UNUSED(mgr); // 可能未使用
 	RTPByteAddress *a = RTPNew(mgr, RTPMEM_TYPE_CLASS_RTPADDRESS) RTPByteAddress(hostaddress, addresslength, port);
 	return a;
 }

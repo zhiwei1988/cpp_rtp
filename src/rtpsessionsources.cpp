@@ -11,7 +11,7 @@ void RTPSessionSources::OnRTPPacket(RTPPacket *pack,const RTPTime &receivetime,c
 
 void RTPSessionSources::OnRTCPCompoundPacket(RTCPCompoundPacket *pack,const RTPTime &receivetime,const RTPAddress *senderaddress)
 {
-	if (senderaddress != 0) // don't analyse own RTCP packets again (they're already analysed on their way out)
+	if (senderaddress != 0) // 不要再次分析自己的 RTCP 包（它们在发送时已经分析过了）
 		rtpsession.rtcpsched.AnalyseIncoming(*pack);
 	rtpsession.OnRTCPCompoundPacket(pack,receivetime,senderaddress);
 }

@@ -42,11 +42,11 @@ int RTCPSDESInfo::SetPrivateValue(const uint8_t *prefix,size_t prefixlen,const u
 	
 	SDESPrivateItem *item;
 	
-	if (found) // replace the value for this entry
+	if (found) // 替换此条目的值
 		item = *it;
-	else // no entry for this prefix found... add it
+	else // 未找到此前缀的条目...添加它
 	{
-		if (privitems.size() >= RTP_MAXPRIVITEMS) // too many items present, just ignore it
+		if (privitems.size() >= RTP_MAXPRIVITEMS) // 项目太多，忽略它
 			return ERR_RTP_SDES_MAXPRIVITEMS;
 		
 		int status;

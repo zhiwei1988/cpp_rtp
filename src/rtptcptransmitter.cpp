@@ -88,7 +88,7 @@ int RTPTCPTransmitter::Create(size_t maximumpacketsize, const RTPTransmissionPar
 		return ERR_RTP_TCPTRANS_ALREADYCREATED;
 	}
 	
-	// Obtain transmission parameters
+	// 获取传输参数
 	
 	if (transparams == 0)
 		params = &defaultparams;
@@ -146,13 +146,13 @@ void RTPTCPTransmitter::Destroy()
 	if (m_waitingForData)
 	{
 		m_pAbortDesc->SendAbortSignal();
-		m_abortDesc.Destroy(); // Doesn't do anything if not initialized
+		m_abortDesc.Destroy(); // 如果未初始化，则不执行任何操作
 		MAINMUTEX_UNLOCK
-		WAITMUTEX_LOCK // to make sure that the WaitForIncomingData function ended
+		WAITMUTEX_LOCK // 确保 WaitForIncomingData 函数已结束
 		WAITMUTEX_UNLOCK
 	}
 	else
-		m_abortDesc.Destroy(); // Doesn't do anything if not initialized
+		m_abortDesc.Destroy(); // 如果未初始化，则不执行任何操作
 
 	MAINMUTEX_UNLOCK
 }
@@ -191,10 +191,7 @@ int RTPTCPTransmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 	if (m_localHostname.size() == 0)
 	{
 		//
-		// TODO
-		// TODO
-		// TODO
-		// TODO
+		// TODO: 需要实现主机名解析
 		//
 		m_localHostname.resize(9);
 		memcpy(&m_localHostname[0], "localhost", m_localHostname.size());
@@ -202,7 +199,7 @@ int RTPTCPTransmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 	
 	if ((*bufferlength) < m_localHostname.size())
 	{
-		*bufferlength = m_localHostname.size(); // tell the application the required size of the buffer
+		*bufferlength = m_localHostname.size(); // 告诉应用程序所需的缓冲区大小
 		MAINMUTEX_UNLOCK
 		return ERR_RTP_TRANS_BUFFERLENGTHTOOSMALL;
 	}
@@ -234,7 +231,7 @@ bool RTPTCPTransmitter::ComesFromThisTransmitter(const RTPAddress *addr)
 	bool v = false;
 
 	MEDIA_RTP_UNUSED(pAddr);
-	// TODO: for now, we're assuming that we can't just send to the same transmitter
+	// TODO: 目前，我们假设我们不能只发送到同一个发送器
 
 	MAINMUTEX_UNLOCK
 	return v;
@@ -264,15 +261,15 @@ int RTPTCPTransmitter::Poll()
 		status = PollSocket(sock, it->second);
 		if (status < 0)
 		{
-			// Stop immediately on out of memory
+			// 内存不足时立即停止
 			if (status == ERR_RTP_OUTOFMEM)
 				break;
 			else
 			{
 				errSockets.push_back(sock);
-				// Don't let this count as an error (due to a closed connection for example),
-				// otherwise the poll thread (if used) will stop because of this. Since there
-				// may be more than one connection, that's not desirable in general.
+				// 不要将此计为错误（例如由于连接关闭），
+				// 否则轮询线程（如果使用）将因此停止。由于可能存在多个连接，
+				// 因此通常不希望这样做。
 				status = 0; 
 			}
 		}
@@ -341,14 +338,14 @@ int RTPTCPTransmitter::WaitForIncomingData(const RTPTime &delay,bool *dataavaila
 	
 	MAINMUTEX_LOCK
 	m_waitingForData = false;
-	if (!m_created) // destroy called
+	if (!m_created) // 调用销毁
 	{
 		MAINMUTEX_UNLOCK;
 		WAITMUTEX_UNLOCK
 		return 0;
 	}
 		
-	// if aborted, read from abort buffer
+	// 如果中止，则从中止缓冲区读取
 	if (m_tmpFlags[idxAbort])
 		m_pAbortDesc->ReadSignallingByte();
 
@@ -452,9 +449,8 @@ int RTPTCPTransmitter::AddDestination(const RTPAddress &addr)
 	}
 	m_destSockets[s] = SocketData();
 
-	// Because the sockets are also used for incoming data, we'll abort a wait
-	// that may be in progress, otherwise it could take a few seconds until the
-	// new socket is monitored for incoming data
+	// 由于套接字也用于传入数据，我们将中止可能正在进行的等待，
+	// 否则可能需要几秒钟才能监视新套接字的传入数据
 	m_pAbortDesc->SendAbortSignal();
 
 	MAINMUTEX_UNLOCK
@@ -495,7 +491,7 @@ int RTPTCPTransmitter::DeleteDestination(const RTPAddress &addr)
 		return ERR_RTP_TCPTRANS_SOCKETNOTFOUNDINDESTINATIONS;
 	}
 
-	// Clean up possibly allocated memory
+	// 清理可能分配的内存
 	uint8_t *pBuf = it->second.ExtractDataBuffer();
 	if (pBuf)
 		RTPDeleteByteArray(pBuf, GetMemoryManager());
@@ -642,7 +638,7 @@ RTPRawPacket *RTPTCPTransmitter::GetNextPacket()
 	return p;
 }
 
-// Here the private functions start...
+// 私有函数从这里开始...
 
 void RTPTCPTransmitter::FlushPackets()
 {
@@ -771,15 +767,14 @@ int RTPTCPTransmitter::SendRTPRTCPData(const void *data, size_t len)
 			OnSendError(errSockets[i]);
 	}
 
-	// Don't return an error code to avoid the poll thread exiting
-	// due to one closed connection for example
+	// 不要返回错误代码以避免轮询线程因例如一个关闭的连接而退出
 
 	return 0;
 }
 
 int RTPTCPTransmitter::ValidateSocket(SocketType)
 {
-	// TODO: should we even do a check (for a TCP socket)? 
+	// TODO: 我们是否应该检查（对于 TCP 套接字）？ 
 	return 0;
 }
 
@@ -814,15 +809,15 @@ void RTPTCPTransmitter::SocketData::Reset()
 
 RTPTCPTransmitter::SocketData::~SocketData()
 {
-	assert(m_pDataBuffer == 0); // Should be deleted externally to avoid storing a memory manager in the class
+	assert(m_pDataBuffer == 0); // 应在外部删除，以避免在类中存储内存管理器
 }
 
 int RTPTCPTransmitter::SocketData::ProcessAvailableBytes(SocketType sock, int availLen, bool &complete, RTPMemoryManager *pMgr)
 {
-	MEDIA_RTP_UNUSED(pMgr); // possibly unused
+	MEDIA_RTP_UNUSED(pMgr); // 可能未使用
 
 	const int numLengthBuffer = 2;
-	if (m_lengthBufferOffset < numLengthBuffer) // first we need to get the length
+	if (m_lengthBufferOffset < numLengthBuffer) // 首先我们需要获取长度
 	{
 		assert(m_pDataBuffer == 0);
 		int num = numLengthBuffer-m_lengthBufferOffset;
@@ -841,7 +836,7 @@ int RTPTCPTransmitter::SocketData::ProcessAvailableBytes(SocketType sock, int av
 		availLen -= r;
 
 		assert(m_lengthBufferOffset <= numLengthBuffer);
-		if (m_lengthBufferOffset == numLengthBuffer) // we can constuct a length
+		if (m_lengthBufferOffset == numLengthBuffer) // 我们可以构造一个长度
 		{
 			int l = 0;
 			for (int i = numLengthBuffer-1, shift = 0 ; i >= 0 ; i--, shift += 8)
@@ -852,18 +847,18 @@ int RTPTCPTransmitter::SocketData::ProcessAvailableBytes(SocketType sock, int av
 
 			//cout << "Expecting " << m_dataLength << " bytes" << endl;
 
-			// avoid allocation of length 0
+			// 避免分配长度为 0
 			if (l == 0)
 				l = 1;
 
-			// We don't yet know if it's an RTP or RTCP packet, so we'll stick to RTP
+			// 我们还不知道它是 RTP 还是 RTCP 包，所以我们暂时当做 RTP 处理
 			m_pDataBuffer = RTPNew(pMgr, RTPMEM_TYPE_BUFFER_RECEIVEDRTPPACKET) uint8_t[l];
 			if (m_pDataBuffer == 0)
 				return ERR_RTP_OUTOFMEM;
 		}
 	}
 
-	if (m_lengthBufferOffset == numLengthBuffer && m_pDataBuffer) // the last one is to make sure we didn't run out of memory
+	if (m_lengthBufferOffset == numLengthBuffer && m_pDataBuffer) // 最后一个是为了确保我们没有耗尽内存
 	{
 		if (m_dataBufferOffset < m_dataLength)
 		{

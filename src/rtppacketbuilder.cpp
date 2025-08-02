@@ -108,7 +108,7 @@ int RTPPacketBuilder::DeleteCSRC(uint32_t csrc)
 	if (!found)
 		return ERR_RTP_PACKBUILD_CSRCNOTINLIST;
 	
-	// move the last csrc in the place of the deleted one
+	// 将最后一个 csrc 移到已删除的位置
 	numcsrcs--;
 	if (numcsrcs > 0 && numcsrcs != i)
 		csrcs[i] = csrcs[numcsrcs];
@@ -128,7 +128,7 @@ uint32_t RTPPacketBuilder::CreateNewSSRC()
 	timestamp = rtprnd.GetRandom32();
 	seqnr = rtprnd.GetRandom16();
 
-	// p 38: the count SHOULD be reset if the sender changes its SSRC identifier
+	// p 38：如果发送方更改其 SSRC 标识符，则计数应重置
 	numpayloadbytes = 0;
 	numpackets = 0;
 	return ssrc;
@@ -147,7 +147,7 @@ uint32_t RTPPacketBuilder::CreateNewSSRC(RTPSources &sources)
 	timestamp = rtprnd.GetRandom32();
 	seqnr = rtprnd.GetRandom16();
 
-	// p 38: the count SHOULD be reset if the sender changes its SSRC identifier
+	// p 38：如果发送方更改其 SSRC 标识符，则计数应重置
 	numpayloadbytes = 0;
 	numpackets = 0;
 	return ssrc;
@@ -210,7 +210,7 @@ int RTPPacketBuilder::PrivateBuildPacket(const void *data,size_t len,
 		return status;
 	packetlength = p.GetPacketLength();
 
-	if (numpackets == 0) // first packet
+	if (numpackets == 0) // 第一个数据包
 	{
 		lastwallclocktime = RTPTime::CurrentTime();
 		lastrtptimestamp = timestamp;

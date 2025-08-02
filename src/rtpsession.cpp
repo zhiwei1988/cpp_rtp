@@ -53,8 +53,7 @@ RTPSession::RTPSession(RTPRandom *r,RTPMemoryManager *mgr)
 	: RTPMemoryObject(mgr),rtprnd(GetRandomNumberGenerator(r)),sources(*this,mgr),packetbuilder(*rtprnd,mgr),rtcpsched(sources,*rtprnd),
 	  rtcpbuilder(sources,packetbuilder,mgr),collisionlist(mgr)
 {
-	// We're not going to set these flags in Create, so that the constructor of a derived class
-	// can already change them
+	// 我们不打算在 Create 中设置这些标志，以便派生类的构造函数可以更改它们
 	m_changeIncomingData = false;
 	m_changeOutgoingData = false;
 
@@ -88,12 +87,12 @@ int RTPSession::Create(const RTPSessionParams &sessparams,const RTPTransmissionP
 	useSR_BYEifpossible = sessparams.GetSenderReportForBYE();
 	sentpackets = false;
 	
-	// Check max packet size
+	// 检查最大数据包大小
 	
 	if ((maxpacksize = sessparams.GetMaximumPacketSize()) < RTP_MINPACKETSIZE)
 		return ERR_RTP_SESSION_MAXPACKETSIZETOOSMALL;
 		
-	// Initialize the transmission component
+	// 初始化传输组件
 	
 	rtptrans = 0;
 	switch(protocol)
@@ -153,7 +152,7 @@ int RTPSession::Create(const RTPSessionParams &sessparams,RTPTransmitter *transm
 	useSR_BYEifpossible = sessparams.GetSenderReportForBYE();
 	sentpackets = false;
 	
-	// Check max packet size
+	// 检查最大数据包大小
 	
 	if ((maxpacksize = sessparams.GetMaximumPacketSize()) < RTP_MINPACKETSIZE)
 		return ERR_RTP_SESSION_MAXPACKETSIZETOOSMALL;
@@ -171,7 +170,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 {
 	int status;
 
-	// Initialize packet builder
+	// 初始化数据包构建器
 	
 	if ((status = packetbuilder.Init(maxpacksize)) < 0)
 	{
@@ -185,12 +184,12 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 
 #ifdef RTP_SUPPORT_PROBATION
 
-	// Set probation type
+	// 设置察看类型
 	sources.SetProbationType(sessparams.GetProbationType());
 
 #endif // RTP_SUPPORT_PROBATION
 
-	// Add our own ssrc to the source table
+	// 将我们自己的 ssrc 添加到源表中
 	
 	if ((status = sources.CreateOwnSSRC(packetbuilder.GetSSRC())) < 0)
 	{
@@ -200,7 +199,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 		return status;
 	}
 
-	// Set the initial receive mode
+	// 设置初始接收模式
 	
 	if ((status = rtptrans->SetReceiveMode(sessparams.GetReceiveMode())) < 0)
 	{
@@ -211,7 +210,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 		return status;
 	}
 
-	// Init the RTCP packet builder
+	// 初始化 RTCP 数据包构建器
 	
 	double timestampunit = sessparams.GetOwnTimestampUnit();
 	uint8_t buf[1024];
@@ -245,7 +244,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 		return status;
 	}
 
-	// Set scheduler parameters
+	// 设置调度器参数
 	
 	rtcpsched.Reset();
 	rtcpsched.SetHeaderOverhead(rtptrans->GetHeaderOverhead());
@@ -287,7 +286,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 	
 	rtcpsched.SetParameters(schedparams);
 
-	// copy other parameters
+	// 复制其他参数
 	
 	acceptownpackets = sessparams.AcceptOwnPackets();
 	membermultiplier = sessparams.GetSourceTimeoutMultiplier();
@@ -296,7 +295,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 	collisionmultiplier = sessparams.GetCollisionTimeoutMultiplier();
 	notemultiplier = sessparams.GetNoteTimeoutMultiplier();
 
-	// Do thread stuff if necessary
+	// 如果需要，执行线程相关操作
 	
 #ifdef RTP_SUPPORT_THREAD
 	pollthread = 0;
@@ -410,7 +409,7 @@ void RTPSession::BYEDestroy(const RTPTime &maxwaittime,const void *reason,size_t
 	if (!created)
 		return;
 
-	// first, stop the thread so we have full control over all components
+	// 首先，停止线程，以便我们完全控制所有组件
 	
 #ifdef RTP_SUPPORT_THREAD
 	if (pollthread)
@@ -420,7 +419,7 @@ void RTPSession::BYEDestroy(const RTPTime &maxwaittime,const void *reason,size_t
 	RTPTime stoptime = RTPTime::CurrentTime();
 	stoptime += maxwaittime;
 
-	// add bye packet to the list if we've sent data
+	// 如果我们已发送数据，则将 bye 数据包添加到列表中
 
 	RTCPCompoundPacket *pack;
 
@@ -457,10 +456,10 @@ void RTPSession::BYEDestroy(const RTPTime &maxwaittime,const void *reason,size_t
 			
 				SendRTCPData(pack->GetCompoundPacketData(),pack->GetCompoundPacketLength());
 				
-				OnSendRTCPCompoundPacket(pack); // we'll place this after the actual send to avoid tampering
+				OnSendRTCPCompoundPacket(pack); // 我们将其放在实际发送之后，以避免篡改
 				
 				RTPDelete(pack,GetMemoryManager());
-				if (!byepackets.empty()) // more bye packets to send, schedule them
+				if (!byepackets.empty()) // 还有更多 bye 包要发送，请调度它们
 					rtcpsched.ScheduleBYEPacket((*(byepackets.begin()))->GetCompoundPacketLength());
 				else
 					done = true;
@@ -478,7 +477,7 @@ void RTPSession::BYEDestroy(const RTPTime &maxwaittime,const void *reason,size_t
 	collisionlist.Clear();
 	sources.Clear();
 
-	// clear rest of bye packets
+	// 清除剩余的 bye 包
 	std::list<RTCPCompoundPacket *>::const_iterator it;
 
 	for (it = byepackets.begin() ; it != byepackets.end() ; it++)
@@ -695,11 +694,11 @@ int RTPSession::SendRTCPAPPPacket(uint8_t subtype, const uint8_t name[4], const 
 	if(status < 0)
 		return status;
 
-	//first packet in an rtcp compound packet should always be SR or RR
+	// rtcp 复合包中的第一个包应该总是 SR 或 RR
 	if((status = pb.StartReceiverReport(ssrc)) < 0)
 		return status;
 
-	//add SDES packet with CNAME item
+	// 添加带有 CNAME 项的 SDES 包
 	if ((status = pb.AddSDESSource(ssrc)) < 0)
 		return status;
 	
@@ -714,14 +713,14 @@ int RTPSession::SendRTCPAPPPacket(uint8_t subtype, const uint8_t name[4], const 
 	}
 	BUILDER_UNLOCK
 	
-	//add our application specific packet
+	// 添加我们的应用程序特定包
 	if((status = pb.AddAPPPacket(subtype, ssrc, name, appdata, appdatalen)) < 0)
 		return status;
 
 	if((status = pb.EndBuild()) < 0)
 		return status;
 
-	//send packet
+	// 发送数据包
 	status = SendRTCPData(pb.GetCompoundPacketData(),pb.GetCompoundPacketLength());
 	if(status < 0)
 		return status;
@@ -764,7 +763,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 
 	if (sr)
 	{
-		// setup for the rtcp 
+		// 设置 rtcp 
 		RTPTime rtppacktime = packetbuilder.GetPacketTime();
 		uint32_t rtppacktimestamp = packetbuilder.GetPacketTimestamp();
 		uint32_t packcount = packetbuilder.GetPacketCount();
@@ -772,7 +771,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 		RTPTime curtime = RTPTime::CurrentTime();
 		RTPTime diff = curtime;
 		diff -= rtppacktime;
-		diff += 1; // add transmission delay or RTPTime(0,0);
+		diff += 1; // 添加传输延迟或 RTPTime(0,0);
 
 		double timestampunit = 90000;
 
@@ -780,7 +779,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 		uint32_t rtptimestamp = rtppacktimestamp+tsdiff;
 		RTPNTPTime ntptimestamp = curtime.GetNTPTime();
 
-		//first packet in an rtcp compound packet should always be SR or RR
+		// rtcp 复合包中的第一个包应该总是 SR 或 RR
 		if((status = rtcpcomppack->StartSenderReport(ssrc,ntptimestamp,rtptimestamp,packcount,octetcount)) < 0)
 		{
 			RTPDelete(rtcpcomppack,GetMemoryManager());
@@ -789,7 +788,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 	}
 	else
 	{
-		//first packet in an rtcp compound packet should always be SR or RR
+		// rtcp 复合包中的第一个包应该总是 SR 或 RR
 		if((status = rtcpcomppack->StartReceiverReport(ssrc)) < 0)
 		{
 			RTPDelete(rtcpcomppack,GetMemoryManager());
@@ -798,7 +797,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 
 	}
 
-	//add SDES packet with CNAME item
+	// 添加带有 CNAME 项的 SDES 包
 	if ((status = rtcpcomppack->AddSDESSource(ssrc)) < 0)
 	{
 		RTPDelete(rtcpcomppack,GetMemoryManager());
@@ -817,7 +816,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 	}
 	BUILDER_UNLOCK
 	
-	//add our packet
+	// 添加我们的数据包
 	if((status = rtcpcomppack->AddUnknownPacket(payload_type, subtype, ssrc, data, len)) < 0)
 	{
 		RTPDelete(rtcpcomppack,GetMemoryManager());
@@ -830,7 +829,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 		return status;
 	}
 
-	//send packet
+	// 发送数据包
 	status = SendRTCPData(rtcpcomppack->GetCompoundPacketData(), rtcpcomppack->GetCompoundPacketLength());
 	if(status < 0)
 	{
@@ -1159,13 +1158,13 @@ int RTPSession::SetMaximumPacketSize(size_t s)
 	if ((status = packetbuilder.SetMaximumPacketSize(s)) < 0)
 	{
 		BUILDER_UNLOCK
-		// restore previous max packet size
+		// 恢复先前的最大数据包大小
 		rtptrans->SetMaximumPacketSize(maxpacksize);
 		return status;
 	}
 	if ((status = rtcpbuilder.SetMaximumPacketSize(s)) < 0)
 	{
-		// restore previous max packet size
+		// 恢复先前的最大数据包大小
 		packetbuilder.SetMaximumPacketSize(maxpacksize);
 		BUILDER_UNLOCK
 		rtptrans->SetMaximumPacketSize(maxpacksize);
@@ -1343,7 +1342,7 @@ int RTPSession::ProcessPolledData()
 	{
 		if (m_changeIncomingData)
 		{
-			// Provide a way to change incoming data, for decryption for example
+			// 提供一种更改传入数据的方法，例如用于解密
 			if (!OnChangeIncomingData(rawpack))
 			{
 				RTPDelete(rawpack,GetMemoryManager());
@@ -1353,8 +1352,8 @@ int RTPSession::ProcessPolledData()
 
 		sources.ClearOwnCollisionFlag();
 
-		// since our sources instance also uses the scheduler (analysis of incoming packets)
-		// we'll lock it
+		// 由于我们的 sources 实例也使用调度程序（分析传入的数据包）
+		// 我们将其锁定
 		SCHED_LOCK
 		if ((status = sources.ProcessRawPacket(rawpack,rtptrans,acceptownpackets)) < 0)
 		{
@@ -1365,7 +1364,7 @@ int RTPSession::ProcessPolledData()
 		}
 		SCHED_UNLOCK
 				
-		if (sources.DetectedOwnCollision()) // collision handling!
+		if (sources.DetectedOwnCollision()) // 冲突处理!
 		{
 			bool created;
 			
@@ -1376,16 +1375,14 @@ int RTPSession::ProcessPolledData()
 				return status;
 			}
 
-			if (created) // first time we've encountered this address, send bye packet and
-			{            // change our own SSRC
+			if (created) // 第一次遇到此地址，发送 BYE 包并更改我们自己的 SSRC
 				PACKSENT_LOCK
 				bool hassentpackets = sentpackets;
 				PACKSENT_UNLOCK
 
 				if (hassentpackets)
 				{
-					// Only send BYE packet if we've actually sent data using this
-					// SSRC
+					// 仅当我们实际使用此SSRC发送了数据时才发送BYE数据包
 					
 					RTCPCompoundPacket *rtcpcomppack;
 
@@ -1400,15 +1397,15 @@ int RTPSession::ProcessPolledData()
 					BUILDER_UNLOCK
 
 					byepackets.push_back(rtcpcomppack);
-					if (byepackets.size() == 1) // was the first packet, schedule a BYE packet (otherwise there's already one scheduled)
+					if (byepackets.size() == 1) // 是第一个数据包，调度一个BYE数据包（否则已经有一个调度了）
 					{
 						SCHED_LOCK
 						rtcpsched.ScheduleBYEPacket(rtcpcomppack->GetCompoundPacketLength());
 						SCHED_UNLOCK
 					}
 				}
-				// bye packet is built and scheduled, now change our SSRC
-				// and reset the packet count in the transmitter
+				// BYE数据包已构建并调度，现在更改我们的SSRC
+				// 并重置发送器中的数据包计数
 				
 				BUILDER_LOCK
 				uint32_t newssrc = packetbuilder.CreateNewSSRC(sources);
@@ -1418,7 +1415,7 @@ int RTPSession::ProcessPolledData()
 				sentpackets = false;
 				PACKSENT_UNLOCK
 	
-				// remove old entry in source table and add new one
+				// 删除源表中的旧条目并添加新条目
 
 				if ((status = sources.DeleteOwnSSRC()) < 0)
 				{
@@ -1452,7 +1449,7 @@ int RTPSession::ProcessPolledData()
 	sources.MultipleTimeouts(t,sendertimeout,byetimeout,generaltimeout,notetimeout);
 	collisionlist.Timeout(t,colltimeout);
 	
-	// We'll check if it's time for RTCP stuff
+	// 我们将检查是否该处理RTCP相关事宜了
 
 	SCHED_LOCK
 	bool istime = rtcpsched.IsTime();
@@ -1462,7 +1459,7 @@ int RTPSession::ProcessPolledData()
 	{
 		RTCPCompoundPacket *pack;
 	
-		// we'll check if there's a bye packet to send, or just a normal packet
+		// 我们将检查是否有BYE数据包要发送，或者只是一个普通的数据包
 
 		if (byepackets.empty())
 		{
@@ -1537,7 +1534,7 @@ int RTPSession::CreateCNAME(uint8_t *buffer,size_t *bufferlength,bool resolve)
 			gotlogin = false;
 	}
 	
-	if (!gotlogin) // try regular getlogin
+	if (!gotlogin) // 尝试常规的getlogin
 	{
 		char *loginname = getlogin();
 		if (loginname == 0)
@@ -1559,7 +1556,7 @@ int RTPSession::CreateCNAME(uint8_t *buffer,size_t *bufferlength,bool resolve)
 			return ERR_RTP_SESSION_CANTGETLOGINNAME;
 		strncpy((char *)buffer,logname,*bufferlength);
 	}
-#else // Win32 version
+#else // Win32 版本
 
 #ifndef _WIN32_WCE
 	DWORD len = *bufferlength;
@@ -1590,7 +1587,7 @@ int RTPSession::CreateCNAME(uint8_t *buffer,size_t *bufferlength,bool resolve)
 	{
 		char hostname[1024];
 		
-		RTP_STRNCPY(hostname,"localhost",1024); // just in case gethostname fails
+		RTP_STRNCPY(hostname,"localhost",1024); // 以防gethostname失败
 
 		gethostname(hostname,1024);
 		RTP_STRNCPY((char *)(buffer+offset),hostname,buflen2);

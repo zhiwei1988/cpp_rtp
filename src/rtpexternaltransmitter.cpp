@@ -80,7 +80,7 @@ int RTPExternalTransmitter::Create(size_t maximumpacketsize,const RTPTransmissio
 		return ERR_RTP_EXTERNALTRANS_ALREADYCREATED;
 	}
 	
-	// Obtain transmission parameters
+			// 获取传输参数
 	
 	if (transparams == 0)
 	{
@@ -143,7 +143,7 @@ void RTPExternalTransmitter::Destroy()
 		m_abortCount++;
 		m_abortDesc.Destroy();
 		MAINMUTEX_UNLOCK
-		WAITMUTEX_LOCK // to make sure that the WaitForIncomingData function ended
+		WAITMUTEX_LOCK // 确保 WaitForIncomingData 函数已结束
 		WAITMUTEX_UNLOCK
 	}
 	else
@@ -185,14 +185,14 @@ int RTPExternalTransmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlengt
 
 	if (localhostname == 0)
 	{
-		// We'll just use 'gethostname' for simplicity
+		// 为简单起见，我们只使用 'gethostname'
 
 		char name[1024];
 
 		if (gethostname(name,1023) != 0)
-			strcpy(name, "localhost"); // failsafe
+			strcpy(name, "localhost"); // 故障安全
 		else
-			name[1023] = 0; // ensure null-termination
+			name[1023] = 0; // 确保以空字符结尾
 
 		localhostnamelength = strlen(name);
 		localhostname = RTPNew(GetMemoryManager(),RTPMEM_TYPE_OTHER) uint8_t [localhostnamelength+1];
@@ -203,7 +203,7 @@ int RTPExternalTransmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlengt
 	
 	if ((*bufferlength) < localhostnamelength)
 	{
-		*bufferlength = localhostnamelength; // tell the application the required size of the buffer
+		*bufferlength = localhostnamelength; // 告诉应用程序所需的缓冲区大小
 		MAINMUTEX_UNLOCK
 		return ERR_RTP_TRANS_BUFFERLENGTHTOOSMALL;
 	}
@@ -276,14 +276,14 @@ int RTPExternalTransmitter::WaitForIncomingData(const RTPTime &delay,bool *dataa
 	
 	MAINMUTEX_LOCK
 	waitingfordata = false;
-	if (!created) // destroy called
+	if (!created) // 调用销毁
 	{
 		MAINMUTEX_UNLOCK;
 		WAITMUTEX_UNLOCK
 		return 0;
 	}
 		
-	// if aborted, read from abort buffer
+	// 如果中止，则从中止缓冲区读取
 	if (isset)
 	{
 		m_abortDesc.ClearAbortSignal();
@@ -537,7 +537,7 @@ RTPRawPacket *RTPExternalTransmitter::GetNextPacket()
 	return p;
 }
 
-// Here the private functions start...
+// 私有函数从这里开始...
 
 void RTPExternalTransmitter::FlushPackets()
 {

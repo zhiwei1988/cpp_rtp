@@ -141,7 +141,7 @@ int GetAutoSockets(uint32_t bindIP, bool allowOdd, bool rtcpMux,
 			return ERR_RTP_UDPV4TRANS_CANTCREATESOCKET;
 		}
 
-		// First we get an automatically chosen port
+		// 首先我们获取一个自动选择的端口
 
 		struct sockaddr_in addr;
 		memset(&addr,0,sizeof(struct sockaddr_in));
@@ -167,7 +167,7 @@ int GetAutoSockets(uint32_t bindIP, bool allowOdd, bool rtcpMux,
 			return status;
 		}
 
-		if (rtcpMux) // only need one socket
+		if (rtcpMux) // 只需要一个套接字
 		{
 			if (basePort%2 == 0 || allowOdd)
 			{
@@ -194,7 +194,7 @@ int GetAutoSockets(uint32_t bindIP, bool allowOdd, bool rtcpMux,
 				return ERR_RTP_UDPV4TRANS_CANTCREATESOCKET;
 			}
 
-			// Try the next port or the previous port
+			// 尝试下一个端口或前一个端口
 			uint16_t secondPort = basePort;
 			bool possiblyValid = false;
 
@@ -203,7 +203,7 @@ int GetAutoSockets(uint32_t bindIP, bool allowOdd, bool rtcpMux,
 				secondPort++;
 				possiblyValid = true;
 			}
-			else if (basePort > 1) // avoid landing on port 0
+			else if (basePort > 1) // 避免使用端口 0
 			{
 				secondPort--;
 				possiblyValid = true;
@@ -218,8 +218,7 @@ int GetAutoSockets(uint32_t bindIP, bool allowOdd, bool rtcpMux,
 				addr.sin_addr.s_addr = htonl(bindIP);
 				if (bind(sock2,(struct sockaddr *)&addr,sizeof(struct sockaddr_in)) == 0)
 				{
-					// In this case, we have two consecutive port numbers, the lower of
-					// which is even
+					// 在这种情况下，我们有两个连续的端口号，其中较低者为偶数
 
 					if (basePort < secondPort)
 					{
@@ -272,7 +271,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		return ERR_RTP_UDPV4TRANS_ALREADYCREATED;
 	}
 	
-	// Obtain transmission parameters
+	// 获取传输参数
 	
 	if (transparams == 0)
 		params = &defaultparams;
@@ -290,7 +289,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 	{
 		closesocketswhendone = false;
 
-		// Determine the port numbers
+		// 确定端口号
 		int status = GetIPv4SocketPort(rtpsock, &m_rtpPort);
 		if (status < 0)
 		{
@@ -320,14 +319,14 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		}
 		else
 		{
-			// Check if portbase is even (if necessary)
+			// 检查端口基数是否为偶数（如果需要）
 			if (!params->GetAllowOddPortbase() && params->GetPortbase()%2 != 0)
 			{
 				MAINMUTEX_UNLOCK
 				return ERR_RTP_UDPV4TRANS_PORTBASENOTEVEN;
 			}
 
-			// create sockets
+			// 创建套接字
 			
 			rtpsock = socket(PF_INET,SOCK_DGRAM,0);
 			if (rtpsock == RTPSOCKERR)
@@ -336,7 +335,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 				return ERR_RTP_UDPV4TRANS_CANTCREATESOCKET;
 			}
 
-			// If we're multiplexing, we're just going to set the RTCP socket to equal the RTP socket
+			// 如果我们进行多路复用，我们只需将 RTCP 套接字设置为等于 RTP 套接字
 			if (params->GetRTCPMultiplexing())
 				rtcpsock = rtpsock;
 			else
@@ -350,7 +349,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 				}
 			}
 
-			// bind sockets
+			// 绑定套接字
 
 			uint32_t bindIP = params->GetBindIP();
 			
@@ -367,7 +366,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 				return ERR_RTP_UDPV4TRANS_CANTBINDRTPSOCKET;
 			}
 
-			if (rtpsock != rtcpsock) // no need to bind same socket twice when multiplexing
+			if (rtpsock != rtcpsock) // 多路复用时无需绑定同一个套接字两次
 			{
 				uint16_t rtpport = params->GetPortbase();
 				uint16_t rtcpport = params->GetForcedRTCPPort();
@@ -396,7 +395,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 				m_rtcpPort = m_rtpPort;
 		}
 
-		// set socket buffer sizes
+		// 设置套接字缓冲区大小
 		
 		size = params->GetRTPReceiveBuffer();
 		if (setsockopt(rtpsock,SOL_SOCKET,SO_RCVBUF,(const char *)&size,sizeof(int)) != 0)
@@ -413,7 +412,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 			return ERR_RTP_UDPV4TRANS_CANTSETRTPTRANSMITBUF;
 		}
 
-		if (rtpsock != rtcpsock) // no need to set RTCP flags when multiplexing
+		if (rtpsock != rtcpsock) // 多路复用时无需设置 RTCP 标志
 		{
 			size = params->GetRTCPReceiveBuffer();
 			if (setsockopt(rtcpsock,SOL_SOCKET,SO_RCVBUF,(const char *)&size,sizeof(int)) != 0)
@@ -432,10 +431,10 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		}
 	}
 
-	// Try to obtain local IP addresses
+	// 尝试获取本地 IP 地址
 
 	localIPs = params->GetLocalIPList();
-	if (localIPs.empty()) // User did not provide list of local IP addresses, calculate them
+	if (localIPs.empty()) // 用户未提供本地 IP 地址列表，计算它们
 	{
 		int status;
 		
@@ -453,7 +452,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		supportsmulticasting = true;
 	else
 		supportsmulticasting = false;
-#else // no multicast support enabled
+#else // 未启用多播支持
 	supportsmulticasting = false;
 #endif // RTP_SUPPORT_IPV4MULTICAST
 
@@ -531,13 +530,13 @@ void RTPUDPv4Transmitter::Destroy()
 	if (waitingfordata)
 	{
 		m_pAbortDesc->SendAbortSignal();
-		m_abortDesc.Destroy(); // Doesn't do anything if not initialized
+		m_abortDesc.Destroy(); // 如果未初始化，则不执行任何操作
 		MAINMUTEX_UNLOCK
-		WAITMUTEX_LOCK // to make sure that the WaitForIncomingData function ended
+		WAITMUTEX_LOCK // 确保 WaitForIncomingData 函数已结束
 		WAITMUTEX_UNLOCK
 	}
 	else
-		m_abortDesc.Destroy(); // Doesn't do anything if not initialized
+		m_abortDesc.Destroy(); // 如果未初始化，则不执行任何操作
 
 	MAINMUTEX_UNLOCK
 }
@@ -635,7 +634,7 @@ int RTPUDPv4Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 	
 		bool found  = false;
 		
-		if (!hostnames.empty())	// try to select the most appropriate hostname
+		if (!hostnames.empty())	// 尝试选择最合适的主机名
 		{
 			std::list<std::string>::const_iterator it;
 		
@@ -658,7 +657,7 @@ int RTPUDPv4Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 			}
 		}
 	
-		if (!found) // use an IP address
+		if (!found) // 使用 IP 地址
 		{
 			uint32_t ip;
 			int len;
@@ -684,7 +683,7 @@ int RTPUDPv4Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 	
 	if ((*bufferlength) < localhostnamelength)
 	{
-		*bufferlength = localhostnamelength; // tell the application the required size of the buffer
+		*bufferlength = localhostnamelength; // 告诉应用程序所需的缓冲区大小
 		MAINMUTEX_UNLOCK
 		return ERR_RTP_TRANS_BUFFERLENGTHTOOSMALL;
 	}
@@ -727,7 +726,7 @@ bool RTPUDPv4Transmitter::ComesFromThisTransmitter(const RTPAddress *addr)
 			v = false;
 		else
 		{
-			if (addr2->GetPort() == m_rtpPort || addr2->GetPort() == m_rtcpPort) // check for RTP port and RTCP port
+			if (addr2->GetPort() == m_rtpPort || addr2->GetPort() == m_rtcpPort) // 检查 RTP 端口和 RTCP 端口
 				v = true;
 			else 
 				v = false;
@@ -753,11 +752,11 @@ int RTPUDPv4Transmitter::Poll()
 		MAINMUTEX_UNLOCK
 		return ERR_RTP_UDPV4TRANS_NOTCREATED;
 	}
-	status = PollSocket(true); // poll RTP socket
-	if (rtpsock != rtcpsock) // no need to poll twice when multiplexing
+	status = PollSocket(true); // 轮询 RTP 套接字
+	if (rtpsock != rtcpsock) // 多路复用时无需轮询两次
 	{
 		if (status >= 0)
-			status = PollSocket(false); // poll RTCP socket
+			status = PollSocket(false); // 轮询 RTCP 套接字
 	}
 	MAINMUTEX_UNLOCK
 	return status;
@@ -806,14 +805,14 @@ int RTPUDPv4Transmitter::WaitForIncomingData(const RTPTime &delay,bool *dataavai
 	
 	MAINMUTEX_LOCK
 	waitingfordata = false;
-	if (!created) // destroy called
+	if (!created) // 调用销毁
 	{
 		MAINMUTEX_UNLOCK;
 		WAITMUTEX_UNLOCK
 		return 0;
 	}
 		
-	// if aborted, read from abort buffer
+	// 如果中止，则从中止缓冲区读取
 	if (readflags[idxAbort])
 		m_pAbortDesc->ReadSignallingByte();
 
@@ -1033,7 +1032,7 @@ int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 			return ERR_RTP_UDPV4TRANS_COULDNTJOINMULTICASTGROUP;
 		}
 
-		if (rtpsock != rtcpsock) // no need to join multicast group twice when multiplexing
+		if (rtpsock != rtcpsock) // 多路复用时无需加入多播组两次
 		{
 			RTPUDPV4TRANS_MCASTMEMBERSHIP(rtcpsock,IP_ADD_MEMBERSHIP,mcastIP,status);
 			if (status != 0)
@@ -1082,7 +1081,7 @@ int RTPUDPv4Transmitter::LeaveMulticastGroup(const RTPAddress &addr)
 	if (status >= 0)
 	{	
 		RTPUDPV4TRANS_MCASTMEMBERSHIP(rtpsock,IP_DROP_MEMBERSHIP,mcastIP,status);
-		if (rtpsock != rtcpsock) // no need to leave multicast group twice when multiplexing
+		if (rtpsock != rtcpsock) // 多路复用时无需离开多播组两次
 			RTPUDPV4TRANS_MCASTMEMBERSHIP(rtcpsock,IP_DROP_MEMBERSHIP,mcastIP,status);
 
 		status = 0;
@@ -1109,7 +1108,7 @@ void RTPUDPv4Transmitter::LeaveAllMulticastGroups()
 			mcastIP = multicastgroups.GetCurrentElement();
 			
 			RTPUDPV4TRANS_MCASTMEMBERSHIP(rtpsock,IP_DROP_MEMBERSHIP,mcastIP,status);
-			if (rtpsock != rtcpsock) // no need to leave multicast group twice when multiplexing
+			if (rtpsock != rtcpsock) // 多路复用时无需离开多播组两次
 				RTPUDPV4TRANS_MCASTMEMBERSHIP(rtcpsock,IP_DROP_MEMBERSHIP,mcastIP,status);
 			MEDIA_RTP_UNUSED(status);
 
@@ -1120,7 +1119,7 @@ void RTPUDPv4Transmitter::LeaveAllMulticastGroups()
 	MAINMUTEX_UNLOCK
 }
 
-#else // no multicast support
+#else // 无多播支持
 
 int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 {
@@ -1379,7 +1378,7 @@ RTPRawPacket *RTPUDPv4Transmitter::GetNextPacket()
 	return p;
 }
 
-// Here the private functions start...
+// 私有函数从这里开始...
 
 #ifdef RTP_SUPPORT_IPV4MULTICAST
 bool RTPUDPv4Transmitter::SetMulticastTTL(uint8_t ttl)
@@ -1391,7 +1390,7 @@ bool RTPUDPv4Transmitter::SetMulticastTTL(uint8_t ttl)
 	if (status != 0)
 		return false;
 
-	if (rtpsock != rtcpsock) // no need to set TTL twice when multiplexing
+	if (rtpsock != rtcpsock) // 多路复用时无需设置 TTL 两次
 	{
 		status = setsockopt(rtcpsock,IPPROTO_IP,IP_MULTICAST_TTL,(const char *)&ttl2,sizeof(int));
 		if (status != 0)
@@ -1435,12 +1434,11 @@ int RTPUDPv4Transmitter::PollSocket(bool rtp)
 		len = 0;
 		RTPIOCTL(sock,FIONREAD,&len);
 
-		if (len <= 0) // make sure a packet of length zero is not queued
+		if (len <= 0) // 确保长度为零的数据包不会排队
 		{
-			// An alternative workaround would be to just use non-blocking sockets.
-			// However, since the user does have access to the sockets and I do not
-			// know how this would affect anyone else's code, I chose to do it using
-			// an extra select call in case ioctl says the length is zero.
+			// 另一种解决方法是只使用非阻塞套接字。
+			// 但是，由于用户可以访问套接字，我不知道这会如何影响其他人的代码，
+			// 所以我选择在 ioctl 返回长度为零的情况下使用额外的 select 调用来解决此问题。
 			
 			int8_t isset = 0;
 			int status = RTPSelect(&sock, &isset, 1, RTPTime(0));
@@ -1464,7 +1462,7 @@ int RTPUDPv4Transmitter::PollSocket(bool rtp)
 			{
 				bool acceptdata;
 
-				// got data, process it
+				// 获取到数据，处理它
 				if (receivemode == RTPTransmitter::AcceptAll)
 					acceptdata = true;
 				else
@@ -1488,7 +1486,7 @@ int RTPUDPv4Transmitter::PollSocket(bool rtp)
 					memcpy(datacopy,packetbuffer,recvlen);
 					
 					bool isrtp = rtp;
-					if (rtpsock == rtcpsock) // check payload type when multiplexing
+					if (rtpsock == rtcpsock) // 多路复用时检查负载类型
 					{
 						isrtp = true;
 
@@ -1521,11 +1519,11 @@ int RTPUDPv4Transmitter::PollSocket(bool rtp)
 int RTPUDPv4Transmitter::ProcessAddAcceptIgnoreEntry(uint32_t ip,uint16_t port)
 {
 	acceptignoreinfo.GotoElement(ip);
-	if (acceptignoreinfo.HasCurrentElement()) // An entry for this IP address already exists
+	if (acceptignoreinfo.HasCurrentElement()) // 该 IP 地址的条目已存在
 	{
 		PortInfo *portinf = acceptignoreinfo.GetCurrentElement();
 		
-		if (port == 0) // select all ports
+		if (port == 0) // 选择所有端口
 		{
 			portinf->all = true;
 			portinf->portlist.clear();
@@ -1538,19 +1536,19 @@ int RTPUDPv4Transmitter::ProcessAddAcceptIgnoreEntry(uint32_t ip,uint16_t port)
 			end = portinf->portlist.end();
 			for (it = begin ; it != end ; it++)
 			{
-				if (*it == port) // already in list
+				if (*it == port) // 已在列表中
 					return 0;
 			}
 			portinf->portlist.push_front(port);
 		}
 	}
-	else // got to create an entry for this IP address
+	else // 需要为此 IP 地址创建条目
 	{
 		PortInfo *portinf;
 		int status;
 		
 		portinf = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_ACCEPTIGNOREPORTINFO) PortInfo();
-		if (port == 0) // select all ports
+		if (port == 0) // 选择所有端口
 			portinf->all = true;
 		else
 			portinf->portlist.push_front(port);
@@ -1589,28 +1587,28 @@ int RTPUDPv4Transmitter::ProcessDeleteAcceptIgnoreEntry(uint32_t ip,uint16_t por
 	PortInfo *inf;
 
 	inf = acceptignoreinfo.GetCurrentElement();
-	if (port == 0) // delete all entries
+	if (port == 0) // 删除所有条目
 	{
 		inf->all = false;
 		inf->portlist.clear();
 	}
-	else // a specific port was selected
+	else // 选择了一个特定的端口
 	{
-		if (inf->all) // currently, all ports are selected. Add the one to remove to the list
+		if (inf->all) // 当前已选择所有端口。将要删除的端口添加到列表中
 		{
-			// we have to check if the list doesn't contain the port already
+			// 我们必须检查列表中是否已包含该端口
 			std::list<uint16_t>::const_iterator it,begin,end;
 
 			begin = inf->portlist.begin();
 			end = inf->portlist.end();
 			for (it = begin ; it != end ; it++)
 			{
-				if (*it == port) // already in list: this means we already deleted the entry
+				if (*it == port) // 已在列表中: this means we already deleted the entry
 					return ERR_RTP_UDPV4TRANS_NOSUCHENTRY;
 			}
 			inf->portlist.push_front(port);
 		}
-		else // check if we can find the port in the list
+		else // 检查我们是否可以在列表中找到该端口
 		{
 			std::list<uint16_t>::iterator it,begin,end;
 			
@@ -1618,13 +1616,13 @@ int RTPUDPv4Transmitter::ProcessDeleteAcceptIgnoreEntry(uint32_t ip,uint16_t por
 			end = inf->portlist.end();
 			for (it = begin ; it != end ; ++it)
 			{
-				if (*it == port) // found it!
+				if (*it == port) // 找到了！
 				{
 					inf->portlist.erase(it);
 					return 0;
 				}
 			}
-			// didn't find it
+			// 没找到
 			return ERR_RTP_UDPV4TRANS_NOSUCHENTRY;			
 		}
 	}
@@ -1642,7 +1640,7 @@ bool RTPUDPv4Transmitter::ShouldAcceptData(uint32_t srcip,uint16_t srcport)
 			return false;
 		
 		inf = acceptignoreinfo.GetCurrentElement();
-		if (!inf->all) // only accept the ones in the list
+		if (!inf->all) // 只接受列表中的
 		{
 			std::list<uint16_t>::const_iterator it,begin,end;
 
@@ -1655,7 +1653,7 @@ bool RTPUDPv4Transmitter::ShouldAcceptData(uint32_t srcip,uint16_t srcport)
 			}
 			return false;
 		}
-		else // accept all, except the ones in the list
+		else // 全部接受，列表中的除外
 		{
 			std::list<uint16_t>::const_iterator it,begin,end;
 
@@ -1669,7 +1667,7 @@ bool RTPUDPv4Transmitter::ShouldAcceptData(uint32_t srcip,uint16_t srcport)
 			return true;
 		}
 	}
-	else // IgnoreSome
+	else // 忽略一些
 	{
 		PortInfo *inf;
 
@@ -1678,7 +1676,7 @@ bool RTPUDPv4Transmitter::ShouldAcceptData(uint32_t srcip,uint16_t srcport)
 			return true;
 		
 		inf = acceptignoreinfo.GetCurrentElement();
-		if (!inf->all) // ignore the ports in the list
+		if (!inf->all) // 忽略列表中的端口
 		{
 			std::list<uint16_t>::const_iterator it,begin,end;
 
@@ -1691,7 +1689,7 @@ bool RTPUDPv4Transmitter::ShouldAcceptData(uint32_t srcip,uint16_t srcport)
 			}
 			return true;
 		}
-		else // ignore all, except the ones in the list
+		else // 全部忽略，列表中的除外
 		{
 			std::list<uint16_t>::const_iterator it,begin,end;
 
@@ -1710,11 +1708,11 @@ bool RTPUDPv4Transmitter::ShouldAcceptData(uint32_t srcip,uint16_t srcport)
 
 int RTPUDPv4Transmitter::CreateLocalIPList()
 {
-	 // first try to obtain the list from the network interface info
+	 // 首先尝试从网络接口信息中获取列表
 
 	if (!GetLocalIPList_Interfaces())
 	{
-		// If this fails, we'll have to depend on DNS info
+		// 如果失败，我们将不得不依赖 DNS 信息
 		GetLocalIPList_DNS();
 	}
 	AddLoopbackAddress();
@@ -1738,7 +1736,7 @@ bool RTPUDPv4Transmitter::GetLocalIPList_Interfaces()
 	for (i = 0 ; i < numaddresses ; i++)
 	{
 		SOCKET_ADDRESS *sockaddr = &(addrlist->Address[i]);
-		if (sockaddr->iSockaddrLength == sizeof(struct sockaddr_in)) // IPv4 address
+		if (sockaddr->iSockaddrLength == sizeof(struct sockaddr_in)) // IPv4 地址
 		{
 			struct sockaddr_in *addr = (struct sockaddr_in *)sockaddr->lpSockaddr;
 
@@ -1752,7 +1750,7 @@ bool RTPUDPv4Transmitter::GetLocalIPList_Interfaces()
 	return true;
 }
 
-#else // use either getifaddrs or ioctl
+#else // 使用 getifaddrs 或 ioctl
 
 #ifdef RTP_SUPPORT_IFADDRS
 
@@ -1780,7 +1778,7 @@ bool RTPUDPv4Transmitter::GetLocalIPList_Interfaces()
 	return true;
 }
 
-#else // user ioctl
+#else // 用户 ioctl
 
 bool RTPUDPv4Transmitter::GetLocalIPList_Interfaces()
 {
@@ -1826,7 +1824,7 @@ bool RTPUDPv4Transmitter::GetLocalIPList_Interfaces()
 			remlen -= l;
 			startptr += l;
 		}
-#else // don't have sa_len in struct sockaddr
+#else // 在 struct sockaddr 中没有 sa_len
 		if (sa->sa_family == PF_INET)
 		{
 			uint32_t ip;

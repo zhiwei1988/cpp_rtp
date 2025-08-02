@@ -1,5 +1,6 @@
 /**
  * \file rtpkeyhashtable.h
+ * \brief 键哈希表
  */
 
 #ifndef RTPKEYHASHTABLE_H
@@ -65,7 +66,7 @@ private:
 template<class Key,class Element,class GetIndex,int hashsize>
 inline RTPKeyHashTable<Key,Element,GetIndex,hashsize>::RTPKeyHashTable(RTPMemoryManager *mgr,int memtype) : RTPMemoryObject(mgr)
 {
-	MEDIA_RTP_UNUSED(memtype); // possibly unused
+	MEDIA_RTP_UNUSED(memtype); // 可能未使用
 
 	for (int i = 0 ; i < hashsize ; i++)
 		table[i] = 0;
@@ -84,34 +85,34 @@ inline int RTPKeyHashTable<Key,Element,GetIndex,hashsize>::DeleteCurrentElement(
 		HashElement *tmp1,*tmp2;
 		int index;
 		
-		// First, relink elements in current hash bucket
+		// 首先，重新链接当前哈希桶中的元素
 		
 		index = curhashelem->GetHashIndex();
 		tmp1 = curhashelem->hashprev;
 		tmp2 = curhashelem->hashnext;
-		if (tmp1 == 0) // no previous element in hash bucket
+		if (tmp1 == 0) // 哈希桶中没有前一个元素
 		{
 			table[index] = tmp2;
 			if (tmp2 != 0)
 				tmp2->hashprev = 0;
 		}
-		else // there is a previous element in the hash bucket
+		else // 哈希桶中有前一个元素
 		{
 			tmp1->hashnext = tmp2;
 			if (tmp2 != 0)
 				tmp2->hashprev = tmp1;
 		}
 
-		// Relink elements in list
+		// 重新链接链表中的元素
 		
 		tmp1 = curhashelem->listprev;
 		tmp2 = curhashelem->listnext;
-		if (tmp1 == 0) // curhashelem is first in list
+		if (tmp1 == 0) // curhashelem 是链表中的第一个元素
 		{
 			firsthashelem = tmp2;
 			if (tmp2 != 0)
 				tmp2->listprev = 0;
-			else // curhashelem is also last in list
+			else // curhashelem 也是链表中的最后一个元素
 				lasthashelem = 0;	
 		}
 		else
@@ -119,13 +120,13 @@ inline int RTPKeyHashTable<Key,Element,GetIndex,hashsize>::DeleteCurrentElement(
 			tmp1->listnext = tmp2;
 			if (tmp2 != 0)
 				tmp2->listprev = tmp1;
-			else // curhashelem is last in list
+			else // curhashelem 是链表中的最后一个元素
 				lasthashelem = tmp1;
 		}
 		
-		// finally, with everything being relinked, we can delete curhashelem
+		// 最后，所有内容都已重新链接，可以删除 curhashelem
 		RTPDelete(curhashelem,GetMemoryManager());
-		curhashelem = tmp2; // Set to next element in list
+		curhashelem = tmp2; // 设置为链表中的下一个元素
 	}
 	else
 		return ERR_RTP_KEYHASHTABLE_NOCURRENTELEMENT;
@@ -235,7 +236,7 @@ inline int RTPKeyHashTable<Key,Element,GetIndex,hashsize>::AddElement(const Key 
 	if (found)
 		return ERR_RTP_KEYHASHTABLE_KEYALREADYEXISTS;
 	
-	// Okay, the key doesn't exist, so we can add the new element in the hash table
+	// 好的，键不存在，因此我们可以在哈希表中添加新元素
 	
 	newelem = RTPNew(GetMemoryManager(),memorytype) HashElement(k,elem,index);
 	if (newelem == 0)
@@ -247,14 +248,14 @@ inline int RTPKeyHashTable<Key,Element,GetIndex,hashsize>::AddElement(const Key 
 	if (e != 0)
 		e->hashprev = newelem;
 	
-	// Now, we still got to add it to the linked list
+	// 现在，我们还需要将其添加到链表中
 	
 	if (firsthashelem == 0)
 	{
 		firsthashelem = newelem;
 		lasthashelem = newelem;
 	}
-	else // there already are some elements in the list
+	else // 链表中已经有一些元素
 	{
 		lasthashelem->listnext = newelem;
 		newelem->listprev = lasthashelem;

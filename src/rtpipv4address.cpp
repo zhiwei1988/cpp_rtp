@@ -32,7 +32,7 @@ bool RTPIPv4Address::IsFromSameHost(const RTPAddress *addr) const
 
 RTPAddress *RTPIPv4Address::CreateCopy(RTPMemoryManager *mgr) const
 {
-	MEDIA_RTP_UNUSED(mgr); // possibly unused
+	MEDIA_RTP_UNUSED(mgr); // 可能未使用
 	RTPIPv4Address *a = RTPNew(mgr,RTPMEM_TYPE_CLASS_RTPADDRESS) RTPIPv4Address(ip,port);
 	return a;
 }
