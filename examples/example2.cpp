@@ -7,7 +7,10 @@
 #include <stdlib.h>
 #include <iostream>
 
-using namespace jrtplib;
+using std::cout;
+using std::cerr;
+using std::cin;
+using std::endl;
 
 int main(void)
 {

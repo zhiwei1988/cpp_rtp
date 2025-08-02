@@ -26,8 +26,7 @@ using namespace std;
 #endif // RTP_SUPPORT_SRTP2
 #include <string>
 
-using namespace jrtplib;
-
+using ;
 
 void checkerror(int rtperr)
 {

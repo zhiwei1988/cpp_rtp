@@ -15,7 +15,10 @@
 #include <iostream>
 #include <string>
 
-using namespace jrtplib;
+using std::cout;
+using std::cerr;
+using std::cin;
+using std::endl;
 
 //
 // This function checks if there was a RTP error. If so, it displays an error

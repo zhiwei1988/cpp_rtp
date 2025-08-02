@@ -10,7 +10,7 @@
 #include <iostream>
 #include <string>
 
-using namespace jrtplib;
+using ;
 
 void checkerror(int rtperr)
 {
@@ -56,7 +56,6 @@ int GetASocket()
 
 	return sock;
 }
-
 
 int main(void)
 {

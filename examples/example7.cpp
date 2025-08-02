@@ -30,7 +30,10 @@ using namespace std;
 #include <srtp/srtp.h>
 #include <string>
 
-using namespace jrtplib;
+using std::cout;
+using std::cerr;
+using std::cin;
+using std::endl;
 
 void checkerror(int rtperr)
 {

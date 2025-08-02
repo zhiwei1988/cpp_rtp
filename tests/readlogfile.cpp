@@ -13,7 +13,7 @@
 #include <vector>
 
 using namespace std;
-using namespace jrtplib;
+using ;
 
 void checkError(int status)
 {

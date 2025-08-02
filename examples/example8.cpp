@@ -27,7 +27,10 @@ using namespace std;
 #include <string>
 #include <vector>
 
-using namespace jrtplib;
+using std::cout;
+using std::cerr;
+using std::cin;
+using std::endl;
 using namespace jthread;
 
 inline void checkerror(int rtperr)

@@ -19,7 +19,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-using namespace jrtplib;
+using ;
 using namespace jthread;
 using namespace std;
 

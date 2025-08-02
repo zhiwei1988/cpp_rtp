@@ -1,35 +1,3 @@
-/*
-
-  This file is a part of JRTPLIB
-  Copyright (c) 1999-2017 Jori Liesenborgs
-
-  Contact: jori.liesenborgs@gmail.com
-
-  This library was developed at the Expertise Centre for Digital Media
-  (http://www.edm.uhasselt.be), a research center of the Hasselt University
-  (http://www.uhasselt.be). The library is based upon work done for 
-  my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
-
-  Permission is hereby granted, free of charge, to any person obtaining a
-  copy of this software and associated documentation files (the "Software"),
-  to deal in the Software without restriction, including without limitation
-  the rights to use, copy, modify, merge, publish, distribute, sublicense,
-  and/or sell copies of the Software, and to permit persons to whom the
-  Software is furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included
-  in all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-  IN THE SOFTWARE.
-
-*/
-
 /**
  * \file rtpsourcedata.h
  */
@@ -47,12 +15,9 @@
 #include "rtpmemoryobject.h"
 #include <list>
 
-namespace jrtplib
-{
-
 class RTPAddress;
 
-class JRTPLIB_IMPORTEXPORT RTCPSenderReportInfo
+class MEDIA_RTP_IMPORTEXPORT RTCPSenderReportInfo
 {
 public:
 	RTCPSenderReportInfo():ntptimestamp(0,0),receivetime(0,0)		{ hasinfo = false; rtptimestamp = 0; packetcount = 0; bytecount = 0; }
@@ -74,7 +39,7 @@ private:
 	RTPTime receivetime;
 };
 
-class JRTPLIB_IMPORTEXPORT RTCPReceiverReportInfo
+class MEDIA_RTP_IMPORTEXPORT RTCPReceiverReportInfo
 {
 public:
 	RTCPReceiverReportInfo():receivetime(0,0)				{ hasinfo = false; fractionlost = 0; packetslost = 0; exthighseqnr = 0; jitter = 0; lsr = 0; dlsr = 0; } 
@@ -100,7 +65,7 @@ private:
 	RTPTime receivetime;
 };
 
-class JRTPLIB_IMPORTEXPORT RTPSourceStats
+class MEDIA_RTP_IMPORTEXPORT RTPSourceStats
 {
 public:
 	RTPSourceStats();
@@ -163,9 +128,9 @@ inline RTPSourceStats::RTPSourceStats():prevpacktime(0,0),lastmsgtime(0,0),lastr
 }
 
 /** Describes an entry in the RTPSources source table. */
-class JRTPLIB_IMPORTEXPORT RTPSourceData : public RTPMemoryObject
+class MEDIA_RTP_IMPORTEXPORT RTPSourceData : public RTPMemoryObject
 {
-	JRTPLIB_NO_COPY(RTPSourceData)
+	MEDIA_RTP_NO_COPY(RTPSourceData)
 protected:
 	RTPSourceData(uint32_t ssrc, RTPMemoryManager *mgr = 0);
 	virtual ~RTPSourceData();
@@ -473,8 +438,6 @@ inline void RTPSourceData::FlushPackets()
 		RTPDelete(*it,GetMemoryManager());
 	packetlist.clear();
 }
-
-} // end namespace
 
 #endif // RTPSOURCEDATA_H
 

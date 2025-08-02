@@ -1,49 +1,3 @@
-/*
-
-  This class allows for jrtp to process packets without sending them out 
-  anywhere.
-  The incoming messages are handed in to jrtp through the TransmissionParams 
-  and can be retreived from jrtp through the normal polling mecanisms.
-  The outgoing RTP/RTCP packets are given to jrtp through the normal
-  session->SendPacket() and those packets are handed back out to the
-  client through a callback function (packet_ready_cb).
-  
-  example usage : Allows for integration of RTP into gstreamer.
-
-  THIS HAS NOT BEEN TESTED WITH THREADS SO DON'T TRY
-
-  Copyright (c) 2005 Philippe Khalaf <burger@speedy.org>
-  
-  This file is a part of JRTPLIB
-  Copyright (c) 1999-2004 Jori Liesenborgs
-
-  Contact: jori.liesenborgs@gmail.com
-
-  This library was developed at the "Expertisecentrum Digitale Media"
-  (http://www.edm.luc.ac.be), a research center of the "Limburgs Universitair
-  Centrum" (http://www.luc.ac.be). The library is based upon work done for 
-  my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
-
-  Permission is hereby granted, free of charge, to any person obtaining a
-  copy of this software and associated documentation files (the "Software"),
-  to deal in the Software without restriction, including without limitation
-  the rights to use, copy, modify, merge, publish, distribute, sublicense,
-  and/or sell copies of the Software, and to permit persons to whom the
-  Software is furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included
-  in all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-  IN THE SOFTWARE.
-
-*/
-
 #include "rtpfaketransmitter.h"
 
 #include "rtprawpacket.h"
@@ -92,9 +46,6 @@
 	#define WAITMUTEX_LOCK
 	#define WAITMUTEX_UNLOCK
 #endif // RTP_SUPPORT_THREAD
-
-namespace jrtplib
-{
 
 RTPFakeTransmitter::RTPFakeTransmitter(RTPMemoryManager *mgr ) : RTPTransmitter(mgr), destinations(mgr,RTPMEM_TYPE_CLASS_DESTINATIONLISTHASHELEMENT),acceptignoreinfo(mgr,RTPMEM_TYPE_CLASS_ACCEPTIGNOREHASHELEMENT)
 {
@@ -473,7 +424,6 @@ int RTPFakeTransmitter::SendRTPData(const void *data,size_t len)
 		MAINMUTEX_UNLOCK
 		return ERR_RTP_FAKETRANS_SPECIFIEDSIZETOOBIG;
 	}
-
 
 	destinations.GotoFirstElement();
     // send to each destination
@@ -1518,6 +1468,4 @@ void RTPFakeTransmitter::Dump()
 	}
 }
 #endif // RTPDEBUG
-
-} // end namespace
 

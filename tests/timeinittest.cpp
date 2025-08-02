@@ -4,8 +4,8 @@
 
 int main(void)
 {
-	jrtplib::RTPUDPv4Transmitter trans(0);
-	jrtplib::RTPTime t(0);
+	RTPUDPv4Transmitter trans(0);
+	RTPTime t(0);
 	std::cout << t.GetDouble() << std::endl;
 	return 0;
 }

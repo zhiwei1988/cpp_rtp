@@ -1,35 +1,3 @@
-/*
-
-  This file is a part of JRTPLIB
-  Copyright (c) 1999-2017 Jori Liesenborgs
-
-  Contact: jori.liesenborgs@gmail.com
-
-  This library was developed at the Expertise Centre for Digital Media
-  (http://www.edm.uhasselt.be), a research center of the Hasselt University
-  (http://www.uhasselt.be). The library is based upon work done for 
-  my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
-
-  Permission is hereby granted, free of charge, to any person obtaining a
-  copy of this software and associated documentation files (the "Software"),
-  to deal in the Software without restriction, including without limitation
-  the rights to use, copy, modify, merge, publish, distribute, sublicense,
-  and/or sell copies of the Software, and to permit persons to whom the
-  Software is furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included
-  in all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-  IN THE SOFTWARE.
-
-*/
-
 /**
  * \file rtpudpv6transmitter.h
  */
@@ -63,11 +31,8 @@
 #define RTPUDPV6TRANS_RTPTRANSMITBUFFER							32768
 #define RTPUDPV6TRANS_RTCPTRANSMITBUFFER						32768
 
-namespace jrtplib
-{
-
 /** Parameters for the UDP over IPv6 transmitter. */
-class JRTPLIB_IMPORTEXPORT RTPUDPv6TransmissionParams : public RTPTransmissionParams
+class MEDIA_RTP_IMPORTEXPORT RTPUDPv6TransmissionParams : public RTPTransmissionParams
 {
 public:
 	RTPUDPv6TransmissionParams();
@@ -171,7 +136,7 @@ inline RTPUDPv6TransmissionParams::RTPUDPv6TransmissionParams()
 }
 
 /** Additional information about the UDP over IPv6 transmitter. */
-class JRTPLIB_IMPORTEXPORT RTPUDPv6TransmissionInfo : public RTPTransmissionInfo
+class MEDIA_RTP_IMPORTEXPORT RTPUDPv6TransmissionInfo : public RTPTransmissionInfo
 {
 public:
 	RTPUDPv6TransmissionInfo(std::list<in6_addr> iplist, SocketType rtpsock, SocketType rtcpsock,
@@ -200,13 +165,13 @@ private:
 	uint16_t m_rtpPort, m_rtcpPort;
 };
 		
-class JRTPLIB_IMPORTEXPORT RTPUDPv6Trans_GetHashIndex_IPv6Dest
+class MEDIA_RTP_IMPORTEXPORT RTPUDPv6Trans_GetHashIndex_IPv6Dest
 {
 public:
 	static int GetIndex(const RTPIPv6Destination &d)					{ in6_addr ip = d.GetIP(); return ((((uint32_t)ip.s6_addr[12])<<24)|(((uint32_t)ip.s6_addr[13])<<16)|(((uint32_t)ip.s6_addr[14])<<8)|((uint32_t)ip.s6_addr[15]))%RTPUDPV6TRANS_HASHSIZE; }
 };
 
-class JRTPLIB_IMPORTEXPORT RTPUDPv6Trans_GetHashIndex_in6_addr
+class MEDIA_RTP_IMPORTEXPORT RTPUDPv6Trans_GetHashIndex_in6_addr
 {
 public:
 	static int GetIndex(const in6_addr &ip)							{ return ((((uint32_t)ip.s6_addr[12])<<24)|(((uint32_t)ip.s6_addr[13])<<16)|(((uint32_t)ip.s6_addr[14])<<8)|((uint32_t)ip.s6_addr[15]))%RTPUDPV6TRANS_HASHSIZE; }
@@ -221,9 +186,9 @@ public:
  *  argument require an argument of RTPIPv6Address. The GetTransmissionInfo member function
  *  returns an instance of type RTPUDPv6TransmissionInfo.
  */
-class JRTPLIB_IMPORTEXPORT RTPUDPv6Transmitter : public RTPTransmitter
+class MEDIA_RTP_IMPORTEXPORT RTPUDPv6Transmitter : public RTPTransmitter
 {
-	JRTPLIB_NO_COPY(RTPUDPv6Transmitter)
+	MEDIA_RTP_NO_COPY(RTPUDPv6Transmitter)
 public:
 	RTPUDPv6Transmitter(RTPMemoryManager *mgr);
 	~RTPUDPv6Transmitter();
@@ -324,8 +289,6 @@ private:
 	int threadsafe;
 #endif // RTP_SUPPORT_THREAD
 };
-
-} // end namespace
 
 #endif // RTP_SUPPORT_IPV6
 

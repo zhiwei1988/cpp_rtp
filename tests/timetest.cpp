@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 using namespace std;
-using namespace jrtplib;
+using ;
 
 int main(void)
 {

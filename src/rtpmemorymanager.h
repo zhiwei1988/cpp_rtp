@@ -1,35 +1,3 @@
-/*
-
-  This file is a part of JRTPLIB
-  Copyright (c) 1999-2017 Jori Liesenborgs
-
-  Contact: jori.liesenborgs@gmail.com
-
-  This library was developed at the Expertise Centre for Digital Media
-  (http://www.edm.uhasselt.be), a research center of the Hasselt University
-  (http://www.uhasselt.be). The library is based upon work done for 
-  my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
-
-  Permission is hereby granted, free of charge, to any person obtaining a
-  copy of this software and associated documentation files (the "Software"),
-  to deal in the Software without restriction, including without limitation
-  the rights to use, copy, modify, merge, publish, distribute, sublicense,
-  and/or sell copies of the Software, and to permit persons to whom the
-  Software is furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included
-  in all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-  IN THE SOFTWARE.
-
-*/
-
 /**
  * \file rtpmemorymanager.h
  */
@@ -143,11 +111,8 @@
 /** Buffer that's used when encrypting a packet. */
 #define RTPMEM_TYPE_BUFFER_SRTPDATA								33
 
-namespace jrtplib
-{
-
 /** A memory manager. */
-class JRTPLIB_IMPORTEXPORT RTPMemoryManager
+class MEDIA_RTP_IMPORTEXPORT RTPMemoryManager
 {
 public:	
 	RTPMemoryManager()									{ }
@@ -166,22 +131,20 @@ public:
 	virtual void FreeBuffer(void *buffer) = 0;
 };
 
-} // end namespace
-
 #ifdef RTP_SUPPORT_MEMORYMANAGEMENT	
 
 #include <new>
 
-inline void *operator new(size_t numbytes, jrtplib::RTPMemoryManager *mgr, int memtype)
+inline void *operator new(size_t numbytes, RTPMemoryManager *mgr, int memtype)
 {
 	if (mgr == 0)
 		return operator new(numbytes);
 	return mgr->AllocateBuffer(numbytes,memtype);
 }
 
-inline void operator delete(void *buffer, jrtplib::RTPMemoryManager *mgr, int memtype)
+inline void operator delete(void *buffer, RTPMemoryManager *mgr, int memtype)
 {
-	JRTPLIB_UNUSED(memtype);
+	MEDIA_RTP_UNUSED(memtype);
 	if (mgr == 0)
 		operator delete(buffer);
 	else
@@ -189,25 +152,22 @@ inline void operator delete(void *buffer, jrtplib::RTPMemoryManager *mgr, int me
 }
 
 #ifdef RTP_HAVE_ARRAYALLOC
-inline void *operator new[](size_t numbytes, jrtplib::RTPMemoryManager *mgr, int memtype)
+inline void *operator new[](size_t numbytes, RTPMemoryManager *mgr, int memtype)
 {
 	if (mgr == 0)
 		return operator new[](numbytes);
 	return mgr->AllocateBuffer(numbytes,memtype);
 }
 
-inline void operator delete[](void *buffer, jrtplib::RTPMemoryManager *mgr, int memtype)
+inline void operator delete[](void *buffer, RTPMemoryManager *mgr, int memtype)
 {
-	JRTPLIB_UNUSED(memtype);
+	MEDIA_RTP_UNUSED(memtype);
 	if (mgr == 0)
 		operator delete[](buffer);
 	else
 		mgr->FreeBuffer(buffer);
 }
 #endif // RTP_HAVE_ARRAYALLOC
-
-namespace jrtplib
-{
 
 inline void RTPDeleteByteArray(uint8_t *buf, RTPMemoryManager *mgr)
 {
@@ -228,8 +188,6 @@ inline void RTPDelete(ClassName *obj, RTPMemoryManager *mgr)
 		mgr->FreeBuffer(obj);
 	}
 }
-
-} // end namespace
 
 #define RTPNew(a,b) 			new(a,b)
 

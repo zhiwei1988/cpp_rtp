@@ -8,7 +8,7 @@
 #include <iostream>
 #include <string>
 
-using namespace jrtplib;
+using ;
 
 void checkerror(int rtperr)
 {

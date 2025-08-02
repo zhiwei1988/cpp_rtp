@@ -1,35 +1,3 @@
-/*
-
-  This file is a part of JRTPLIB
-  Copyright (c) 1999-2017 Jori Liesenborgs
-
-  Contact: jori.liesenborgs@gmail.com
-
-  This library was developed at the Expertise Centre for Digital Media
-  (http://www.edm.uhasselt.be), a research center of the Hasselt University
-  (http://www.uhasselt.be). The library is based upon work done for 
-  my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
-
-  Permission is hereby granted, free of charge, to any person obtaining a
-  copy of this software and associated documentation files (the "Software"),
-  to deal in the Software without restriction, including without limitation
-  the rights to use, copy, modify, merge, publish, distribute, sublicense,
-  and/or sell copies of the Software, and to permit persons to whom the
-  Software is furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included
-  in all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-  IN THE SOFTWARE.
-
-*/
-
 /**
  * \file rtpudpv4transmitter.h
  */
@@ -59,11 +27,8 @@
 #define RTPUDPV4TRANS_RTPTRANSMITBUFFER							32768
 #define RTPUDPV4TRANS_RTCPTRANSMITBUFFER						32768
 
-namespace jrtplib
-{
-
 /** Parameters for the UDP over IPv4 transmitter. */
-class JRTPLIB_IMPORTEXPORT RTPUDPv4TransmissionParams : public RTPTransmissionParams
+class MEDIA_RTP_IMPORTEXPORT RTPUDPv4TransmissionParams : public RTPTransmissionParams
 {
 public:
 	RTPUDPv4TransmissionParams();
@@ -204,7 +169,7 @@ inline RTPUDPv4TransmissionParams::RTPUDPv4TransmissionParams() : RTPTransmissio
 }
 
 /** Additional information about the UDP over IPv4 transmitter. */
-class JRTPLIB_IMPORTEXPORT RTPUDPv4TransmissionInfo : public RTPTransmissionInfo
+class MEDIA_RTP_IMPORTEXPORT RTPUDPv4TransmissionInfo : public RTPTransmissionInfo
 {
 public:
 	RTPUDPv4TransmissionInfo(std::list<uint32_t> iplist,SocketType rtpsock,SocketType rtcpsock,
@@ -233,13 +198,13 @@ private:
 	uint16_t m_rtpPort, m_rtcpPort;
 };
 	
-class JRTPLIB_IMPORTEXPORT RTPUDPv4Trans_GetHashIndex_IPv4Dest
+class MEDIA_RTP_IMPORTEXPORT RTPUDPv4Trans_GetHashIndex_IPv4Dest
 {
 public:
 	static int GetIndex(const RTPIPv4Destination &d)							{ return d.GetIP()%RTPUDPV4TRANS_HASHSIZE; }
 };
 
-class JRTPLIB_IMPORTEXPORT RTPUDPv4Trans_GetHashIndex_uint32_t
+class MEDIA_RTP_IMPORTEXPORT RTPUDPv4Trans_GetHashIndex_uint32_t
 {
 public:
 	static int GetIndex(const uint32_t &k)									{ return k%RTPUDPV4TRANS_HASHSIZE; }
@@ -254,9 +219,9 @@ public:
  *  argument require an argument of RTPIPv4Address. The GetTransmissionInfo member function
  *  returns an instance of type RTPUDPv4TransmissionInfo.
  */
-class JRTPLIB_IMPORTEXPORT RTPUDPv4Transmitter : public RTPTransmitter
+class MEDIA_RTP_IMPORTEXPORT RTPUDPv4Transmitter : public RTPTransmitter
 {
-	JRTPLIB_NO_COPY(RTPUDPv4Transmitter)
+	MEDIA_RTP_NO_COPY(RTPUDPv4Transmitter)
 public:
 	RTPUDPv4Transmitter(RTPMemoryManager *mgr);
 	~RTPUDPv4Transmitter();
@@ -358,8 +323,6 @@ private:
 	int threadsafe;
 #endif // RTP_SUPPORT_THREAD
 };
-
-} // end namespace
 
 #endif // RTPUDPV4TRANSMITTER_H
 

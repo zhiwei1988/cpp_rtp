@@ -1,35 +1,3 @@
-/*
-
-  This file is a part of JRTPLIB
-  Copyright (c) 1999-2017 Jori Liesenborgs
-
-  Contact: jori.liesenborgs@gmail.com
-
-  This library was developed at the Expertise Centre for Digital Media
-  (http://www.edm.uhasselt.be), a research center of the Hasselt University
-  (http://www.uhasselt.be). The library is based upon work done for 
-  my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
-
-  Permission is hereby granted, free of charge, to any person obtaining a
-  copy of this software and associated documentation files (the "Software"),
-  to deal in the Software without restriction, including without limitation
-  the rights to use, copy, modify, merge, publish, distribute, sublicense,
-  and/or sell copies of the Software, and to permit persons to whom the
-  Software is furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included
-  in all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-  IN THE SOFTWARE.
-
-*/
-
 /**
  * \file rtpexternaltransmitter.h
  */
@@ -47,9 +15,6 @@
 	#include <jthread/jmutex.h>
 #endif // RTP_SUPPORT_THREAD
 
-namespace jrtplib
-{
-
 class RTPExternalTransmitter;
 
 /** Base class to specify a mechanism to transmit RTP packets outside of this library.
@@ -60,7 +25,7 @@ class RTPExternalTransmitter;
  *  so that the transmitter will call the \c SendRTP, \c SendRTCP and \c ComesFromThisSender
  *  methods of this instance when needed.
  */
-class JRTPLIB_IMPORTEXPORT RTPExternalSender
+class MEDIA_RTP_IMPORTEXPORT RTPExternalSender
 {
 public:
 	RTPExternalSender()										{ }
@@ -83,7 +48,7 @@ public:
  *  be using, you can obtain the associated RTPExternalPacketInjecter instance. By calling it's
  *  member functions, you can then inject RTP or RTCP data into the library for further processing.
  */
-class JRTPLIB_IMPORTEXPORT RTPExternalPacketInjecter
+class MEDIA_RTP_IMPORTEXPORT RTPExternalPacketInjecter
 {
 public:
 	RTPExternalPacketInjecter(RTPExternalTransmitter *trans)					{ transmitter = trans; }
@@ -102,7 +67,7 @@ private:
 };
 
 /** Parameters to initialize a transmitter of type RTPExternalTransmitter. */
-class JRTPLIB_IMPORTEXPORT RTPExternalTransmissionParams : public RTPTransmissionParams
+class MEDIA_RTP_IMPORTEXPORT RTPExternalTransmissionParams : public RTPTransmissionParams
 {
 public:
 	/** Using this constructor you can specify which RTPExternalSender object you'll be using
@@ -117,7 +82,7 @@ private:
 };
 
 /** Additional information about the external transmission component. */
-class JRTPLIB_IMPORTEXPORT RTPExternalTransmissionInfo : public RTPTransmissionInfo
+class MEDIA_RTP_IMPORTEXPORT RTPExternalTransmissionInfo : public RTPTransmissionInfo
 {
 public:
 	RTPExternalTransmissionInfo(RTPExternalPacketInjecter *p) : RTPTransmissionInfo(RTPTransmitter::ExternalProto) { packetinjector = p; }
@@ -137,9 +102,9 @@ private:
  *  sending the data. Obtain the RTPExternalTransmissionInfo object associated with this
  *  transmitter to obtain the functions needed to pass RTP/RTCP packets on to the transmitter.
  */
-class JRTPLIB_IMPORTEXPORT RTPExternalTransmitter : public RTPTransmitter
+class MEDIA_RTP_IMPORTEXPORT RTPExternalTransmitter : public RTPTransmitter
 {
-	JRTPLIB_NO_COPY(RTPExternalTransmitter)
+	MEDIA_RTP_NO_COPY(RTPExternalTransmitter)
 public:
 	RTPExternalTransmitter(RTPMemoryManager *mgr);
 	~RTPExternalTransmitter();
@@ -228,8 +193,5 @@ inline void RTPExternalPacketInjecter::InjectRTPorRTCP(const void *data, size_t 
 	transmitter->InjectRTPorRTCP(data, len, a); 
 }
 
-} // end namespace
-
 #endif // RTPTCPSOCKETTRANSMITTER_H
-
 

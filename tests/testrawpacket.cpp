@@ -14,7 +14,7 @@
 #include <list>
 #include <vector>
 
-using namespace jrtplib;
+using ;
 using namespace std;
 
 void checkerror(int rtperr)

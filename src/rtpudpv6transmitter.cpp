@@ -1,35 +1,3 @@
-/*
-
-  This file is a part of JRTPLIB
-  Copyright (c) 1999-2017 Jori Liesenborgs
-
-  Contact: jori.liesenborgs@gmail.com
-
-  This library was developed at the Expertise Centre for Digital Media
-  (http://www.edm.uhasselt.be), a research center of the Hasselt University
-  (http://www.uhasselt.be). The library is based upon work done for 
-  my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
-
-  Permission is hereby granted, free of charge, to any person obtaining a
-  copy of this software and associated documentation files (the "Software"),
-  to deal in the Software without restriction, including without limitation
-  the rights to use, copy, modify, merge, publish, distribute, sublicense,
-  and/or sell copies of the Software, and to permit persons to whom the
-  Software is furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included
-  in all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-  IN THE SOFTWARE.
-
-*/
-
 // This is for getaddrinfo when using mingw
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0600
@@ -80,9 +48,6 @@ inline bool operator==(const in6_addr &ip1,const in6_addr &ip2)
 		return true;
 	return false;
 }
-
-namespace jrtplib
-{
 
 RTPUDPv6Transmitter::RTPUDPv6Transmitter(RTPMemoryManager *mgr) : RTPTransmitter(mgr),
 								  destinations(GetMemoryManager(),RTPMEM_TYPE_CLASS_DESTINATIONLISTHASHELEMENT),
@@ -936,7 +901,7 @@ void RTPUDPv6Transmitter::LeaveAllMulticastGroups()
 			RTPUDPV6TRANS_MCASTMEMBERSHIP(rtpsock,IPV6_LEAVE_GROUP,mcastIP,status);
 			RTPUDPV6TRANS_MCASTMEMBERSHIP(rtcpsock,IPV6_LEAVE_GROUP,mcastIP,status);
 			multicastgroups.GotoNextElement();
-			JRTPLIB_UNUSED(status);
+			MEDIA_RTP_UNUSED(status);
 		}
 		multicastgroups.Clear();
 	}
@@ -1204,7 +1169,6 @@ RTPRawPacket *RTPUDPv6Transmitter::GetNextPacket()
 
 // Here the private functions start...
 
-
 #ifdef RTP_SUPPORT_IPV6MULTICAST
 bool RTPUDPv6Transmitter::SetMulticastTTL(uint8_t ttl)
 {
@@ -1220,7 +1184,6 @@ bool RTPUDPv6Transmitter::SetMulticastTTL(uint8_t ttl)
 	return true;
 }
 #endif // RTP_SUPPORT_IPV6MULTICAST
-
 
 void RTPUDPv6Transmitter::FlushPackets()
 {
@@ -1780,8 +1743,6 @@ void RTPUDPv6Transmitter::Dump()
 
 }
 #endif // RTPDEBUG
-
-} // end namespace
 
 #endif // RTP_SUPPORT_IPV6
 

@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <iostream>
 
-using namespace jrtplib;
+using ;
 
 void checkError(int status)
 {

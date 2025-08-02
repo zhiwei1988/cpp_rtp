@@ -16,7 +16,10 @@
 #include <iostream>
 #include <string>
 
-using namespace jrtplib;
+using std::cout;
+using std::cerr;
+using std::cin;
+using std::endl;
 
 #ifdef RTP_SUPPORT_THREAD
 

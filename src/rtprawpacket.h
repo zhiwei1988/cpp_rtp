@@ -1,35 +1,3 @@
-/*
-
-  This file is a part of JRTPLIB
-  Copyright (c) 1999-2017 Jori Liesenborgs
-
-  Contact: jori.liesenborgs@gmail.com
-
-  This library was developed at the Expertise Centre for Digital Media
-  (http://www.edm.uhasselt.be), a research center of the Hasselt University
-  (http://www.uhasselt.be). The library is based upon work done for 
-  my thesis at the School for Knowledge Technology (Belgium/The Netherlands).
-
-  Permission is hereby granted, free of charge, to any person obtaining a
-  copy of this software and associated documentation files (the "Software"),
-  to deal in the Software without restriction, including without limitation
-  the rights to use, copy, modify, merge, publish, distribute, sublicense,
-  and/or sell copies of the Software, and to permit persons to whom the
-  Software is furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included
-  in all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-  IN THE SOFTWARE.
-
-*/
-
 /**
  * \file rtprawpacket.h
  */
@@ -45,13 +13,10 @@
 #include "rtpmemoryobject.h"
 #include "rtpstructs.h"
 
-namespace jrtplib
-{
-
 /** This class is used by the transmission component to store the incoming RTP and RTCP data in. */
-class JRTPLIB_IMPORTEXPORT RTPRawPacket : public RTPMemoryObject
+class MEDIA_RTP_IMPORTEXPORT RTPRawPacket : public RTPMemoryObject
 {
-	JRTPLIB_NO_COPY(RTPRawPacket)
+	MEDIA_RTP_NO_COPY(RTPRawPacket)
 public:	
     /** Creates an instance which stores data from \c data with length \c datalen.
 	 *  Creates an instance which stores data from \c data with length \c datalen. Only the pointer 
@@ -163,7 +128,7 @@ inline void RTPRawPacket::DeleteData()
 
 inline uint8_t *RTPRawPacket::AllocateBytes(bool isrtp, int recvlen) const
 {
-	JRTPLIB_UNUSED(isrtp); // possibly unused
+	MEDIA_RTP_UNUSED(isrtp); // possibly unused
 	return RTPNew(GetMemoryManager(),(isrtp)?RTPMEM_TYPE_BUFFER_RECEIVEDRTPPACKET:RTPMEM_TYPE_BUFFER_RECEIVEDRTCPPACKET) uint8_t[recvlen];
 }
 
@@ -183,8 +148,6 @@ inline void RTPRawPacket::SetSenderAddress(RTPAddress *address)
 
 	senderaddress = address;
 }
-
-} // end namespace
 
 #endif // RTPRAWPACKET_H
 

@@ -7,7 +7,7 @@
 #include <iostream>
 
 using namespace std;
-using namespace jrtplib;
+using ;
 
 #ifdef RTP_SUPPORT_THREAD
 
