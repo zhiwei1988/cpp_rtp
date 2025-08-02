@@ -8,7 +8,6 @@
 #include <iostream>
 #include <string>
 
-using ;
 
 void checkerror(int rtperr)
 {

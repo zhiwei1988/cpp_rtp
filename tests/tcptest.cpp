@@ -14,7 +14,6 @@
 #include <vector>
 
 using namespace std;
-using ;
 
 inline void checkerror(int rtperr)
 {
@@ -154,7 +153,7 @@ int main(int argc, char *argv[])
 	servAddr.sin_family = AF_INET;
 	servAddr.sin_port = htons(atoi(argv[1]));
 
-	if (bind(listener, (struct sockaddr *)&servAddr, sizeof(servAddr)) != 0)
+	if (::bind(listener, (struct sockaddr *)&servAddr, sizeof(servAddr)) != 0)
 	{
 		cerr << "Can't bind listener socket" << endl;
 		return -1;

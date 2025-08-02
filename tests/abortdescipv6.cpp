@@ -26,7 +26,6 @@ using namespace std;
 #include <string>
 #include <vector>
 
-using ;
 using namespace jthread;
 
 inline void checkerror(int rtperr)

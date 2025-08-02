@@ -7,7 +7,6 @@
 #include <iostream>
 
 using namespace std;
-using ;
 
 #ifdef RTP_SUPPORT_THREAD
 

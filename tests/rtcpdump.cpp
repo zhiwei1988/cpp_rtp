@@ -11,8 +11,6 @@
 #include <stdio.h>
 #include <iostream>
 
-using ;
-
 void checkError(int status)
 {
 	if (status >= 0)

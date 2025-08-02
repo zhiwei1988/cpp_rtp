@@ -13,7 +13,6 @@
 #include <list>
 #include <vector>
 
-using ;
 using namespace std;
 
 void checkerror(int rtperr)
