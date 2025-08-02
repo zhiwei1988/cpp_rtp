@@ -25,7 +25,6 @@ set (HEADERS
 	rtpipv6address.h
 	rtpipv6destination.h
 	rtpkeyhashtable.h
-	rtplibraryversion.h
 	rtpmemorymanager.h
 	rtpmemoryobject.h
 	rtppacket.h
@@ -76,7 +75,6 @@ set(SOURCES
 	rtpipv6address.cpp
 	rtpipv4destination.cpp
 	rtpipv6destination.cpp
-	rtplibraryversion.cpp
 	rtppacket.cpp
 	rtppacketbuilder.cpp
 	rtppollthread.cpp

@@ -8,7 +8,6 @@
 #include "rtpipv4address.h"
 #include "rtpsessionparams.h"
 #include "rtperrors.h"
-#include "rtplibraryversion.h"
 #include "rtpsourcedata.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -77,8 +76,6 @@ int main(void)
 	uint32_t destip;
 	std::string ipstr;
 	int status,i,num;
-
-	std::cout << "Using version " << RTPLibraryVersion::GetVersion().GetVersionString() << std::endl;
 
 	// First, we'll ask for the necessary information
 		

@@ -22,7 +22,6 @@ using namespace std;
 #include "rtpipv4address.h"
 #include "rtpsessionparams.h"
 #include "rtperrors.h"
-#include "rtplibraryversion.h"
 #include "rtpsourcedata.h"
 #include "rtprawpacket.h"
 #include <stdlib.h>
