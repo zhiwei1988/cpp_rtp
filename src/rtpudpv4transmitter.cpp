@@ -1414,13 +1414,8 @@ int RTPUDPv4Transmitter::PollSocket(bool rtp)
 	RTPSOCKLENTYPE fromlen;
 	int recvlen;
 	char packetbuffer[RTPUDPV4TRANS_MAXPACKSIZE];
-#ifdef RTP_SOCKETTYPE_WINSOCK
-	SOCKET sock;
-	unsigned long len;
-#else 
 	size_t len;
 	int sock;
-#endif // RTP_SOCKETTYPE_WINSOCK
 	struct sockaddr_in srcaddr;
 	bool dataavailable;
 	
@@ -1719,38 +1714,7 @@ int RTPUDPv4Transmitter::CreateLocalIPList()
 	return 0;
 }
 
-#ifdef RTP_SOCKETTYPE_WINSOCK
-
-bool RTPUDPv4Transmitter::GetLocalIPList_Interfaces()
-{
-	unsigned char buffer[RTPUDPV4TRANS_IFREQBUFSIZE];
-	DWORD outputsize;
-	DWORD numaddresses,i;
-	SOCKET_ADDRESS_LIST *addrlist;
-
-	if (WSAIoctl(rtpsock,SIO_ADDRESS_LIST_QUERY,NULL,0,&buffer,RTPUDPV4TRANS_IFREQBUFSIZE,&outputsize,NULL,NULL))
-		return false;
-	
-	addrlist = (SOCKET_ADDRESS_LIST *)buffer;
-	numaddresses = addrlist->iAddressCount;
-	for (i = 0 ; i < numaddresses ; i++)
-	{
-		SOCKET_ADDRESS *sockaddr = &(addrlist->Address[i]);
-		if (sockaddr->iSockaddrLength == sizeof(struct sockaddr_in)) // IPv4 地址
-		{
-			struct sockaddr_in *addr = (struct sockaddr_in *)sockaddr->lpSockaddr;
-
-			localIPs.push_back(ntohl(addr->sin_addr.s_addr));
-		}
-	}
-
-	if (localIPs.empty())
-		return false;
-
-	return true;
-}
-
-#else // 使用 getifaddrs 或 ioctl
+// 使用 getifaddrs 或 ioctl
 
 #ifdef RTP_SUPPORT_IFADDRS
 
@@ -1845,8 +1809,6 @@ bool RTPUDPv4Transmitter::GetLocalIPList_Interfaces()
 }
 
 #endif // RTP_SUPPORT_IFADDRS
-
-#endif // RTP_SOCKETTYPE_WINSOCK
 
 void RTPUDPv4Transmitter::GetLocalIPList_DNS()
 {

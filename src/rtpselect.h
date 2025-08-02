@@ -12,12 +12,10 @@
 #include "rtptimeutilities.h"
 #include "rtpsocketutil.h"
 
-#if defined(RTP_HAVE_WSAPOLL) || defined(RTP_HAVE_POLL)
+#if defined(RTP_HAVE_POLL)
 
-#ifndef RTP_HAVE_WSAPOLL
 #include <poll.h>
 #include <errno.h>
-#endif // !RTP_HAVE_WSAPOLL
 
 #include <vector>
 #include <limits>
@@ -46,11 +44,6 @@ inline int RTPSelect(const SocketType *sockets, int8_t *readflags, size_t numsoc
 		timeoutmsec = (int)dtimeoutmsec;
 	}
 
-#ifdef RTP_HAVE_WSAPOLL
-	int status = WSAPoll(&(fds[0]), (ULONG)numsocks, timeoutmsec);
-	if (status < 0)
-		return ERR_RTP_SELECT_ERRORINPOLL;
-#else
 	int status = poll(&(fds[0]), numsocks, timeoutmsec);
 	if (status < 0)
 	{
@@ -59,7 +52,6 @@ inline int RTPSelect(const SocketType *sockets, int8_t *readflags, size_t numsoc
 			return 0;
 		return ERR_RTP_SELECT_ERRORINPOLL;
 	}
-#endif // RTP_HAVE_WSAPOLL
 
 	if (status > 0)
 	{
@@ -74,12 +66,10 @@ inline int RTPSelect(const SocketType *sockets, int8_t *readflags, size_t numsoc
 
 #else
 
-#ifndef RTP_SOCKETTYPE_WINSOCK
 #include <sys/select.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <errno.h>
-#endif // !RTP_SOCKETTYPE_WINSOCK
 
 /** Wrapper function around 'select', 'poll' or 'WSAPoll', depending on the
  *  availability on your platform.
@@ -107,22 +97,16 @@ inline int RTPSelect(const SocketType *sockets, int8_t *readflags, size_t numsoc
 	FD_ZERO(&fdset);
 	for (size_t i = 0 ; i < numsocks ; i++)
 	{
-#ifndef RTP_SOCKETTYPE_WINSOCK
 		const int setsize = FD_SETSIZE;
 		// On windows it seems that comparing the socket value to FD_SETSIZE does
 		// not make sense
 		if (sockets[i] >= setsize)
 			return ERR_RTP_SELECT_SOCKETDESCRIPTORTOOLARGE;
-#endif // RTP_SOCKETTYPE_WINSOCK
 		FD_SET(sockets[i], &fdset);
 		readflags[i] = 0;
 	}
 
 	int status = select(FD_SETSIZE, &fdset, 0, 0, pTv);
-#ifdef RTP_SOCKETTYPE_WINSOCK
-	if (status < 0)
-		return ERR_RTP_SELECT_ERRORINSELECT;
-#else
 	if (status < 0)
 	{
 		// We're just going to ignore an EINTR
@@ -130,7 +114,6 @@ inline int RTPSelect(const SocketType *sockets, int8_t *readflags, size_t numsoc
 			return 0;
 		return ERR_RTP_SELECT_ERRORINSELECT;
 	}
-#endif // RTP_HAVE_WSAPOLL
 
 	if (status > 0) // some descriptors were set, check them
 	{
@@ -143,6 +126,6 @@ inline int RTPSelect(const SocketType *sockets, int8_t *readflags, size_t numsoc
 	return status;
 }
 
-#endif // RTP_HAVE_POLL || RTP_HAVE_WSAPOLL
+#endif // RTP_HAVE_POLL
 
 #endif // RTPSELECT_H

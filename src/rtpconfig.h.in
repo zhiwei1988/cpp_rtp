@@ -57,19 +57,19 @@ ${RTP_SUPPORT_RTCPUNKNOWN}
 
 ${RTP_SUPPORT_NETINET_IN}
 
-${RTP_SOCKETTYPE_WINSOCK}
+// Linux - not using winsock sockets
 
-${RTP_HAVE_QUERYPERFORMANCECOUNTER}
+// Linux - no QueryPerformanceCounter support
 
-${RTP_HAVE_VSUINT64SUFFIX}
+// Linux - no ui64 suffix
 
 ${RTP_SNPRINTF_VERSION}
 
 ${RTP_HAVE_ARRAYALLOC}
 
-${RTP_HAVE_RAND_S}
+// Linux - no rand_s support
 
-${RTP_HAVE_STRNCPY_S}
+// Linux - no strncpy_s support
 
 ${RTP_SUPPORT_SRTP}
 
@@ -79,7 +79,7 @@ ${RTP_HAVE_CLOCK_GETTIME}
 
 ${RTP_HAVE_POLL}
 
-${RTP_HAVE_WSAPOLL}
+// Linux - no WSAPoll support
 
 ${RTP_HAVE_MSG_NOSIGNAL}
 

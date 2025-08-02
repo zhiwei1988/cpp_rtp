@@ -1,7 +1,4 @@
-// 这是在使用 mingw 时用于 getaddrinfo
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0600
-#endif
+// IPv6 transmitter implementation
 
 #include "rtpudpv6transmitter.h"
 
@@ -1187,13 +1184,8 @@ int RTPUDPv6Transmitter::PollSocket(bool rtp)
 	RTPSOCKLENTYPE fromlen;
 	int recvlen;
 	char packetbuffer[RTPUDPV6TRANS_MAXPACKSIZE];
-#ifdef RTP_SOCKETTYPE_WINSOCK
-	SOCKET sock;
-	unsigned long len;
-#else 
 	size_t len;
 	int sock;
-#endif // RTP_SOCKETTYPE_WINSOCK
 	struct sockaddr_in6 srcaddr;
 	bool dataavailable;
 	
@@ -1485,37 +1477,6 @@ int RTPUDPv6Transmitter::CreateLocalIPList()
 	return 0;
 }
 
-#ifdef RTP_SOCKETTYPE_WINSOCK
-
-bool RTPUDPv6Transmitter::GetLocalIPList_Interfaces()
-{
-	unsigned char buffer[RTPUDPV6TRANS_IFREQBUFSIZE];
-	DWORD outputsize;
-	DWORD numaddresses,i;
-	SOCKET_ADDRESS_LIST *addrlist;
-
-	if (WSAIoctl(rtpsock,SIO_ADDRESS_LIST_QUERY,NULL,0,&buffer,RTPUDPV6TRANS_IFREQBUFSIZE,&outputsize,NULL,NULL))
-		return false;
-	
-	addrlist = (SOCKET_ADDRESS_LIST *)buffer;
-	numaddresses = addrlist->iAddressCount;
-	for (i = 0 ; i < numaddresses ; i++)
-	{
-		SOCKET_ADDRESS *sockaddr = &(addrlist->Address[i]);
-		if (sockaddr->iSockaddrLength == sizeof(struct sockaddr_in6)) // IPv6 地址
-		{
-			struct sockaddr_in6 *addr = (struct sockaddr_in6 *)sockaddr->lpSockaddr;
-
-			localIPs.push_back(addr->sin6_addr);
-		}
-	}
-
-	if (localIPs.empty())
-		return false;
-	return true;
-}
-
-#else
 
 #ifdef RTP_SUPPORT_IFADDRS
 
@@ -1551,8 +1512,6 @@ bool RTPUDPv6Transmitter::GetLocalIPList_Interfaces()
 }
 
 #endif // RTP_SUPPORT_IFADDRS
-
-#endif // RTP_SOCKETTYPE_WINSOCK
 
 void RTPUDPv6Transmitter::GetLocalIPList_DNS()
 {

@@ -8,21 +8,13 @@
 
 #include "rtpconfig.h"
 #include "rtptypes.h"
-#ifndef RTP_HAVE_QUERYPERFORMANCECOUNTER
-	#include <sys/time.h>
-	#include <time.h>
-	#include <errno.h>	
-#endif // RTP_HAVE_QUERYPERFORMANCECOUNTER
+#include <sys/time.h>
+#include <time.h>
+#include <errno.h>
 
 #define RTP_NTPTIMEOFFSET									2208988800UL
 
-#ifdef RTP_HAVE_VSUINT64SUFFIX
-#define C1000000 1000000ui64
-#define CEPOCH 11644473600000000ui64
-#else
 #define C1000000 1000000ULL
-#define CEPOCH 11644473600000000ULL
-#endif // RTP_HAVE_VSUINT64SUFFIX
 
 /**
  * This is a simple wrapper for the most significant word (MSW) and least 
@@ -93,10 +85,6 @@ public:
 
 	bool IsZero() const { return m_t == 0; }
 private:
-#ifdef RTP_HAVE_QUERYPERFORMANCECOUNTER
-	static inline uint64_t CalculateMicroseconds(uint64_t performancecount,uint64_t performancefrequency);
-#endif // RTP_HAVE_QUERYPERFORMANCECOUNTER
-
 	double m_t;
 };
 
@@ -167,62 +155,7 @@ inline uint32_t RTPTime::GetMicroSeconds() const
 	return microsec;
 }
 
-#ifdef RTP_HAVE_QUERYPERFORMANCECOUNTER
-
-inline uint64_t RTPTime::CalculateMicroseconds(uint64_t performancecount,uint64_t performancefrequency)
-{
-	uint64_t f = performancefrequency;
-	uint64_t a = performancecount;
-	uint64_t b = a/f;
-	uint64_t c = a%f; // a = b*f+c => (a*1000000)/f = b*1000000+(c*1000000)/f
-
-	return b*C1000000+(c*C1000000)/f;
-}
-
-inline RTPTime RTPTime::CurrentTime()
-{
-	static int inited = 0;
-	static uint64_t microseconds, initmicroseconds;
-	static LARGE_INTEGER performancefrequency;
-
-	uint64_t emulate_microseconds, microdiff;
-	SYSTEMTIME systemtime;
-	FILETIME filetime;
-
-	LARGE_INTEGER performancecount;
-
-	QueryPerformanceCounter(&performancecount);
-    
-	if(!inited){
-		inited = 1;
-		QueryPerformanceFrequency(&performancefrequency);
-		GetSystemTime(&systemtime);
-		SystemTimeToFileTime(&systemtime,&filetime);
-		microseconds = ( ((uint64_t)(filetime.dwHighDateTime) << 32) + (uint64_t)(filetime.dwLowDateTime) ) / (uint64_t)10;
-		microseconds-= CEPOCH; // EPOCH
-		initmicroseconds = CalculateMicroseconds(performancecount.QuadPart, performancefrequency.QuadPart);
-	}
-    
-	emulate_microseconds = CalculateMicroseconds(performancecount.QuadPart, performancefrequency.QuadPart);
-
-	microdiff = emulate_microseconds - initmicroseconds;
-
-	double t = 1e-6*(double)(microseconds + microdiff);
-	return RTPTime(t);
-}
-
-inline void RTPTime::Wait(const RTPTime &delay)
-{
-	if (delay.m_t <= 0)
-		return;
-
-	uint64_t sec = (uint64_t)delay.m_t;
-	uint32_t microsec = (uint32_t)(1e6*(delay.m_t-(double)sec));
-	DWORD t = ((DWORD)sec)*1000+(((DWORD)microsec)/1000);
-	Sleep(t);
-}
-
-#else // unix style
+// Linux time implementation
 
 #ifdef RTP_HAVE_CLOCK_GETTIME
 inline double RTPTime_timespecToDouble(struct timespec &ts)
@@ -289,8 +222,6 @@ inline void RTPTime::Wait(const RTPTime &delay)
 		req = rem;
 	} while (ret == -1 && errno == EINTR);
 }
-
-#endif // RTP_HAVE_QUERYPERFORMANCECOUNTER
 
 inline RTPTime &RTPTime::operator-=(const RTPTime &t)
 { 

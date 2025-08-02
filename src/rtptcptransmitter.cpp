@@ -651,11 +651,7 @@ void RTPTCPTransmitter::FlushPackets()
 
 int RTPTCPTransmitter::PollSocket(SocketType sock, SocketData &sdata)
 {
-#ifdef RTP_SOCKETTYPE_WINSOCK
-	unsigned long len;
-#else 
 	size_t len;
-#endif // RTP_SOCKETTYPE_WINSOCK
 	bool dataavailable;
 	
 	do

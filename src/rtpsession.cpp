@@ -18,12 +18,8 @@
 	#include "rtcpcompoundpacket.h"
 #endif // RTP_SUPPORT_SENDAPP
 #include "rtpinternalutils.h"
-#ifndef WIN32
-	#include <unistd.h>
-	#include <stdlib.h>
-#else
-	#include <winbase.h>
-#endif // WIN32
+#include <unistd.h>
+#include <stdlib.h>
 
 
 
@@ -1376,6 +1372,7 @@ int RTPSession::ProcessPolledData()
 			}
 
 			if (created) // 第一次遇到此地址，发送 BYE 包并更改我们自己的 SSRC
+			{
 				PACKSENT_LOCK
 				bool hassentpackets = sentpackets;
 				PACKSENT_UNLOCK
@@ -1522,7 +1519,6 @@ int RTPSession::ProcessPolledData()
 
 int RTPSession::CreateCNAME(uint8_t *buffer,size_t *bufferlength,bool resolve)
 {
-#ifndef WIN32
 	bool gotlogin = true;
 #ifdef RTP_SUPPORT_GETLOGINR
 	buffer[0] = 0;
@@ -1556,17 +1552,6 @@ int RTPSession::CreateCNAME(uint8_t *buffer,size_t *bufferlength,bool resolve)
 			return ERR_RTP_SESSION_CANTGETLOGINNAME;
 		strncpy((char *)buffer,logname,*bufferlength);
 	}
-#else // Win32 版本
-
-#ifndef _WIN32_WCE
-	DWORD len = *bufferlength;
-	if (!GetUserName((LPTSTR)buffer,&len))
-		RTP_STRNCPY((char *)buffer,"unknown",*bufferlength);
-#else 
-	RTP_STRNCPY((char *)buffer,"unknown",*bufferlength);
-#endif // _WIN32_WCE
-	
-#endif // WIN32
 	buffer[*bufferlength-1] = 0;
 
 	size_t offset = strlen((const char *)buffer);

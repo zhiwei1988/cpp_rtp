@@ -9,11 +9,9 @@
 #include "rtpconfig.h"
 #include "rtptypes.h"
 #include "rtpipv4address.h"
-#ifndef RTP_SOCKETTYPE_WINSOCK
-	#include <netinet/in.h>
-	#include <arpa/inet.h>
-	#include <sys/socket.h>
-#endif // RTP_SOCKETTYPE_WINSOCK
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 #include <string.h>
 #include <string>
 

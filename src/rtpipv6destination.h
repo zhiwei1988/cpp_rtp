@@ -13,11 +13,9 @@
 #include "rtptypes.h"
 #include <string.h>
 #include <string>
-#ifndef RTP_SOCKETTYPE_WINSOCK
-	#include <netinet/in.h>
-	#include <arpa/inet.h>
-	#include <sys/socket.h>
-#endif // RTP_SOCKETTYPE_WINSOCK
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
 class MEDIA_RTP_IMPORTEXPORT RTPIPv6Destination
 {
