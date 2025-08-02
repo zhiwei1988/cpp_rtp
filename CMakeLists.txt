@@ -86,7 +86,6 @@ else (CMAKE_CROSSCOMPILING)
 endif (CMAKE_CROSSCOMPILING)
 
 option(MEDIA_RTP_COMPILE_TESTS "Compile various tests in the 'tests' subdirectory" NO)
-option(MEDIA_RTP_COMPILE_EXAMPLES "Compile various examples in the 'examples' subdirectory" YES)
 
 # Linux only - no winsock support
 set(TESTDEFS "")
@@ -142,10 +141,6 @@ save_paths(MEDIA_RTP_INTERNAL_INCLUDES "${PROJECT_SOURCE_DIR}/src" "${PROJECT_BI
 
 add_subdirectory(src)
 
-if (MEDIA_RTP_COMPILE_EXAMPLES)
-	add_subdirectory(examples)
-endif()
-
 if (MEDIA_RTP_COMPILE_TESTS)
 	add_subdirectory(tests)
 endif()
@@ -176,8 +171,5 @@ endforeach()
 foreach(ARG ${MEDIA_RTP_INCDIRS})
 	set(MEDIA_RTP_INCDIRS_PKGCONFIG "${MEDIA_RTP_INCDIRS_PKGCONFIG} -I${ARG}")
 endforeach()
-
-configure_file(${PROJECT_SOURCE_DIR}/pkgconfig/media_rtp.pc.in ${PROJECT_BINARY_DIR}/pkgconfig/media_rtp.pc)
-install(FILES ${PROJECT_BINARY_DIR}/pkgconfig/media_rtp.pc DESTINATION ${LIBRARY_INSTALL_DIR}/pkgconfig)
 
 
