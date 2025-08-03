@@ -51,7 +51,6 @@ struct TestStats {
 // 统一的错误检查函数
 void checkError(int rtperr, const string& testName) {
     if (rtperr < 0) {
-        cerr << "错误 [" << testName << "]: " << RTPGetErrorString(rtperr) << endl;
         throw std::runtime_error("RTP错误");
     }
 }
@@ -388,7 +387,6 @@ public:
             int result = session.Create(sessParams, &transParams);
             
             if (result < 0) {
-                cout << "正确捕获无效端口错误: " << RTPGetErrorString(result) << endl;
                 stats.addResult(true);
             } else {
                 session.BYEDestroy(RTPTime(1,0), 0, 0);

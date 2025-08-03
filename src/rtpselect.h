@@ -50,7 +50,7 @@ inline int RTPSelect(const SocketType *sockets, int8_t *readflags, size_t numsoc
 		// We're just going to ignore an EINTR
 		if (errno == EINTR)
 			return 0;
-		return ERR_RTP_SELECT_ERRORINPOLL;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 
 	if (status > 0)
@@ -101,7 +101,7 @@ inline int RTPSelect(const SocketType *sockets, int8_t *readflags, size_t numsoc
 		// On windows it seems that comparing the socket value to FD_SETSIZE does
 		// not make sense
 		if (sockets[i] >= setsize)
-			return ERR_RTP_SELECT_SOCKETDESCRIPTORTOOLARGE;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		FD_SET(sockets[i], &fdset);
 		readflags[i] = 0;
 	}
@@ -112,7 +112,7 @@ inline int RTPSelect(const SocketType *sockets, int8_t *readflags, size_t numsoc
 		// We're just going to ignore an EINTR
 		if (errno == EINTR)
 			return 0;
-		return ERR_RTP_SELECT_ERRORINSELECT;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 
 	if (status > 0) // some descriptors were set, check them

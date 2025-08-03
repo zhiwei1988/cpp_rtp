@@ -54,7 +54,7 @@ RTPUDPv6Transmitter::~RTPUDPv6Transmitter()
 int RTPUDPv6Transmitter::Init(bool tsafe)
 {
 	if (init)
-		return ERR_RTP_UDPV6TRANS_ALREADYINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 #ifdef RTP_SUPPORT_THREAD
 	threadsafe = tsafe;
@@ -64,14 +64,14 @@ int RTPUDPv6Transmitter::Init(bool tsafe)
 		
 		status = mainmutex.Init();
 		if (status < 0)
-			return ERR_RTP_UDPV6TRANS_CANTINITMUTEX;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		status = waitmutex.Init();
 		if (status < 0)
-			return ERR_RTP_UDPV6TRANS_CANTINITMUTEX;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 #else
 	if (tsafe)
-		return ERR_RTP_NOTHREADSUPPORT;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 #endif // RTP_SUPPORT_THREAD
 
 	init = true;
@@ -86,14 +86,14 @@ int RTPUDPv6Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 	int status;
 
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 
 	if (created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_ALREADYCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	
 	// 获取传输参数
@@ -105,7 +105,7 @@ int RTPUDPv6Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		if (transparams->GetTransmissionProtocol() != RTPTransmitter::IPv6UDPProto)
 		{
 			MAINMUTEX_UNLOCK
-			return ERR_RTP_UDPV6TRANS_ILLEGALPARAMETERS;
+			return MEDIA_RTP_ERR_INVALID_PARAMETER;
 		}
 		params = (const RTPUDPv6TransmissionParams *)transparams;
 	}
@@ -114,7 +114,7 @@ int RTPUDPv6Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 	if (params->GetPortbase()%2 != 0)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_PORTBASENOTEVEN;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 
 			// 创建套接字
@@ -123,14 +123,14 @@ int RTPUDPv6Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 	if (rtpsock == RTPSOCKERR)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_CANTCREATESOCKET;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	rtcpsock = socket(PF_INET6,SOCK_DGRAM,0);
 	if (rtcpsock == RTPSOCKERR)
 	{
 		RTPCLOSE(rtpsock);
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_CANTCREATESOCKET;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
 			// 设置套接字缓冲区大小
@@ -141,7 +141,7 @@ int RTPUDPv6Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		RTPCLOSE(rtpsock);
 		RTPCLOSE(rtcpsock);
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_CANTSETRTPRECEIVEBUF;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	size = params->GetRTPSendBuffer();
 	if (setsockopt(rtpsock,SOL_SOCKET,SO_SNDBUF,(const char *)&size,sizeof(int)) != 0)
@@ -149,7 +149,7 @@ int RTPUDPv6Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		RTPCLOSE(rtpsock);
 		RTPCLOSE(rtcpsock);
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_CANTSETRTPTRANSMITBUF;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	size = params->GetRTCPReceiveBuffer();
 	if (setsockopt(rtcpsock,SOL_SOCKET,SO_RCVBUF,(const char *)&size,sizeof(int)) != 0)
@@ -157,7 +157,7 @@ int RTPUDPv6Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		RTPCLOSE(rtpsock);
 		RTPCLOSE(rtcpsock);
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_CANTSETRTCPRECEIVEBUF;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	size = params->GetRTCPSendBuffer();
 	if (setsockopt(rtcpsock,SOL_SOCKET,SO_SNDBUF,(const char *)&size,sizeof(int)) != 0)
@@ -165,7 +165,7 @@ int RTPUDPv6Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		RTPCLOSE(rtpsock);
 		RTPCLOSE(rtcpsock);
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_CANTSETRTCPTRANSMITBUF;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
 			// 绑定套接字
@@ -182,7 +182,7 @@ int RTPUDPv6Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		RTPCLOSE(rtpsock);
 		RTPCLOSE(rtcpsock);
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_CANTBINDRTPSOCKET;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	memset(&addr,0,sizeof(struct sockaddr_in6));
 	addr.sin6_family = AF_INET6;
@@ -193,7 +193,7 @@ int RTPUDPv6Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		RTPCLOSE(rtpsock);
 		RTPCLOSE(rtcpsock);
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_CANTBINDRTCPSOCKET;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 
 	// 尝试获取本地 IP 地址
@@ -227,7 +227,7 @@ int RTPUDPv6Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		RTPCLOSE(rtpsock);
 		RTPCLOSE(rtcpsock);
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_SPECIFIEDSIZETOOBIG;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	}
 	
 	if (!params->GetCreatedAbortDescriptors())
@@ -249,7 +249,7 @@ int RTPUDPv6Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 			RTPCLOSE(rtpsock);
 			RTPCLOSE(rtcpsock);
 			MAINMUTEX_UNLOCK
-			return ERR_RTP_ABORTDESC_NOTINIT;
+			return MEDIA_RTP_ERR_INVALID_STATE;
 		}
 	}
 
@@ -333,13 +333,13 @@ void RTPUDPv6Transmitter::DeleteTransmissionInfo(RTPTransmissionInfo *i)
 int RTPUDPv6Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_LOCK
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 
 	if (localhostname == 0)
@@ -347,7 +347,7 @@ int RTPUDPv6Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 		if (localIPs.empty())
 		{
 			MAINMUTEX_UNLOCK
-			return ERR_RTP_UDPV6TRANS_NOLOCALIPS;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		}
 		
 		std::list<in6_addr>::const_iterator it;
@@ -414,7 +414,7 @@ int RTPUDPv6Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 					if (localhostname == 0)
 					{
 						MAINMUTEX_UNLOCK
-						return ERR_RTP_OUTOFMEM;
+						return MEDIA_RTP_ERR_RESOURCE_ERROR;
 					}
 					memcpy(localhostname,(*it).c_str(),localhostnamelength);
 					localhostname[localhostnamelength] = 0;
@@ -447,7 +447,7 @@ int RTPUDPv6Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 			if (localhostname == 0)
 			{
 				MAINMUTEX_UNLOCK
-				return ERR_RTP_OUTOFMEM;
+				return MEDIA_RTP_ERR_RESOURCE_ERROR;
 			}
 			memcpy(localhostname,str,localhostnamelength);
 			localhostname[localhostnamelength] = 0;
@@ -458,7 +458,7 @@ int RTPUDPv6Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 	{
 		*bufferlength = localhostnamelength; // 告诉应用程序所需的缓冲区大小
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TRANS_BUFFERLENGTHTOOSMALL;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	}
 
 	memcpy(buffer,localhostname,localhostnamelength);
@@ -519,7 +519,7 @@ bool RTPUDPv6Transmitter::ComesFromThisTransmitter(const RTPAddress *addr)
 int RTPUDPv6Transmitter::Poll()
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 	
@@ -527,7 +527,7 @@ int RTPUDPv6Transmitter::Poll()
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	status = PollSocket(true); // 轮询 RTP 套接字
 	if (status >= 0)
@@ -539,19 +539,19 @@ int RTPUDPv6Transmitter::Poll()
 int RTPUDPv6Transmitter::WaitForIncomingData(const RTPTime &delay,bool *dataavailable)
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 		
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (waitingfordata)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_ALREADYWAITING;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	
 	SocketType abortSocket = m_pAbortDesc->GetAbortSocket();
@@ -605,18 +605,18 @@ int RTPUDPv6Transmitter::WaitForIncomingData(const RTPTime &delay,bool *dataavai
 int RTPUDPv6Transmitter::AbortWait()
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (!waitingfordata)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTWAITING;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 
 	m_pAbortDesc->SendAbortSignal();
@@ -628,19 +628,19 @@ int RTPUDPv6Transmitter::AbortWait()
 int RTPUDPv6Transmitter::SendRTPData(const void *data,size_t len)	
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_LOCK
 	
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (len > maxpacksize)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_SPECIFIEDSIZETOOBIG;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	}
 	
 	for (const auto& dest : destinations)
@@ -655,19 +655,19 @@ int RTPUDPv6Transmitter::SendRTPData(const void *data,size_t len)
 int RTPUDPv6Transmitter::SendRTCPData(const void *data,size_t len)
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_LOCK
 	
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (len > maxpacksize)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_SPECIFIEDSIZETOOBIG;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	}
 	
 	for (const auto& dest : destinations)
@@ -682,25 +682,25 @@ int RTPUDPv6Transmitter::SendRTCPData(const void *data,size_t len)
 int RTPUDPv6Transmitter::AddDestination(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (addr.GetAddressType() != RTPAddress::IPv6Address)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	
 	RTPIPv6Address &address = (RTPIPv6Address &)addr;
 	RTPIPv6Destination dest(address.GetIP(),address.GetPort());
 	auto result = destinations.insert(dest);
-	int status = result.second ? 0 : ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
+	int status = result.second ? 0 : MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_UNLOCK
 	return status;
@@ -709,25 +709,25 @@ int RTPUDPv6Transmitter::AddDestination(const RTPAddress &addr)
 int RTPUDPv6Transmitter::DeleteDestination(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (addr.GetAddressType() != RTPAddress::IPv6Address)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	
 	RTPIPv6Address &address = (RTPIPv6Address &)addr;	
 	RTPIPv6Destination dest(address.GetIP(),address.GetPort());
 	size_t erased = destinations.erase(dest);
-	int status = erased > 0 ? 0 : ERR_RTP_HASHTABLE_ELEMENTNOTFOUND;
+	int status = erased > 0 ? 0 : MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_UNLOCK
 	return status;
@@ -767,7 +767,7 @@ bool RTPUDPv6Transmitter::SupportsMulticasting()
 int RTPUDPv6Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_LOCK
 	
@@ -776,12 +776,12 @@ int RTPUDPv6Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (addr.GetAddressType() != RTPAddress::IPv6Address)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	
 	const RTPIPv6Address &address = (const RTPIPv6Address &)addr;
@@ -790,11 +790,11 @@ int RTPUDPv6Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 	if (!RTPUDPV6TRANS_IS_MCASTADDR(mcastIP))
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTAMULTICASTADDRESS;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
 	auto result = multicastgroups.insert(mcastIP);
-	status = result.second ? 0 : ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
+	status = result.second ? 0 : MEDIA_RTP_ERR_INVALID_STATE;
 	if (status >= 0)
 	{
 		RTPUDPV6TRANS_MCASTMEMBERSHIP(rtpsock,IPV6_JOIN_GROUP,mcastIP,status);
@@ -802,7 +802,7 @@ int RTPUDPv6Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 		{
 			multicastgroups.erase(mcastIP);
 			MAINMUTEX_UNLOCK
-			return ERR_RTP_UDPV6TRANS_COULDNTJOINMULTICASTGROUP;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		}
 		RTPUDPV6TRANS_MCASTMEMBERSHIP(rtcpsock,IPV6_JOIN_GROUP,mcastIP,status);
 		if (status != 0)
@@ -810,7 +810,7 @@ int RTPUDPv6Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 			RTPUDPV6TRANS_MCASTMEMBERSHIP(rtpsock,IPV6_LEAVE_GROUP,mcastIP,status);
 			multicastgroups.erase(mcastIP);
 			MAINMUTEX_UNLOCK
-			return ERR_RTP_UDPV6TRANS_COULDNTJOINMULTICASTGROUP;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		}
 	}
 	MAINMUTEX_UNLOCK	
@@ -820,7 +820,7 @@ int RTPUDPv6Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 int RTPUDPv6Transmitter::LeaveMulticastGroup(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_LOCK
 	
@@ -829,12 +829,12 @@ int RTPUDPv6Transmitter::LeaveMulticastGroup(const RTPAddress &addr)
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (addr.GetAddressType() != RTPAddress::IPv6Address)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	
 	const RTPIPv6Address &address = (const RTPIPv6Address &)addr;
@@ -843,11 +843,11 @@ int RTPUDPv6Transmitter::LeaveMulticastGroup(const RTPAddress &addr)
 	if (!RTPUDPV6TRANS_IS_MCASTADDR(mcastIP))
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTAMULTICASTADDRESS;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
 	size_t erased = multicastgroups.erase(mcastIP);
-	status = erased > 0 ? 0 : ERR_RTP_HASHTABLE_ELEMENTNOTFOUND;
+	status = erased > 0 ? 0 : MEDIA_RTP_ERR_INVALID_STATE;
 	if (status >= 0)
 	{	
 		RTPUDPV6TRANS_MCASTMEMBERSHIP(rtpsock,IPV6_LEAVE_GROUP,mcastIP,status);
@@ -883,12 +883,12 @@ void RTPUDPv6Transmitter::LeaveAllMulticastGroups()
 
 int RTPUDPv6Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 {
-	return ERR_RTP_UDPV6TRANS_NOMULTICASTSUPPORT;
+	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
 
 int RTPUDPv6Transmitter::LeaveMulticastGroup(const RTPAddress &addr)
 {
-	return ERR_RTP_UDPV6TRANS_NOMULTICASTSUPPORT;
+	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
 
 void RTPUDPv6Transmitter::LeaveAllMulticastGroups()
@@ -900,13 +900,13 @@ void RTPUDPv6Transmitter::LeaveAllMulticastGroups()
 int RTPUDPv6Transmitter::SetReceiveMode(RTPTransmitter::ReceiveMode m)
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (m != receivemode)
 	{
@@ -920,7 +920,7 @@ int RTPUDPv6Transmitter::SetReceiveMode(RTPTransmitter::ReceiveMode m)
 int RTPUDPv6Transmitter::AddToIgnoreList(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_LOCK
 	
@@ -929,17 +929,17 @@ int RTPUDPv6Transmitter::AddToIgnoreList(const RTPAddress &addr)
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (addr.GetAddressType() != RTPAddress::IPv6Address)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	if (receivemode != RTPTransmitter::IgnoreSome)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_DIFFERENTRECEIVEMODE;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
 	const RTPIPv6Address &address = (const RTPIPv6Address &)addr;
@@ -952,7 +952,7 @@ int RTPUDPv6Transmitter::AddToIgnoreList(const RTPAddress &addr)
 int RTPUDPv6Transmitter::DeleteFromIgnoreList(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	
@@ -961,17 +961,17 @@ int RTPUDPv6Transmitter::DeleteFromIgnoreList(const RTPAddress &addr)
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (addr.GetAddressType() != RTPAddress::IPv6Address)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	if (receivemode != RTPTransmitter::IgnoreSome)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_DIFFERENTRECEIVEMODE;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
 	const RTPIPv6Address &address = (const RTPIPv6Address &)addr;	
@@ -995,7 +995,7 @@ void RTPUDPv6Transmitter::ClearIgnoreList()
 int RTPUDPv6Transmitter::AddToAcceptList(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	
@@ -1004,17 +1004,17 @@ int RTPUDPv6Transmitter::AddToAcceptList(const RTPAddress &addr)
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (addr.GetAddressType() != RTPAddress::IPv6Address)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	if (receivemode != RTPTransmitter::AcceptSome)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_DIFFERENTRECEIVEMODE;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
 	const RTPIPv6Address &address = (const RTPIPv6Address &)addr;
@@ -1027,7 +1027,7 @@ int RTPUDPv6Transmitter::AddToAcceptList(const RTPAddress &addr)
 int RTPUDPv6Transmitter::DeleteFromAcceptList(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	
@@ -1036,17 +1036,17 @@ int RTPUDPv6Transmitter::DeleteFromAcceptList(const RTPAddress &addr)
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (addr.GetAddressType() != RTPAddress::IPv6Address)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	if (receivemode != RTPTransmitter::AcceptSome)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_DIFFERENTRECEIVEMODE;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
 	const RTPIPv6Address &address = (const RTPIPv6Address &)addr;
@@ -1070,18 +1070,18 @@ void RTPUDPv6Transmitter::ClearAcceptList()
 int RTPUDPv6Transmitter::SetMaximumPacketSize(size_t s)	
 {
 	if (!init)
-		return ERR_RTP_UDPV6TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (s > RTPUDPV6TRANS_MAXPACKSIZE)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV6TRANS_SPECIFIEDSIZETOOBIG;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	}
 	maxpacksize = s;
 	MAINMUTEX_UNLOCK
@@ -1221,12 +1221,12 @@ int RTPUDPv6Transmitter::PollSocket(bool rtp)
 
 				addr = new RTPIPv6Address(srcaddr.sin6_addr,ntohs(srcaddr.sin6_port));
 				if (addr == 0)
-					return ERR_RTP_OUTOFMEM;
+					return MEDIA_RTP_ERR_RESOURCE_ERROR;
 				datacopy = new uint8_t[recvlen];
 				if (datacopy == 0)
 				{
 					delete addr;
-					return ERR_RTP_OUTOFMEM;
+					return MEDIA_RTP_ERR_RESOURCE_ERROR;
 				}
 				memcpy(datacopy,packetbuffer,recvlen);
 				
@@ -1235,7 +1235,7 @@ int RTPUDPv6Transmitter::PollSocket(bool rtp)
 				{
 					delete addr;
 					delete [] datacopy;
-					return ERR_RTP_OUTOFMEM;
+					return MEDIA_RTP_ERR_RESOURCE_ERROR;
 				}
 				rawpacketlist.push_back(pack);	
 			}
@@ -1299,7 +1299,7 @@ int RTPUDPv6Transmitter::ProcessAddAcceptIgnoreEntry(in6_addr ip,uint16_t port)
 			portinf->portlist.push_front(port);
 		
 		auto result = acceptignoreinfo.emplace(ip, portinf);
-		status = result.second ? 0 : ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
+		status = result.second ? 0 : MEDIA_RTP_ERR_INVALID_STATE;
 		if (status < 0)
 		{
 			delete portinf;
@@ -1323,7 +1323,7 @@ int RTPUDPv6Transmitter::ProcessDeleteAcceptIgnoreEntry(in6_addr ip,uint16_t por
 {
 	auto it = acceptignoreinfo.find(ip);
 	if (it == acceptignoreinfo.end())
-		return ERR_RTP_UDPV6TRANS_NOSUCHENTRY;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	
 	PortInfo *inf = it->second;
 			if (port == 0) // 删除所有条目
@@ -1343,7 +1343,7 @@ int RTPUDPv6Transmitter::ProcessDeleteAcceptIgnoreEntry(in6_addr ip,uint16_t por
 			for (it = begin ; it != end ; it++)
 			{
 				if (*it == port) // 已在列表中：这意味着我们已经删除了该条目
-					return ERR_RTP_UDPV6TRANS_NOSUCHENTRY;
+					return MEDIA_RTP_ERR_OPERATION_FAILED;
 			}
 			inf->portlist.push_front(port);
 		}
@@ -1362,7 +1362,7 @@ int RTPUDPv6Transmitter::ProcessDeleteAcceptIgnoreEntry(in6_addr ip,uint16_t por
 				}
 			}
 			// 没找到
-			return ERR_RTP_UDPV6TRANS_NOSUCHENTRY;			
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		}
 	}
 	return 0;

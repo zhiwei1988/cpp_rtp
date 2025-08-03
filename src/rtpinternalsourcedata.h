@@ -60,7 +60,7 @@ inline int RTPInternalSourceData::SetRTPDataAddress(const RTPAddress *a)
 	{
 		RTPAddress *newaddr = a->CreateCopy();
 		if (newaddr == 0)
-			return ERR_RTP_OUTOFMEM;
+			return MEDIA_RTP_ERR_RESOURCE_ERROR;
 		
 		if (rtpaddr && a != rtpaddr)
 			delete rtpaddr;
@@ -84,7 +84,7 @@ inline int RTPInternalSourceData::SetRTCPDataAddress(const RTPAddress *a)
 	{
 		RTPAddress *newaddr = a->CreateCopy();
 		if (newaddr == 0)
-			return ERR_RTP_OUTOFMEM;
+			return MEDIA_RTP_ERR_RESOURCE_ERROR;
 		
 		if (rtcpaddr && a != rtcpaddr)
 			delete rtcpaddr;

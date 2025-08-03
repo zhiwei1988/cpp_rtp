@@ -13,7 +13,6 @@ void checkerror(int rtperr)
 {
 	if (rtperr < 0)
 	{
-		std::cout << "ERROR: " << RTPGetErrorString(rtperr) << std::endl;
 		exit(-1);
 	}
 }

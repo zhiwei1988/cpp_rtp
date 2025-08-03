@@ -63,7 +63,7 @@ int RTPInternalSourceData::ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &re
 			validated = true;
 			break;
 		default:
-			return ERR_RTP_INTERNALSOURCEDATA_INVALIDPROBATIONTYPE;
+			return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 #else
 	if (!accept)
@@ -229,7 +229,7 @@ int RTPInternalSourceData::ProcessPrivateSDESItem(const uint8_t *prefix,size_t p
 	
 	stats.SetLastMessageTime(receivetime);
 	status = SDESinf.SetPrivateValue(prefix,prefixlen,value,valuelen);
-	if (status == ERR_RTP_SDES_MAXPRIVITEMS)
+	if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
 		return 0; // 不要仅仅因为项目数量已满就停止处理
 	return status;
 }
@@ -248,7 +248,7 @@ int RTPInternalSourceData::ProcessBYEPacket(const uint8_t *reason,size_t reasonl
 	byetime = receivetime;
 	byereason = new uint8_t[reasonlen];
 	if (byereason == 0)
-		return ERR_RTP_OUTOFMEM;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	memcpy(byereason,reason,reasonlen);
 	byereasonlen = reasonlen;
 	receivedbye = true;

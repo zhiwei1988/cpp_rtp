@@ -23,7 +23,7 @@ RTCPCompoundPacket::RTCPCompoundPacket(RTPRawPacket &rawpack)
 	
 	if (rawpack.IsRTP())
 	{
-		error = ERR_RTP_RTCPCOMPOUND_INVALIDPACKET;
+		error = MEDIA_RTP_ERR_PROTOCOL_ERROR;
 		return;
 	}
 
@@ -72,7 +72,7 @@ int RTCPCompoundPacket::ParseData(uint8_t *data, size_t datalen)
 	bool first;
 	
 	if (datalen < sizeof(RTCPCommonHeader))
-		return ERR_RTP_RTCPCOMPOUND_INVALIDPACKET;
+		return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 
 	first = true;
 	
@@ -85,7 +85,7 @@ int RTCPCompoundPacket::ParseData(uint8_t *data, size_t datalen)
 		if (rtcphdr->version != RTP_VERSION) // check version
 		{
 			ClearPacketList();
-			return ERR_RTP_RTCPCOMPOUND_INVALIDPACKET;
+			return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 		}
 		if (first)
 		{
@@ -95,7 +95,7 @@ int RTCPCompoundPacket::ParseData(uint8_t *data, size_t datalen)
 			if ( ! (rtcphdr->packettype == RTP_RTCPTYPE_SR || rtcphdr->packettype == RTP_RTCPTYPE_RR))
 			{
 				ClearPacketList();
-				return ERR_RTP_RTCPCOMPOUND_INVALIDPACKET;
+				return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 			}
 		}
 		
@@ -106,7 +106,7 @@ int RTCPCompoundPacket::ParseData(uint8_t *data, size_t datalen)
 		if (length > datalen) // invalid length field
 		{
 			ClearPacketList();
-			return ERR_RTP_RTCPCOMPOUND_INVALIDPACKET;
+			return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 		}
 		
 		if (rtcphdr->padding)
@@ -115,7 +115,7 @@ int RTCPCompoundPacket::ParseData(uint8_t *data, size_t datalen)
 			if (length != datalen)
 			{
 				ClearPacketList();
-				return ERR_RTP_RTCPCOMPOUND_INVALIDPACKET;
+				return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 			}
 		}
 
@@ -145,7 +145,7 @@ int RTCPCompoundPacket::ParseData(uint8_t *data, size_t datalen)
 		if (p == 0)
 		{
 			ClearPacketList();
-			return ERR_RTP_OUTOFMEM;
+			return MEDIA_RTP_ERR_RESOURCE_ERROR;
 		}
 
 		rtcppacklist.push_back(p);
@@ -157,7 +157,7 @@ int RTCPCompoundPacket::ParseData(uint8_t *data, size_t datalen)
 	if (datalen != 0) // some remaining bytes
 	{
 		ClearPacketList();
-		return ERR_RTP_RTCPCOMPOUND_INVALIDPACKET;
+		return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 	}
 	return 0;
 }

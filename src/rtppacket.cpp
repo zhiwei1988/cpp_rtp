@@ -55,9 +55,9 @@ RTPPacket::RTPPacket(uint8_t payloadtype,const void *payloaddata,size_t payloadl
 {
 	Clear();
 	if (buffer == 0)
-		error = ERR_RTP_PACKET_EXTERNALBUFFERNULL;
+		error = MEDIA_RTP_ERR_INVALID_PARAMETER;
 	else if (buffersize <= 0)
-		error = ERR_RTP_PACKET_ILLEGALBUFFERSIZE;
+		error = MEDIA_RTP_ERR_INVALID_PARAMETER;
 	else
 		error = BuildPacket(payloadtype,payloaddata,payloadlen,seqnr,timestamp,ssrc,gotmarker,numcsrcs,
 		                    csrcs,gotextension,extensionid,extensionlen_numwords,extensiondata,buffer,buffersize);
@@ -77,19 +77,19 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 	RTPExtensionHeader *rtpextheader;
 	
 	if (!rawpack.IsRTP()) // 如果我们没有在 RTP 端口上收到它，我们将忽略它
-		return ERR_RTP_PACKET_INVALIDPACKET;
+		return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 	
 	// 长度至少应为 RTP 报头的大小
 	packetlen = rawpack.GetDataLength();
 	if (packetlen < sizeof(RTPHeader))
-		return ERR_RTP_PACKET_INVALIDPACKET;
+		return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 	
 	packetbytes = (uint8_t *)rawpack.GetData();
 	rtpheader = (RTPHeader *)packetbytes;
 	
 	// 版本号应该正确
 	if (rtpheader->version != RTP_VERSION)
-		return ERR_RTP_PACKET_INVALIDPACKET;
+		return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 	
 	// 我们将检查这是否可能是 RTCP 数据包。为此，
 	// 标记位和有效负载类型的组合应为 SR 或 RR
@@ -99,9 +99,9 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 	if (marker)
 	{
 		if (payloadtype == (RTP_RTCPTYPE_SR & 127)) // 不检查高位（这是标记！！）
-			return ERR_RTP_PACKET_INVALIDPACKET;
+			return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 		if (payloadtype == (RTP_RTCPTYPE_RR & 127))
-			return ERR_RTP_PACKET_INVALIDPACKET;
+			return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 	}
 
 	csrccount = rtpheader->csrccount;
@@ -111,7 +111,7 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 	{
 		numpadbytes = (int)packetbytes[packetlen-1]; // 最后一个字节包含填充字节数
 		if (numpadbytes <= 0)
-			return ERR_RTP_PACKET_INVALIDPACKET;
+			return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 	}
 	else
 		numpadbytes = 0;
@@ -132,7 +132,7 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 	
 	payloadlength = packetlen-numpadbytes-payloadoffset;
 	if (payloadlength < 0)
-		return ERR_RTP_PACKET_INVALIDPACKET;
+		return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 
 	// 现在，我们有了一个有效的数据包，因此我们可以创建 RTPPacket 的一个新实例并填充成员
 	
@@ -187,12 +187,12 @@ int RTPPacket::BuildPacket(uint8_t payloadtype,const void *payloaddata,size_t pa
 		  void *buffer,size_t maxsize)
 {
 	if (numcsrcs > RTP_MAXCSRCS)
-		return ERR_RTP_PACKET_TOOMANYCSRCS;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 
 	if (payloadtype > 127) // 不应使用高位
-		return ERR_RTP_PACKET_BADPAYLOADTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	if (payloadtype == 72 || payloadtype == 73) // 可能与 rtcp 类型混淆
-		return ERR_RTP_PACKET_BADPAYLOADTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	
 	packetlength = sizeof(RTPHeader);
 	packetlength += sizeof(uint32_t)*((size_t)numcsrcs);
@@ -206,7 +206,7 @@ int RTPPacket::BuildPacket(uint8_t payloadtype,const void *payloaddata,size_t pa
 	if (maxsize > 0 && packetlength > maxsize)
 	{
 		packetlength = 0;
-		return ERR_RTP_PACKET_DATAEXCEEDSMAXSIZE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 
 	// 好的，现在我们开始填充...
@@ -219,7 +219,7 @@ int RTPPacket::BuildPacket(uint8_t payloadtype,const void *payloaddata,size_t pa
 		if (packet == 0)
 		{
 			packetlength = 0;
-			return ERR_RTP_OUTOFMEM;
+			return MEDIA_RTP_ERR_RESOURCE_ERROR;
 		}
 		externalbuffer = false;
 	}

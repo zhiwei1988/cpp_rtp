@@ -64,7 +64,7 @@ RTPUDPv4Transmitter::~RTPUDPv4Transmitter()
 int RTPUDPv4Transmitter::Init(bool tsafe)
 {
 	if (init)
-		return ERR_RTP_UDPV4TRANS_ALREADYINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 #ifdef RTP_SUPPORT_THREAD
 	threadsafe = tsafe;
@@ -74,14 +74,14 @@ int RTPUDPv4Transmitter::Init(bool tsafe)
 		
 		status = mainmutex.Init();
 		if (status < 0)
-			return ERR_RTP_UDPV4TRANS_CANTINITMUTEX;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		status = waitmutex.Init();
 		if (status < 0)
-			return ERR_RTP_UDPV4TRANS_CANTINITMUTEX;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 #else
 	if (tsafe)
-		return ERR_RTP_NOTHREADSUPPORT;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 #endif // RTP_SUPPORT_THREAD
 
 	init = true;
@@ -97,23 +97,23 @@ static int GetIPv4SocketPort(SocketType s, uint16_t *pPort)
 
 	RTPSOCKLENTYPE size = sizeof(struct sockaddr_in);
 	if (getsockname(s,(struct sockaddr*)&addr,&size) != 0)
-		return ERR_RTP_UDPV4TRANS_CANTGETSOCKETPORT;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 
 	if (addr.sin_family != AF_INET)
-		return ERR_RTP_UDPV4TRANS_NOTANIPV4SOCKET;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 
 	uint16_t port = ntohs(addr.sin_port);
 	if (port == 0)
-		return ERR_RTP_UDPV4TRANS_SOCKETPORTNOTSET;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	
 	int type = 0;
 	RTPSOCKLENTYPE length = sizeof(type);
 
 	if (getsockopt(s, SOL_SOCKET, SO_TYPE, (char*)&type, &length) != 0)
-		return ERR_RTP_UDPV4TRANS_CANTGETSOCKETTYPE;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 
 	if (type != SOCK_DGRAM)
-		return ERR_RTP_UDPV4TRANS_INVALIDSOCKETTYPE;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 
 	*pPort = port;
 	return 0;
@@ -134,7 +134,7 @@ int GetAutoSockets(uint32_t bindIP, bool allowOdd, bool rtcpMux,
 		{
 			for (size_t i = 0 ; i < toClose.size() ; i++)
 				RTPCLOSE(toClose[i]);
-			return ERR_RTP_UDPV4TRANS_CANTCREATESOCKET;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		}
 
 		// 首先我们获取一个自动选择的端口
@@ -150,7 +150,7 @@ int GetAutoSockets(uint32_t bindIP, bool allowOdd, bool rtcpMux,
 			RTPCLOSE(sock);
 			for (size_t i = 0 ; i < toClose.size() ; i++)
 				RTPCLOSE(toClose[i]);
-			return ERR_RTP_UDPV4TRANS_CANTGETVALIDSOCKET;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		}
 
 		uint16_t basePort = 0;
@@ -187,7 +187,7 @@ int GetAutoSockets(uint32_t bindIP, bool allowOdd, bool rtcpMux,
 				RTPCLOSE(sock);
 				for (size_t i = 0 ; i < toClose.size() ; i++)
 					RTPCLOSE(toClose[i]);
-				return ERR_RTP_UDPV4TRANS_CANTCREATESOCKET;
+				return MEDIA_RTP_ERR_OPERATION_FAILED;
 			}
 
 			// 尝试下一个端口或前一个端口
@@ -246,7 +246,7 @@ int GetAutoSockets(uint32_t bindIP, bool allowOdd, bool rtcpMux,
 	for (size_t i = 0 ; i < toClose.size() ; i++)
 		RTPCLOSE(toClose[i]);
 
-	return ERR_RTP_UDPV4TRANS_TOOMANYATTEMPTSCHOOSINGSOCKET;
+	return MEDIA_RTP_ERR_RESOURCE_ERROR;
 }
 
 int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionParams *transparams)
@@ -257,14 +257,14 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 	int status;
 
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 
 	if (created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_ALREADYCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	
 	// 获取传输参数
@@ -276,7 +276,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		if (transparams->GetTransmissionProtocol() != RTPTransmitter::IPv4UDPProto)
 		{
 			MAINMUTEX_UNLOCK
-			return ERR_RTP_UDPV4TRANS_ILLEGALPARAMETERS;
+			return MEDIA_RTP_ERR_INVALID_PARAMETER;
 		}
 		params = (const RTPUDPv4TransmissionParams *)transparams;
 	}
@@ -319,7 +319,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 			if (!params->GetAllowOddPortbase() && params->GetPortbase()%2 != 0)
 			{
 				MAINMUTEX_UNLOCK
-				return ERR_RTP_UDPV4TRANS_PORTBASENOTEVEN;
+				return MEDIA_RTP_ERR_OPERATION_FAILED;
 			}
 
 			// 创建套接字
@@ -328,7 +328,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 			if (rtpsock == RTPSOCKERR)
 			{
 				MAINMUTEX_UNLOCK
-				return ERR_RTP_UDPV4TRANS_CANTCREATESOCKET;
+				return MEDIA_RTP_ERR_OPERATION_FAILED;
 			}
 
 			// 如果我们进行多路复用，我们只需将 RTCP 套接字设置为等于 RTP 套接字
@@ -341,7 +341,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 				{
 					RTPCLOSE(rtpsock);
 					MAINMUTEX_UNLOCK
-					return ERR_RTP_UDPV4TRANS_CANTCREATESOCKET;
+					return MEDIA_RTP_ERR_OPERATION_FAILED;
 				}
 			}
 
@@ -359,7 +359,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 			{
 				CLOSESOCKETS;
 				MAINMUTEX_UNLOCK
-				return ERR_RTP_UDPV4TRANS_CANTBINDRTPSOCKET;
+				return MEDIA_RTP_ERR_OPERATION_FAILED;
 			}
 
 			if (rtpsock != rtcpsock) // 多路复用时无需绑定同一个套接字两次
@@ -382,7 +382,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 				{
 					CLOSESOCKETS;
 					MAINMUTEX_UNLOCK
-					return ERR_RTP_UDPV4TRANS_CANTBINDRTCPSOCKET;
+					return MEDIA_RTP_ERR_OPERATION_FAILED;
 				}
 
 				m_rtcpPort = rtcpport;
@@ -398,14 +398,14 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		{
 			CLOSESOCKETS;
 			MAINMUTEX_UNLOCK
-			return ERR_RTP_UDPV4TRANS_CANTSETRTPRECEIVEBUF;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		}
 		size = params->GetRTPSendBuffer();
 		if (setsockopt(rtpsock,SOL_SOCKET,SO_SNDBUF,(const char *)&size,sizeof(int)) != 0)
 		{
 			CLOSESOCKETS;
 			MAINMUTEX_UNLOCK
-			return ERR_RTP_UDPV4TRANS_CANTSETRTPTRANSMITBUF;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		}
 
 		if (rtpsock != rtcpsock) // 多路复用时无需设置 RTCP 标志
@@ -415,14 +415,14 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 			{
 				CLOSESOCKETS;
 				MAINMUTEX_UNLOCK
-				return ERR_RTP_UDPV4TRANS_CANTSETRTCPRECEIVEBUF;
+				return MEDIA_RTP_ERR_OPERATION_FAILED;
 			}
 			size = params->GetRTCPSendBuffer();
 			if (setsockopt(rtcpsock,SOL_SOCKET,SO_SNDBUF,(const char *)&size,sizeof(int)) != 0)
 			{
 				CLOSESOCKETS;
 				MAINMUTEX_UNLOCK
-				return ERR_RTP_UDPV4TRANS_CANTSETRTCPTRANSMITBUF;
+				return MEDIA_RTP_ERR_OPERATION_FAILED;
 			}
 		}
 	}
@@ -456,7 +456,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 	{
 		CLOSESOCKETS;
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	}
 	
 	if (!params->GetCreatedAbortDescriptors())
@@ -476,7 +476,7 @@ int RTPUDPv4Transmitter::Create(size_t maximumpacketsize,const RTPTransmissionPa
 		{
 			CLOSESOCKETS;
 			MAINMUTEX_UNLOCK
-			return ERR_RTP_ABORTDESC_NOTINIT;
+			return MEDIA_RTP_ERR_INVALID_STATE;
 		}
 	}
 
@@ -559,13 +559,13 @@ void RTPUDPv4Transmitter::DeleteTransmissionInfo(RTPTransmissionInfo *i)
 int RTPUDPv4Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_LOCK
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 
 	if (localhostname == 0)
@@ -573,7 +573,7 @@ int RTPUDPv4Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 		if (localIPs.empty())
 		{
 			MAINMUTEX_UNLOCK
-			return ERR_RTP_UDPV4TRANS_NOLOCALIPS;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		}
 		
 		std::list<uint32_t>::const_iterator it;
@@ -645,7 +645,7 @@ int RTPUDPv4Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 					if (localhostname == 0)
 					{
 						MAINMUTEX_UNLOCK
-						return ERR_RTP_OUTOFMEM;
+						return MEDIA_RTP_ERR_RESOURCE_ERROR;
 					}
 					memcpy(localhostname,(*it).c_str(),localhostnamelength);
 					localhostname[localhostnamelength] = 0;
@@ -670,7 +670,7 @@ int RTPUDPv4Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 			if (localhostname == 0)
 			{
 				MAINMUTEX_UNLOCK
-				return ERR_RTP_OUTOFMEM;
+				return MEDIA_RTP_ERR_RESOURCE_ERROR;
 			}
 			memcpy(localhostname,str,localhostnamelength);
 			localhostname[localhostnamelength] = 0;
@@ -681,7 +681,7 @@ int RTPUDPv4Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 	{
 		*bufferlength = localhostnamelength; // 告诉应用程序所需的缓冲区大小
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TRANS_BUFFERLENGTHTOOSMALL;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	}
 
 	memcpy(buffer,localhostname,localhostnamelength);
@@ -738,7 +738,7 @@ bool RTPUDPv4Transmitter::ComesFromThisTransmitter(const RTPAddress *addr)
 int RTPUDPv4Transmitter::Poll()
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 	
@@ -746,7 +746,7 @@ int RTPUDPv4Transmitter::Poll()
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	status = PollSocket(true); // 轮询 RTP 套接字
 	if (rtpsock != rtcpsock) // 多路复用时无需轮询两次
@@ -761,19 +761,19 @@ int RTPUDPv4Transmitter::Poll()
 int RTPUDPv4Transmitter::WaitForIncomingData(const RTPTime &delay,bool *dataavailable)
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (waitingfordata)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_ALREADYWAITING;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	
 	SocketType abortSocket = m_pAbortDesc->GetAbortSocket();
@@ -828,18 +828,18 @@ int RTPUDPv4Transmitter::WaitForIncomingData(const RTPTime &delay,bool *dataavai
 int RTPUDPv4Transmitter::AbortWait()
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (!waitingfordata)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTWAITING;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 
 	m_pAbortDesc->SendAbortSignal();
@@ -851,19 +851,19 @@ int RTPUDPv4Transmitter::AbortWait()
 int RTPUDPv4Transmitter::SendRTPData(const void *data,size_t len)	
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_LOCK
 	
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (len > maxpacksize)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	}
 	
 	for (const auto& dest : destinations)
@@ -878,19 +878,19 @@ int RTPUDPv4Transmitter::SendRTPData(const void *data,size_t len)
 int RTPUDPv4Transmitter::SendRTCPData(const void *data,size_t len)
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_LOCK
 	
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (len > maxpacksize)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	}
 	
 	for (const auto& dest : destinations)
@@ -905,25 +905,25 @@ int RTPUDPv4Transmitter::SendRTCPData(const void *data,size_t len)
 int RTPUDPv4Transmitter::AddDestination(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 
 	RTPIPv4Destination dest;
 	if (!RTPIPv4Destination::AddressToDestination(addr, dest))
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	
 	auto result = destinations.insert(dest);
-	int status = result.second ? 0 : ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
+	int status = result.second ? 0 : MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_UNLOCK
 	return status;
@@ -932,24 +932,24 @@ int RTPUDPv4Transmitter::AddDestination(const RTPAddress &addr)
 int RTPUDPv4Transmitter::DeleteDestination(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	RTPIPv4Destination dest;
 	if (!RTPIPv4Destination::AddressToDestination(addr, dest))
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	
 	size_t erased = destinations.erase(dest);
-	int status = erased > 0 ? 0 : ERR_RTP_HASHTABLE_ELEMENTNOTFOUND;
+	int status = erased > 0 ? 0 : MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_UNLOCK
 	return status;
@@ -989,7 +989,7 @@ bool RTPUDPv4Transmitter::SupportsMulticasting()
 int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_LOCK
 	
@@ -998,12 +998,12 @@ int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (addr.GetAddressType() != RTPAddress::IPv4Address)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	
 	const RTPIPv4Address &address = (const RTPIPv4Address &)addr;
@@ -1012,11 +1012,11 @@ int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 	if (!RTPUDPV4TRANS_IS_MCASTADDR(mcastIP))
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTAMULTICASTADDRESS;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
 	auto result = multicastgroups.insert(mcastIP);
-	status = result.second ? 0 : ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
+	status = result.second ? 0 : MEDIA_RTP_ERR_INVALID_STATE;
 	if (status >= 0)
 	{
 		RTPUDPV4TRANS_MCASTMEMBERSHIP(rtpsock,IP_ADD_MEMBERSHIP,mcastIP,status);
@@ -1024,7 +1024,7 @@ int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 		{
 			multicastgroups.erase(mcastIP);
 			MAINMUTEX_UNLOCK
-			return ERR_RTP_UDPV4TRANS_COULDNTJOINMULTICASTGROUP;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		}
 
 		if (rtpsock != rtcpsock) // 多路复用时无需加入多播组两次
@@ -1035,7 +1035,7 @@ int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 				RTPUDPV4TRANS_MCASTMEMBERSHIP(rtpsock,IP_DROP_MEMBERSHIP,mcastIP,status);
 				multicastgroups.erase(mcastIP);
 				MAINMUTEX_UNLOCK
-				return ERR_RTP_UDPV4TRANS_COULDNTJOINMULTICASTGROUP;
+				return MEDIA_RTP_ERR_OPERATION_FAILED;
 			}
 		}
 	}
@@ -1046,7 +1046,7 @@ int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 int RTPUDPv4Transmitter::LeaveMulticastGroup(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_LOCK
 	
@@ -1055,12 +1055,12 @@ int RTPUDPv4Transmitter::LeaveMulticastGroup(const RTPAddress &addr)
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (addr.GetAddressType() != RTPAddress::IPv4Address)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	
 	const RTPIPv4Address &address = (const RTPIPv4Address &)addr;
@@ -1069,11 +1069,11 @@ int RTPUDPv4Transmitter::LeaveMulticastGroup(const RTPAddress &addr)
 	if (!RTPUDPV4TRANS_IS_MCASTADDR(mcastIP))
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTAMULTICASTADDRESS;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
 	size_t erased = multicastgroups.erase(mcastIP);
-	status = erased > 0 ? 0 : ERR_RTP_HASHTABLE_ELEMENTNOTFOUND;
+	status = erased > 0 ? 0 : MEDIA_RTP_ERR_INVALID_STATE;
 	if (status >= 0)
 	{	
 		RTPUDPV4TRANS_MCASTMEMBERSHIP(rtpsock,IP_DROP_MEMBERSHIP,mcastIP,status);
@@ -1113,12 +1113,12 @@ void RTPUDPv4Transmitter::LeaveAllMulticastGroups()
 
 int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 {
-	return ERR_RTP_UDPV4TRANS_NOMULTICASTSUPPORT;
+	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
 
 int RTPUDPv4Transmitter::LeaveMulticastGroup(const RTPAddress &addr)
 {
-	return ERR_RTP_UDPV4TRANS_NOMULTICASTSUPPORT;
+	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
 
 void RTPUDPv4Transmitter::LeaveAllMulticastGroups()
@@ -1130,13 +1130,13 @@ void RTPUDPv4Transmitter::LeaveAllMulticastGroups()
 int RTPUDPv4Transmitter::SetReceiveMode(RTPTransmitter::ReceiveMode m)
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (m != receivemode)
 	{
@@ -1150,7 +1150,7 @@ int RTPUDPv4Transmitter::SetReceiveMode(RTPTransmitter::ReceiveMode m)
 int RTPUDPv4Transmitter::AddToIgnoreList(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_LOCK
 	
@@ -1159,17 +1159,17 @@ int RTPUDPv4Transmitter::AddToIgnoreList(const RTPAddress &addr)
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (addr.GetAddressType() != RTPAddress::IPv4Address)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	if (receivemode != RTPTransmitter::IgnoreSome)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_DIFFERENTRECEIVEMODE;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
 	const RTPIPv4Address &address = (const RTPIPv4Address &)addr;
@@ -1182,7 +1182,7 @@ int RTPUDPv4Transmitter::AddToIgnoreList(const RTPAddress &addr)
 int RTPUDPv4Transmitter::DeleteFromIgnoreList(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	
@@ -1191,17 +1191,17 @@ int RTPUDPv4Transmitter::DeleteFromIgnoreList(const RTPAddress &addr)
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (addr.GetAddressType() != RTPAddress::IPv4Address)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	if (receivemode != RTPTransmitter::IgnoreSome)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_DIFFERENTRECEIVEMODE;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
 	const RTPIPv4Address &address = (const RTPIPv4Address &)addr;	
@@ -1225,7 +1225,7 @@ void RTPUDPv4Transmitter::ClearIgnoreList()
 int RTPUDPv4Transmitter::AddToAcceptList(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	
@@ -1234,17 +1234,17 @@ int RTPUDPv4Transmitter::AddToAcceptList(const RTPAddress &addr)
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (addr.GetAddressType() != RTPAddress::IPv4Address)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	if (receivemode != RTPTransmitter::AcceptSome)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_DIFFERENTRECEIVEMODE;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
 	const RTPIPv4Address &address = (const RTPIPv4Address &)addr;
@@ -1257,7 +1257,7 @@ int RTPUDPv4Transmitter::AddToAcceptList(const RTPAddress &addr)
 int RTPUDPv4Transmitter::DeleteFromAcceptList(const RTPAddress &addr)
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	
@@ -1266,17 +1266,17 @@ int RTPUDPv4Transmitter::DeleteFromAcceptList(const RTPAddress &addr)
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (addr.GetAddressType() != RTPAddress::IPv4Address)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	if (receivemode != RTPTransmitter::AcceptSome)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_DIFFERENTRECEIVEMODE;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
 	const RTPIPv4Address &address = (const RTPIPv4Address &)addr;
@@ -1300,18 +1300,18 @@ void RTPUDPv4Transmitter::ClearAcceptList()
 int RTPUDPv4Transmitter::SetMaximumPacketSize(size_t s)	
 {
 	if (!init)
-		return ERR_RTP_UDPV4TRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	if (!created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (s > RTPUDPV4TRANS_MAXPACKSIZE)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	}
 	maxpacksize = s;
 	MAINMUTEX_UNLOCK
@@ -1461,12 +1461,12 @@ int RTPUDPv4Transmitter::PollSocket(bool rtp)
 
 					addr = new RTPIPv4Address(ntohl(srcaddr.sin_addr.s_addr),ntohs(srcaddr.sin_port));
 					if (addr == 0)
-						return ERR_RTP_OUTOFMEM;
+						return MEDIA_RTP_ERR_RESOURCE_ERROR;
 					datacopy = new uint8_t[recvlen];
 					if (datacopy == 0)
 					{
 						delete addr;
-						return ERR_RTP_OUTOFMEM;
+						return MEDIA_RTP_ERR_RESOURCE_ERROR;
 					}
 					memcpy(datacopy,packetbuffer,recvlen);
 					
@@ -1490,7 +1490,7 @@ int RTPUDPv4Transmitter::PollSocket(bool rtp)
 					{
 						delete addr;
 						delete [] datacopy;
-						return ERR_RTP_OUTOFMEM;
+						return MEDIA_RTP_ERR_RESOURCE_ERROR;
 					}
 					rawpacketlist.push_back(pack);	
 				}
@@ -1538,7 +1538,7 @@ int RTPUDPv4Transmitter::ProcessAddAcceptIgnoreEntry(uint32_t ip,uint16_t port)
 			portinf->portlist.push_front(port);
 		
 		auto result = acceptignoreinfo.emplace(ip, portinf);
-		int status = result.second ? 0 : ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
+		int status = result.second ? 0 : MEDIA_RTP_ERR_INVALID_STATE;
 		if (status < 0)
 		{
 			delete portinf;
@@ -1563,7 +1563,7 @@ int RTPUDPv4Transmitter::ProcessDeleteAcceptIgnoreEntry(uint32_t ip,uint16_t por
 {
 	auto it = acceptignoreinfo.find(ip);
 	if (it == acceptignoreinfo.end())
-		return ERR_RTP_UDPV4TRANS_NOSUCHENTRY;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	
 	PortInfo *inf = it->second;
 	if (port == 0) // 删除所有条目
@@ -1583,7 +1583,7 @@ int RTPUDPv4Transmitter::ProcessDeleteAcceptIgnoreEntry(uint32_t ip,uint16_t por
 			for (it = begin ; it != end ; it++)
 			{
 				if (*it == port) // 已在列表中: this means we already deleted the entry
-					return ERR_RTP_UDPV4TRANS_NOSUCHENTRY;
+					return MEDIA_RTP_ERR_OPERATION_FAILED;
 			}
 			inf->portlist.push_front(port);
 		}
@@ -1602,7 +1602,7 @@ int RTPUDPv4Transmitter::ProcessDeleteAcceptIgnoreEntry(uint32_t ip,uint16_t por
 				}
 			}
 			// 没找到
-			return ERR_RTP_UDPV4TRANS_NOSUCHENTRY;			
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		}
 	}
 	return 0;

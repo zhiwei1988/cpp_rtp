@@ -19,7 +19,6 @@ void checkError(int status)
 	if (status >= 0)
 		return;
 
-	cerr << "ERROR: " << RTPGetErrorString(status) << endl;
 	exit(-1);
 }
 

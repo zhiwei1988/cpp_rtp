@@ -22,10 +22,10 @@ RTPAbortDescriptors::~RTPAbortDescriptors()
 int RTPAbortDescriptors::Init()
 {
 	if (m_init)
-		return ERR_RTP_ABORTDESC_ALREADYINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	if (pipe(m_descriptors) < 0)
-		return ERR_RTP_ABORTDESC_CANTCREATEPIPE;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 
 	m_init = true;
 	return 0;
@@ -47,7 +47,7 @@ void RTPAbortDescriptors::Destroy()
 int RTPAbortDescriptors::SendAbortSignal()
 {
 	if (!m_init)
-		return ERR_RTP_ABORTDESC_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	if (write(m_descriptors[1],"*",1))
 	{
@@ -60,7 +60,7 @@ int RTPAbortDescriptors::SendAbortSignal()
 int RTPAbortDescriptors::ReadSignallingByte()
 {
 	if (!m_init)
-		return ERR_RTP_ABORTDESC_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	unsigned char buf[1];
 
@@ -76,7 +76,7 @@ int RTPAbortDescriptors::ReadSignallingByte()
 int RTPAbortDescriptors::ClearAbortSignal()
 {
 	if (!m_init)
-		return ERR_RTP_ABORTDESC_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	bool done = false;
 	while (!done)

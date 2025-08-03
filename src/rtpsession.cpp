@@ -64,12 +64,12 @@ int RTPSession::Create(const RTPSessionParams &sessparams,const RTPTransmissionP
 	int status;
 	
 	if (created)
-		return ERR_RTP_SESSION_ALREADYCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	usingpollthread = sessparams.IsUsingPollThread();
 	needthreadsafety = sessparams.NeedThreadSafety();
 	if (usingpollthread && !needthreadsafety)
-		return ERR_RTP_SESSION_THREADSAFETYCONFLICT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	useSR_BYEifpossible = sessparams.GetSenderReportForBYE();
 	sentpackets = false;
@@ -77,7 +77,7 @@ int RTPSession::Create(const RTPSessionParams &sessparams,const RTPTransmissionP
 	// 检查最大数据包大小
 	
 	if ((maxpacksize = sessparams.GetMaximumPacketSize()) < RTP_MINPACKETSIZE)
-		return ERR_RTP_SESSION_MAXPACKETSIZETOOSMALL;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 		
 	// 初始化传输组件
 	
@@ -96,11 +96,11 @@ int RTPSession::Create(const RTPSessionParams &sessparams,const RTPTransmissionP
 		rtptrans = new RTPTCPTransmitter();
 		break;
 	default:
-		return ERR_RTP_SESSION_UNSUPPORTEDTRANSMISSIONPROTOCOL;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	
 	if (rtptrans == 0)
-		return ERR_RTP_OUTOFMEM;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	if ((status = rtptrans->Init(needthreadsafety)) < 0)
 	{
 		delete rtptrans;
@@ -121,12 +121,12 @@ int RTPSession::Create(const RTPSessionParams &sessparams,RTPTransmitter *transm
 	int status;
 	
 	if (created)
-		return ERR_RTP_SESSION_ALREADYCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	usingpollthread = sessparams.IsUsingPollThread();
 	needthreadsafety = sessparams.NeedThreadSafety();
 	if (usingpollthread && !needthreadsafety)
-		return ERR_RTP_SESSION_THREADSAFETYCONFLICT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	useSR_BYEifpossible = sessparams.GetSenderReportForBYE();
 	sentpackets = false;
@@ -134,7 +134,7 @@ int RTPSession::Create(const RTPSessionParams &sessparams,RTPTransmitter *transm
 	// 检查最大数据包大小
 	
 	if ((maxpacksize = sessparams.GetMaximumPacketSize()) < RTP_MINPACKETSIZE)
-		return ERR_RTP_SESSION_MAXPACKETSIZETOOSMALL;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 		
 	rtptrans = transmitter;
 
@@ -289,7 +289,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 				packetbuilder.Destroy();
 				sources.Clear();
 				rtcpbuilder.Destroy();
-				return ERR_RTP_SESSION_CANTINITMUTEX;
+				return MEDIA_RTP_ERR_OPERATION_FAILED;
 			}
 		}
 		if (!buildermutex.IsInitialized())
@@ -301,7 +301,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 				packetbuilder.Destroy();
 				sources.Clear();
 				rtcpbuilder.Destroy();
-				return ERR_RTP_SESSION_CANTINITMUTEX;
+				return MEDIA_RTP_ERR_OPERATION_FAILED;
 			}
 		}
 		if (!schedmutex.IsInitialized())
@@ -313,7 +313,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 				packetbuilder.Destroy();
 				sources.Clear();
 				rtcpbuilder.Destroy();
-				return ERR_RTP_SESSION_CANTINITMUTEX;
+				return MEDIA_RTP_ERR_OPERATION_FAILED;
 			}
 		}
 		if (!packsentmutex.IsInitialized())
@@ -325,7 +325,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 				packetbuilder.Destroy();
 				sources.Clear();
 				rtcpbuilder.Destroy();
-				return ERR_RTP_SESSION_CANTINITMUTEX;
+				return MEDIA_RTP_ERR_OPERATION_FAILED;
 			}
 		}
 		
@@ -337,7 +337,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 			packetbuilder.Destroy();
 			sources.Clear();
 			rtcpbuilder.Destroy();
-			return ERR_RTP_OUTOFMEM;
+			return MEDIA_RTP_ERR_RESOURCE_ERROR;
 		}
 		if ((status = pollthread->Start(rtptrans)) < 0)
 		{
@@ -487,14 +487,14 @@ uint32_t RTPSession::GetLocalSSRC()
 int RTPSession::AddDestination(const RTPAddress &addr)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	return rtptrans->AddDestination(addr);
 }
 
 int RTPSession::DeleteDestination(const RTPAddress &addr)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	return rtptrans->DeleteDestination(addr);
 }
 
@@ -515,14 +515,14 @@ bool RTPSession::SupportsMulticasting()
 int RTPSession::JoinMulticastGroup(const RTPAddress &addr)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	return rtptrans->JoinMulticastGroup(addr);
 }
 
 int RTPSession::LeaveMulticastGroup(const RTPAddress &addr)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	return rtptrans->LeaveMulticastGroup(addr);
 }
 
@@ -538,7 +538,7 @@ int RTPSession::SendPacket(const void *data,size_t len)
 	int status;
 	
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	BUILDER_LOCK
 	if ((status = packetbuilder.BuildPacket(data,len)) < 0)
@@ -568,7 +568,7 @@ int RTPSession::SendPacket(const void *data,size_t len,
 	int status;
 
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	BUILDER_LOCK
 	if ((status = packetbuilder.BuildPacket(data,len,pt,mark,timestampinc)) < 0)
@@ -598,7 +598,7 @@ int RTPSession::SendPacketEx(const void *data,size_t len,
 	int status;
 	
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	BUILDER_LOCK
 	if ((status = packetbuilder.BuildPacketEx(data,len,hdrextID,hdrextdata,numhdrextwords)) < 0)
@@ -629,7 +629,7 @@ int RTPSession::SendPacketEx(const void *data,size_t len,
 	int status;
 	
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	BUILDER_LOCK
 	if ((status = packetbuilder.BuildPacketEx(data,len,pt,mark,timestampinc,hdrextID,hdrextdata,numhdrextwords)) < 0)
@@ -660,7 +660,7 @@ int RTPSession::SendRTCPAPPPacket(uint8_t subtype, const uint8_t name[4], const 
 	int status;
 
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	BUILDER_LOCK
 	uint32_t ssrc = packetbuilder.GetSSRC();
@@ -720,7 +720,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 	int status;
 
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	BUILDER_LOCK
 	uint32_t ssrc = packetbuilder.GetSSRC();
@@ -730,7 +730,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 	if (rtcpcomppack == 0)
 	{
 		delete rtcpcomppack;
-		return ERR_RTP_OUTOFMEM;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	}
 
 	status = rtcpcomppack->InitBuild(maxpacksize);	
@@ -833,7 +833,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 int RTPSession::SendRawData(const void *data, size_t len, bool usertpchannel)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 
@@ -847,7 +847,7 @@ int RTPSession::SendRawData(const void *data, size_t len, bool usertpchannel)
 int RTPSession::SetDefaultPayloadType(uint8_t pt)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	int status;
 	
@@ -860,7 +860,7 @@ int RTPSession::SetDefaultPayloadType(uint8_t pt)
 int RTPSession::SetDefaultMark(bool m)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 
@@ -873,7 +873,7 @@ int RTPSession::SetDefaultMark(bool m)
 int RTPSession::SetDefaultTimestampIncrement(uint32_t timestampinc)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 
@@ -886,7 +886,7 @@ int RTPSession::SetDefaultTimestampIncrement(uint32_t timestampinc)
 int RTPSession::IncrementTimestamp(uint32_t inc)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 
@@ -899,7 +899,7 @@ int RTPSession::IncrementTimestamp(uint32_t inc)
 int RTPSession::IncrementTimestampDefault()
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 	
@@ -912,7 +912,7 @@ int RTPSession::IncrementTimestampDefault()
 int RTPSession::SetPreTransmissionDelay(const RTPTime &delay)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 
@@ -941,9 +941,9 @@ int RTPSession::Poll()
 	int status;
 	
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	if (usingpollthread)
-		return ERR_RTP_SESSION_USINGPOLLTHREAD;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	if ((status = rtptrans->Poll()) < 0)
 		return status;
 	return ProcessPolledData();
@@ -952,18 +952,18 @@ int RTPSession::Poll()
 int RTPSession::WaitForIncomingData(const RTPTime &delay,bool *dataavailable)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	if (usingpollthread)
-		return ERR_RTP_SESSION_USINGPOLLTHREAD;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	return rtptrans->WaitForIncomingData(delay,dataavailable);
 }
 
 int RTPSession::AbortWait()
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	if (usingpollthread)
-		return ERR_RTP_SESSION_USINGPOLLTHREAD;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	return rtptrans->AbortWait();
 }
 
@@ -985,7 +985,7 @@ RTPTime RTPSession::GetRTCPDelay()
 int RTPSession::BeginDataAccess()
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	SOURCES_LOCK
 	return 0;
 }
@@ -1066,7 +1066,7 @@ void RTPSession::DeletePacket(RTPPacket *p)
 int RTPSession::EndDataAccess()
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	SOURCES_UNLOCK
 	return 0;
 }
@@ -1074,21 +1074,21 @@ int RTPSession::EndDataAccess()
 int RTPSession::SetReceiveMode(RTPTransmitter::ReceiveMode m)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	return rtptrans->SetReceiveMode(m);
 }
 
 int RTPSession::AddToIgnoreList(const RTPAddress &addr)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	return rtptrans->AddToIgnoreList(addr);
 }
 
 int RTPSession::DeleteFromIgnoreList(const RTPAddress &addr)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	return rtptrans->DeleteFromIgnoreList(addr);
 }
 
@@ -1102,14 +1102,14 @@ void RTPSession::ClearIgnoreList()
 int RTPSession::AddToAcceptList(const RTPAddress &addr)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	return rtptrans->AddToAcceptList(addr);
 }
 
 int RTPSession::DeleteFromAcceptList(const RTPAddress &addr)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	return rtptrans->DeleteFromAcceptList(addr);
 }
 
@@ -1123,10 +1123,10 @@ void RTPSession::ClearAcceptList()
 int RTPSession::SetMaximumPacketSize(size_t s)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	if (s < RTP_MINPACKETSIZE)
-		return ERR_RTP_SESSION_MAXPACKETSIZETOOSMALL;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	
 	int status;
 
@@ -1157,7 +1157,7 @@ int RTPSession::SetMaximumPacketSize(size_t s)
 int RTPSession::SetSessionBandwidth(double bw)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 	SCHED_LOCK
@@ -1175,7 +1175,7 @@ int RTPSession::SetSessionBandwidth(double bw)
 int RTPSession::SetTimestampUnit(double u)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 
@@ -1242,7 +1242,7 @@ void RTPSession::SetNoteInterval(int count)
 int RTPSession::SetLocalName(const void *s,size_t len)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 	BUILDER_LOCK
@@ -1254,7 +1254,7 @@ int RTPSession::SetLocalName(const void *s,size_t len)
 int RTPSession::SetLocalEMail(const void *s,size_t len)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 	BUILDER_LOCK
@@ -1266,7 +1266,7 @@ int RTPSession::SetLocalEMail(const void *s,size_t len)
 int RTPSession::SetLocalLocation(const void *s,size_t len)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 	BUILDER_LOCK
@@ -1278,7 +1278,7 @@ int RTPSession::SetLocalLocation(const void *s,size_t len)
 int RTPSession::SetLocalPhone(const void *s,size_t len)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 	BUILDER_LOCK
@@ -1290,7 +1290,7 @@ int RTPSession::SetLocalPhone(const void *s,size_t len)
 int RTPSession::SetLocalTool(const void *s,size_t len)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 	BUILDER_LOCK
@@ -1302,7 +1302,7 @@ int RTPSession::SetLocalTool(const void *s,size_t len)
 int RTPSession::SetLocalNote(const void *s,size_t len)
 {
 	if (!created)
-		return ERR_RTP_SESSION_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 	BUILDER_LOCK
@@ -1532,7 +1532,7 @@ int RTPSession::CreateCNAME(uint8_t *buffer,size_t *bufferlength,bool resolve)
 	{
 		char *logname = getenv("LOGNAME");
 		if (logname == 0)
-			return ERR_RTP_SESSION_CANTGETLOGINNAME;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		strncpy((char *)buffer,logname,*bufferlength);
 	}
 	buffer[*bufferlength-1] = 0;

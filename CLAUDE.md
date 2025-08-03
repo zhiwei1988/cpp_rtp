@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 工作流程
 
-1. 首先分析问题，阅读相关文件，制定计划并写入tasks/todo.md
+1. 首先分析问题，阅读相关文件，制定计划并使用TodoWrite工具跟踪任务
 2. 计划应包含可检查完成状态的待办事项清单
 3. 开始工作前，与用户确认计划
 4. 执行待办事项，逐步标记完成状态
 5. 每个步骤都提供高层次的变更说明
 6. 保持每个任务和代码变更尽可能简单，避免大规模复杂变更，最小化代码影响范围
-7. 最后在todo.md文件中添加审查部分，总结变更和相关信息
+7. 所有变更完成后验证构建和测试是否通过
 8. 使用中文回复
 
 ## Project Overview
@@ -84,8 +84,14 @@ Tests are located in `tests/` directory:
 cmake -DMEDIA_RTP_COMPILE_TESTS=ON ..
 make
 
-# Run specific test
-./tests/comprehensive_udp_test
+# Available test programs:
+./tests/comprehensive_udp_test    # Main UDP functionality test
+./tests/tcptest                   # TCP transmission test
+./tests/testautoportbase         # Auto port selection test
+./tests/testrawpacket            # Raw packet handling test
+./tests/rtcpdump                 # RTCP packet analysis
+./tests/abortdesctest            # Abort descriptor test
+./tests/abortdescipv6            # IPv6 abort descriptor test
 ```
 
 ### Platform-Specific Notes
@@ -130,10 +136,24 @@ This is a library for implementing RTP protocol. When working with network proto
 - Memory management system requires consistent use of library's allocation/deallocation
 - Use `session.DeletePacket()` to properly deallocate RTPPacket instances
 
-## Important File Locations
+## File Structure & Navigation
 
-- **Main Library**: `src/` - Core RTP implementation files
-- **Tests**: `tests/` - Comprehensive test suite including UDP and TCP tests
-- **Tools**: `tools/` - Platform detection and configuration utilities
-- **CMake Modules**: `cmake/` - Build system configuration and platform detection
-- **Task Tracking**: `tasks/todo.md` - Project modification tracking and plans
+### Core Implementation
+- **`src/rtpsession.h/.cpp`** - Main RTPSession class (primary API entry point)
+- **`src/rtp*transmitter.h/.cpp`** - Transmission layer implementations (UDP IPv4/IPv6, TCP)
+- **`src/rtppacket*.h/.cpp`** - RTP packet handling and building
+- **`src/rtcp*.h/.cpp`** - RTCP protocol implementation and packet types
+- **`src/rtpsources.h/.cpp`** - RTP source/participant management
+
+### Build & Configuration
+- **`CMakeLists.txt`** - Main build configuration
+- **`src/rtpconfig.h.in`** - Platform feature detection template
+- **`cmake/`** - Build system modules and platform detection
+
+### Testing & Validation
+- **`tests/`** - Comprehensive test suite (enable with `MEDIA_RTP_COMPILE_TESTS=ON`)
+- **`tools/`** - Platform detection utilities for build configuration
+
+### Documentation & Tracking
+- **`tasks/todo.md`** - Project modification tracking and development plans
+- **`CLAUDE.md`** - This guidance file for Claude Code instances

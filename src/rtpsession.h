@@ -622,7 +622,7 @@ inline void RTPSession::OnPollThreadStop()                                      
 #endif // RTP_SUPPORT_THREAD
 
 inline int RTPSession::OnChangeRTPOrRTCPData(const void *, size_t, bool, void **, size_t *) {
-	return ERR_RTP_RTPSESSION_CHANGEREQUESTEDBUTNOTIMPLEMENTED;
+	return MEDIA_RTP_ERR_INVALID_STATE;
 }
 inline void RTPSession::OnSentRTPOrRTCPData(void *, size_t, bool)                                       { }
 inline bool RTPSession::OnChangeIncomingData(RTPRawPacket *)                                            { return true; }

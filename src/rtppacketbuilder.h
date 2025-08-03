@@ -189,7 +189,7 @@ private:
 inline int RTPPacketBuilder::SetDefaultPayloadType(uint8_t pt)
 {
 	if (!init)
-		return ERR_RTP_PACKBUILD_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	defptset = true;
 	defaultpayloadtype = pt;
 	return 0;
@@ -198,7 +198,7 @@ inline int RTPPacketBuilder::SetDefaultPayloadType(uint8_t pt)
 inline int RTPPacketBuilder::SetDefaultMark(bool m)
 {
 	if (!init)
-		return ERR_RTP_PACKBUILD_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	defmarkset = true;
 	defaultmark = m;
 	return 0;
@@ -207,7 +207,7 @@ inline int RTPPacketBuilder::SetDefaultMark(bool m)
 inline int RTPPacketBuilder::SetDefaultTimestampIncrement(uint32_t timestampinc)
 {
 	if (!init)
-		return ERR_RTP_PACKBUILD_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	deftsset = true;
 	defaulttimestampinc = timestampinc;
 	return 0;
@@ -216,7 +216,7 @@ inline int RTPPacketBuilder::SetDefaultTimestampIncrement(uint32_t timestampinc)
 inline int RTPPacketBuilder::IncrementTimestamp(uint32_t inc)
 {
 	if (!init)
-		return ERR_RTP_PACKBUILD_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	timestamp += inc;
 	return 0;
 }
@@ -224,9 +224,9 @@ inline int RTPPacketBuilder::IncrementTimestamp(uint32_t inc)
 inline int RTPPacketBuilder::IncrementTimestampDefault()
 {
 	if (!init)
-		return ERR_RTP_PACKBUILD_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	if (!deftsset)
-		return ERR_RTP_PACKBUILD_DEFAULTTSINCNOTSET;
+		return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 	timestamp += defaulttimestampinc;
 	return 0;
 }

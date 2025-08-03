@@ -27,7 +27,7 @@ RTCPSchedulerParams::~RTCPSchedulerParams()
 int RTCPSchedulerParams::SetRTCPBandwidth(double bw)
 {
 	if (bw < 0.0)
-		return ERR_RTP_SCHEDPARAMS_INVALIDBANDWIDTH;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	bandwidth = bw;
 	return 0;
 }
@@ -35,7 +35,7 @@ int RTCPSchedulerParams::SetRTCPBandwidth(double bw)
 int RTCPSchedulerParams::SetSenderBandwidthFraction(double fraction)
 {
 	if (fraction < 0.0 || fraction > 1.0)
-		return ERR_RTP_SCHEDPARAMS_BADFRACTION;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	senderfraction = fraction;
 	return 0;
 }
@@ -45,7 +45,7 @@ int RTCPSchedulerParams::SetMinimumTransmissionInterval(const RTPTime &t)
 	double t2 = t.GetDouble();
 
 	if (t2 < RTCPSCHED_MININTERVAL)
-		return ERR_RTP_SCHEDPARAMS_BADMINIMUMINTERVAL;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 
 	mininterval = t;
 	return 0;

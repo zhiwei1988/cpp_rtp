@@ -26,17 +26,17 @@ RTPPollThread::~RTPPollThread()
 int RTPPollThread::Start(RTPTransmitter *trans)
 {
 	if (JThread::IsRunning())
-		return ERR_RTP_POLLTHREAD_ALREADYRUNNING;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	transmitter = trans;
 	if (!stopmutex.IsInitialized())
 	{
 		if (stopmutex.Init() < 0)
-			return ERR_RTP_POLLTHREAD_CANTINITMUTEX;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	stop = false;
 	if (JThread::Start() < 0)
-		return ERR_RTP_POLLTHREAD_CANTSTARTTHREAD;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	return 0;
 }
 

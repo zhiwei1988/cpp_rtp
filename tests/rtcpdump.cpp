@@ -17,7 +17,6 @@ void checkError(int status)
 		return;
 	
 	std::cerr << "An error occured in the RTP component: " << std::endl;
-	std::cerr << "Error description: " << RTPGetErrorString(status) << std::endl;
 	
 	exit(-1);
 }
@@ -69,7 +68,7 @@ protected:
 
 	void OnRTCPCompoundPacket(RTCPCompoundPacket *p, const RTPTime &receivetime, const RTPAddress *senderaddress)
 	{	
-		printf("%lu.%06u RECEIVED\n",receivetime.GetSeconds(),receivetime.GetMicroSeconds());
+		printf("%lld.%06u RECEIVED\n",receivetime.GetSeconds(),receivetime.GetMicroSeconds());
 		
 		DumpCompoundPacket(stdout,p);
 	}
@@ -78,7 +77,7 @@ protected:
 	{	
 		RTPTime t = RTPTime::CurrentTime();
 		
-		printf("%lu.%06u SENDING\n",t.GetSeconds(),t.GetMicroSeconds());
+		printf("%lld.%06u SENDING\n",t.GetSeconds(),t.GetMicroSeconds());
 		
 		DumpCompoundPacket(stdout,p);
 	}
@@ -97,7 +96,7 @@ protected:
 				RTPTime t(p->GetNTPTimestamp());
 				
 				fprintf(f,"  SR packet\n    SSRC %27u\n",p->GetSenderSSRC());
-				fprintf(f,"    NTP timestamp: %10lu.%06u\n    RTP timestamp: %17u\n    Packets sent: %18u\n    Octets sent: %19u\n",t.GetSeconds(),t.GetMicroSeconds(),p->GetRTPTimestamp(),p->GetSenderPacketCount(),p->GetSenderOctetCount());
+				fprintf(f,"    NTP timestamp: %10lld.%06u\n    RTP timestamp: %17u\n    Packets sent: %18u\n    Octets sent: %19u\n",t.GetSeconds(),t.GetMicroSeconds(),p->GetRTPTimestamp(),p->GetSenderPacketCount(),p->GetSenderOctetCount());
 					
 				for (int i = 0 ; i < p->GetReceptionReportCount() ; i++)
 					fprintf(f,"    RR block %d\n      SSRC %25u\n      Fraction lost: %15d\n      Packets lost: %16d\n      Ext. high. seq. nr: %10u\n      Jitter: %22u\n      LSR: %25u\n      DLSR: %24u\n",(i+1),

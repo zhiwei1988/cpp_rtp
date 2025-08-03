@@ -51,10 +51,10 @@ public:
 	 *  divided by the timestamp interval corresponding to that interval: for 8000 Hz audio this would 
 	 *  be 1/8000.
 	 */
-	int SetTimestampUnit(double tsunit)						{ if (!init) return ERR_RTP_RTCPPACKETBUILDER_NOTINIT; if (tsunit < 0) return ERR_RTP_RTCPPACKETBUILDER_ILLEGALTIMESTAMPUNIT; timestampunit = tsunit; return 0; }
+	int SetTimestampUnit(double tsunit)						{ if (!init) return MEDIA_RTP_ERR_INVALID_STATE; if (tsunit < 0) return MEDIA_RTP_ERR_INVALID_PARAMETER; timestampunit = tsunit; return 0; }
 
 	/** Sets the maximum size allowed size of an RTCP compound packet to \c maxpacksize. */
-	int SetMaximumPacketSize(size_t maxpacksize)					{ if (!init) return ERR_RTP_RTCPPACKETBUILDER_NOTINIT; if (maxpacksize < RTP_MINPACKETSIZE) return ERR_RTP_RTCPPACKETBUILDER_ILLEGALMAXPACKSIZE; maxpacketsize = maxpacksize; return 0; }
+	int SetMaximumPacketSize(size_t maxpacksize)					{ if (!init) return MEDIA_RTP_ERR_INVALID_STATE; if (maxpacksize < RTP_MINPACKETSIZE) return MEDIA_RTP_ERR_INVALID_PARAMETER; maxpacketsize = maxpacksize; return 0; }
 	
 	/** This function allows you to inform RTCP packet builder about the delay between sampling the first 
 	 *  sample of a packet and sending the packet.
@@ -62,7 +62,7 @@ public:
 	 *  sample of a packet and sending the packet. This delay is taken into account when calculating the 
 	 *  relation between RTP timestamp and wallclock time, used for inter-media synchronization.
 	 */
-	int SetPreTransmissionDelay(const RTPTime &delay)				{ if (!init) return ERR_RTP_RTCPPACKETBUILDER_NOTINIT; transmissiondelay = delay; return 0; }
+	int SetPreTransmissionDelay(const RTPTime &delay)				{ if (!init) return MEDIA_RTP_ERR_INVALID_STATE; transmissiondelay = delay; return 0; }
 	
 	/** Builds the next RTCP compound packet which should be sent and stores it in \c pack. */
 	int BuildNextPacket(RTCPCompoundPacket **pack);
@@ -123,22 +123,22 @@ public:
 	void SetNoteInterval(int count)							{ if (!init) return; interval_note = count; }
 
 	/** Sets the SDES name item for the local participant to the value \c s with length \c len. */
-	int SetLocalName(const void *s,size_t len)					{ if (!init) return ERR_RTP_RTCPPACKETBUILDER_NOTINIT; return ownsdesinfo.SetName((const uint8_t *)s,len); }
+	int SetLocalName(const void *s,size_t len)					{ if (!init) return MEDIA_RTP_ERR_INVALID_STATE; return ownsdesinfo.SetName((const uint8_t *)s,len); }
 	
 	/** Sets the SDES e-mail item for the local participant to the value \c s with length \c len. */
-	int SetLocalEMail(const void *s,size_t len)					{ if (!init) return ERR_RTP_RTCPPACKETBUILDER_NOTINIT; return ownsdesinfo.SetEMail((const uint8_t *)s,len); }
+	int SetLocalEMail(const void *s,size_t len)					{ if (!init) return MEDIA_RTP_ERR_INVALID_STATE; return ownsdesinfo.SetEMail((const uint8_t *)s,len); }
 	
 	/** Sets the SDES location item for the local participant to the value \c s with length \c len. */
-	int SetLocalLocation(const void *s,size_t len)					{ if (!init) return ERR_RTP_RTCPPACKETBUILDER_NOTINIT; return ownsdesinfo.SetLocation((const uint8_t *)s,len); }
+	int SetLocalLocation(const void *s,size_t len)					{ if (!init) return MEDIA_RTP_ERR_INVALID_STATE; return ownsdesinfo.SetLocation((const uint8_t *)s,len); }
 	
 	/** Sets the SDES phone item for the local participant to the value \c s with length \c len. */
-	int SetLocalPhone(const void *s,size_t len)					{ if (!init) return ERR_RTP_RTCPPACKETBUILDER_NOTINIT; return ownsdesinfo.SetPhone((const uint8_t *)s,len); }
+	int SetLocalPhone(const void *s,size_t len)					{ if (!init) return MEDIA_RTP_ERR_INVALID_STATE; return ownsdesinfo.SetPhone((const uint8_t *)s,len); }
 	
 	/** Sets the SDES tool item for the local participant to the value \c s with length \c len. */
-	int SetLocalTool(const void *s,size_t len)					{ if (!init) return ERR_RTP_RTCPPACKETBUILDER_NOTINIT; return ownsdesinfo.SetTool((const uint8_t *)s,len); }
+	int SetLocalTool(const void *s,size_t len)					{ if (!init) return MEDIA_RTP_ERR_INVALID_STATE; return ownsdesinfo.SetTool((const uint8_t *)s,len); }
 	
 	/** Sets the SDES note item for the local participant to the value \c s with length \c len. */
-	int SetLocalNote(const void *s,size_t len)					{ if (!init) return ERR_RTP_RTCPPACKETBUILDER_NOTINIT; return ownsdesinfo.SetNote((const uint8_t *)s,len); }
+	int SetLocalNote(const void *s,size_t len)					{ if (!init) return MEDIA_RTP_ERR_INVALID_STATE; return ownsdesinfo.SetNote((const uint8_t *)s,len); }
 
 	/** Returns the own CNAME item with length \c len */
 	uint8_t *GetLocalCNAME(size_t *len) const					{ if (!init) return 0; return ownsdesinfo.GetCNAME(len); }

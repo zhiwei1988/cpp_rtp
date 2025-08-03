@@ -19,7 +19,6 @@ void checkerror(int rtperr)
 {
 	if (rtperr < 0)
 	{
-		std::cout << "ERROR: " << RTPGetErrorString(rtperr) << std::endl;
 		exit(-1);
 	}
 }
@@ -166,7 +165,7 @@ int main(void)
 			if ((err = p.GetCreationError()) == 0)
 				cout << "Valid RTP packet" << endl;
 			else
-				cout << "Bad RTP packet: " << RTPGetErrorString(err) << endl;
+				cout << "Invalid RTP packet: " << err << endl;
 		}
 		else
 		{
@@ -176,7 +175,7 @@ int main(void)
 			if ((err = p.GetCreationError()) == 0)
 				cout << "Valid RTCP packet" << endl;
 			else
-				cout << "Bad RTCP packet: " << RTPGetErrorString(err) << endl;
+				cout << "Invalid RTCP packet: " << err << endl;
 		}
 	}
 	return 0;

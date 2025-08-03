@@ -34,7 +34,7 @@ public:
 
 	/** Checks if the RTCP compound packet was created successfully.
 	 *  If the raw packet data in the constructor could not be parsed, this function returns the error code of
-	 *  what went wrong. If the packet had an invalid format, the return value is \c ERR_RTP_RTCPCOMPOUND_INVALIDPACKET.
+	 *  what went wrong. If the packet had an invalid format, the return value is \c MEDIA_RTP_ERR_PROTOCOL_ERROR.
 	 */
 	int GetCreationError()									{ return error; }
 

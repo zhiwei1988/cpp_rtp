@@ -60,7 +60,6 @@ set(SOURCES
 	rtcpsdespacket.cpp
 	rtcpsrpacket.cpp
 	rtpcollisionlist.cpp
-	rtperrors.cpp
 	rtpinternalsourcedata.cpp
 	rtpipv4address.cpp
 	rtpipv6address.cpp

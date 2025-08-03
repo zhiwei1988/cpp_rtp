@@ -21,7 +21,7 @@ void RTPCollisionList::Clear()
 int RTPCollisionList::UpdateAddress(const RTPAddress *addr,const RTPTime &receivetime,bool *created)
 {
 	if (addr == 0)
-		return ERR_RTP_COLLISIONLIST_BADADDRESS;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	
 	std::list<AddressAndTime>::iterator it;
 	
@@ -37,7 +37,7 @@ int RTPCollisionList::UpdateAddress(const RTPAddress *addr,const RTPTime &receiv
 
 	RTPAddress *newaddr = addr->CreateCopy();
 	if (newaddr == 0)
-		return ERR_RTP_OUTOFMEM;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	
 	addresslist.push_back(AddressAndTime(newaddr,receivetime));
 	*created = true;

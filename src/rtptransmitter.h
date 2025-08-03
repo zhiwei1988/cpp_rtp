@@ -91,7 +91,7 @@ public:
 	 *  should initially contain the number of bytes that may be stored in \c buffer. If the function 
 	 *  succeeds, \c bufferlength is set to the number of bytes stored in \c buffer. Note that the data 
 	 *  in \c buffer is not NULL-terminated. If the function fails because the buffer isn't large enough, 
-	 *  it returns \c ERR_RTP_TRANS_BUFFERLENGTHTOOSMALL and stores the number of bytes needed in
+	 *  it returns \c MEDIA_RTP_ERR_RESOURCE_ERROR and stores the number of bytes needed in
 	 *  \c bufferlength.
 	 */
 	virtual int GetLocalHostName(uint8_t *buffer,size_t *bufferlength) = 0;

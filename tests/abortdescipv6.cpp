@@ -32,7 +32,6 @@ inline void checkerror(int rtperr)
 {
 	if (rtperr < 0)
 	{
-		cerr << "ERROR: " << RTPGetErrorString(rtperr) << std::endl;
 		exit(-1);
 	}
 }

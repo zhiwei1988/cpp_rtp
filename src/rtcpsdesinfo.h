@@ -49,7 +49,7 @@ public:
 #ifdef RTP_SUPPORT_SDESPRIV
 	/** Sets the entry for the prefix string specified by \c prefix with length \c prefixlen to contain 
 	 *  the value string specified by \c value with length \c valuelen (if the maximum allowed
-	 *  number of prefixes was reached, the error code \c ERR_RTP_SDES_MAXPRIVITEMS is returned.
+	 *  number of prefixes was reached, the error code \c MEDIA_RTP_ERR_RESOURCE_ERROR is returned.
 	 */
 	int SetPrivateValue(const uint8_t *prefix,size_t prefixlen,const uint8_t *value,size_t valuelen);
 
@@ -100,7 +100,7 @@ public:
 	bool GetPrivateValue(const uint8_t *prefix,size_t prefixlen,uint8_t **value,size_t *valuelen) const;
 #endif // RTP_SUPPORT_SDESPRIV
 private:
-	int SetNonPrivateItem(int itemno,const uint8_t *s,size_t l)		{ if (l > RTCP_SDES_MAXITEMLENGTH) return ERR_RTP_SDES_LENGTHTOOBIG; return nonprivateitems[itemno].SetInfo(s,l); }
+	int SetNonPrivateItem(int itemno,const uint8_t *s,size_t l)		{ if (l > RTCP_SDES_MAXITEMLENGTH) return MEDIA_RTP_ERR_RESOURCE_ERROR; return nonprivateitems[itemno].SetInfo(s,l); }
 	uint8_t *GetNonPrivateItem(int itemno,size_t *len) const		{ return nonprivateitems[itemno].GetInfo(len); }
 
 	class SDESItem
@@ -133,7 +133,7 @@ private:
 				len = (len>RTCP_SDES_MAXITEMLENGTH)?RTCP_SDES_MAXITEMLENGTH:len;
 				uint8_t *str2 = new uint8_t[len];
 				if (str2 == 0)
-					return ERR_RTP_OUTOFMEM;
+					return MEDIA_RTP_ERR_RESOURCE_ERROR;
 				memcpy(str2,s,len);
 				*destlen = len;
 				if (*dest)

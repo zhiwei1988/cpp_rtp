@@ -20,7 +20,6 @@ void checkError(int status)
 		return;
 	
 	cerr << "An error occured in the RTP component: " << endl;
-	cerr << "Error description: " << RTPGetErrorString(status) << endl;
 	
 	exit(-1);
 }

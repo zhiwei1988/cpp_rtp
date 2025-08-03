@@ -56,9 +56,9 @@ void RTPSources::ClearSourceList()
 int RTPSources::CreateOwnSSRC(uint32_t ssrc)
 {
 	if (owndata != 0)
-		return ERR_RTP_SOURCES_ALREADYHAVEOWNSSRC;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	if (GotEntry(ssrc))
-		return ERR_RTP_SOURCES_SSRCEXISTS;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	int status;
 	bool created;
@@ -83,7 +83,7 @@ int RTPSources::CreateOwnSSRC(uint32_t ssrc)
 int RTPSources::DeleteOwnSSRC()
 {
 	if (owndata == 0)
-		return ERR_RTP_SOURCES_DONTHAVEOWNSSRC;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	uint32_t ssrc = owndata->GetSSRC();
 
@@ -138,10 +138,10 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack,RTPTransmitter *rtptrans[
 		// 首先，我们将查看数据包是否可以解析
 		rtppack = new RTPPacket(*rawpack);
 		if (rtppack == 0)
-			return ERR_RTP_OUTOFMEM;
+			return MEDIA_RTP_ERR_RESOURCE_ERROR;
 		if ((status = rtppack->GetCreationError()) < 0)
 		{
-			if (status == ERR_RTP_PACKET_INVALIDPACKET)
+			if (status == MEDIA_RTP_ERR_PROTOCOL_ERROR)
 			{
 				delete rtppack;
 				rtppack = 0;
@@ -203,7 +203,7 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack,RTPTransmitter *rtptrans[
 		
 		if ((status = rtcpcomppack.GetCreationError()) < 0)
 		{
-			if (status != ERR_RTP_RTCPCOMPOUND_INVALIDPACKET)
+			if (status != MEDIA_RTP_ERR_PROTOCOL_ERROR)
 				return status;
 		}
 		else
@@ -658,7 +658,7 @@ int RTPSources::ProcessSDESNormalItem(uint32_t ssrc,RTCPSDESPacket::ItemType t,s
 		sdesid = RTCP_SDES_ID_NOTE;
 		break;
 	default:
-		return ERR_RTP_SOURCES_ILLEGALSDESTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}	
 	
 	status = GetRTCPSourceData(ssrc,senderaddress,&srcdat,&created);
@@ -754,12 +754,12 @@ int RTPSources::ObtainSourceDataInstance(uint32_t ssrc,RTPInternalSourceData **s
 		srcdat2 = new RTPInternalSourceData(ssrc,RTPSources::NoProbation);
 #endif // RTP_SUPPORT_PROBATION
 		if (srcdat2 == 0)
-			return ERR_RTP_OUTOFMEM;
+			return MEDIA_RTP_ERR_RESOURCE_ERROR;
 		auto result = sourcelist.emplace(ssrc, srcdat2);
 		if (!result.second)
 		{
 			delete srcdat2;
-			return ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
+			return MEDIA_RTP_ERR_INVALID_STATE;
 		}
 		*srcdat = srcdat2;
 		*created = true;

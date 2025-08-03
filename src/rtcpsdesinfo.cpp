@@ -47,13 +47,13 @@ int RTCPSDESInfo::SetPrivateValue(const uint8_t *prefix,size_t prefixlen,const u
 	else // 未找到此前缀的条目...添加它
 	{
 		if (privitems.size() >= RTP_MAXPRIVITEMS) // 项目太多，忽略它
-			return ERR_RTP_SDES_MAXPRIVITEMS;
+			return MEDIA_RTP_ERR_RESOURCE_ERROR;
 		
 		int status;
 		
 		item = new SDESPrivateItem();
 		if (item == 0)
-			return ERR_RTP_OUTOFMEM;
+			return MEDIA_RTP_ERR_RESOURCE_ERROR;
 		if ((status = item->SetPrefix(prefix,prefixlen)) < 0)
 		{
 			delete item;
@@ -90,7 +90,7 @@ int RTCPSDESInfo::DeletePrivatePrefix(const uint8_t *prefix,size_t prefixlen)
 			++it;
 	}
 	if (!found)
-		return ERR_RTP_SDES_PREFIXNOTFOUND;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	delete *it;
 	privitems.erase(it);

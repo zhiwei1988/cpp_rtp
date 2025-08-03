@@ -23,14 +23,14 @@ RTPPacketBuilder::~RTPPacketBuilder()
 int RTPPacketBuilder::Init(size_t max)
 {
 	if (init)
-		return ERR_RTP_PACKBUILD_ALREADYINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	if (max <= 0)
-		return ERR_RTP_PACKBUILD_INVALIDMAXPACKETSIZE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	
 	maxpacksize = max;
 	buffer = new uint8_t [max];
 	if (buffer == 0)
-		return ERR_RTP_OUTOFMEM;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	packetlength = 0;
 	
 	CreateNewSSRC();
@@ -58,10 +58,10 @@ int RTPPacketBuilder::SetMaximumPacketSize(size_t max)
 	uint8_t *newbuf;
 
 	if (max <= 0)
-		return ERR_RTP_PACKBUILD_INVALIDMAXPACKETSIZE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	newbuf = new uint8_t[max];
 	if (newbuf == 0)
-		return ERR_RTP_OUTOFMEM;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	
 	delete [] buffer;
 	buffer = newbuf;
@@ -72,16 +72,16 @@ int RTPPacketBuilder::SetMaximumPacketSize(size_t max)
 int RTPPacketBuilder::AddCSRC(uint32_t csrc)
 {
 	if (!init)
-		return ERR_RTP_PACKBUILD_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	if (numcsrcs >= RTP_MAXCSRCS)
-		return ERR_RTP_PACKBUILD_CSRCLISTFULL;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 
 	int i;
 	
 	for (i = 0 ; i < numcsrcs ; i++)
 	{
 		if (csrcs[i] == csrc)
-			return ERR_RTP_PACKBUILD_CSRCALREADYINLIST;
+			return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	csrcs[numcsrcs] = csrc;
 	numcsrcs++;
@@ -91,7 +91,7 @@ int RTPPacketBuilder::AddCSRC(uint32_t csrc)
 int RTPPacketBuilder::DeleteCSRC(uint32_t csrc)
 {
 	if (!init)
-		return ERR_RTP_PACKBUILD_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	int i = 0;
 	bool found = false;
@@ -105,7 +105,7 @@ int RTPPacketBuilder::DeleteCSRC(uint32_t csrc)
 	}
 
 	if (!found)
-		return ERR_RTP_PACKBUILD_CSRCNOTINLIST;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	// 将最后一个 csrc 移到已删除的位置
 	numcsrcs--;
@@ -155,13 +155,13 @@ uint32_t RTPPacketBuilder::CreateNewSSRC(RTPSources &sources)
 int RTPPacketBuilder::BuildPacket(const void *data,size_t len)
 {
 	if (!init)
-		return ERR_RTP_PACKBUILD_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	if (!defptset)
-		return ERR_RTP_PACKBUILD_DEFAULTPAYLOADTYPENOTSET;
+		return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 	if (!defmarkset)
-		return ERR_RTP_PACKBUILD_DEFAULTMARKNOTSET;
+		return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 	if (!deftsset)
-		return ERR_RTP_PACKBUILD_DEFAULTTSINCNOTSET;
+		return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 	return PrivateBuildPacket(data,len,defaultpayloadtype,defaultmark,defaulttimestampinc,false);
 }
 
@@ -169,7 +169,7 @@ int RTPPacketBuilder::BuildPacket(const void *data,size_t len,
                 uint8_t pt,bool mark,uint32_t timestampinc)
 {
 	if (!init)
-		return ERR_RTP_PACKBUILD_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	return PrivateBuildPacket(data,len,pt,mark,timestampinc,false);
 }
 
@@ -177,13 +177,13 @@ int RTPPacketBuilder::BuildPacketEx(const void *data,size_t len,
                   uint16_t hdrextID,const void *hdrextdata,size_t numhdrextwords)
 {
 	if (!init)
-		return ERR_RTP_PACKBUILD_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	if (!defptset)
-		return ERR_RTP_PACKBUILD_DEFAULTPAYLOADTYPENOTSET;
+		return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 	if (!defmarkset)
-		return ERR_RTP_PACKBUILD_DEFAULTMARKNOTSET;
+		return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 	if (!deftsset)
-		return ERR_RTP_PACKBUILD_DEFAULTTSINCNOTSET;
+		return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 	return PrivateBuildPacket(data,len,defaultpayloadtype,defaultmark,defaulttimestampinc,true,hdrextID,hdrextdata,numhdrextwords);
 }
 
@@ -192,7 +192,7 @@ int RTPPacketBuilder::BuildPacketEx(const void *data,size_t len,
 		  uint16_t hdrextID,const void *hdrextdata,size_t numhdrextwords)
 {
 	if (!init)
-		return ERR_RTP_PACKBUILD_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	return PrivateBuildPacket(data,len,pt,mark,timestampinc,true,hdrextID,hdrextdata,numhdrextwords);
 
 }

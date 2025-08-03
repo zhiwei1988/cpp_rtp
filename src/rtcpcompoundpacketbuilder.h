@@ -18,7 +18,7 @@ class RTPMemoryManager;
 /** This class can be used to construct an RTCP compound packet.
  *  The RTCPCompoundPacketBuilder class can be used to construct an RTCP compound packet. It inherits the member
  *  functions of RTCPCompoundPacket which can be used to access the information in the compound packet once it has
- *  been built successfully. The member functions described below return \c ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT
+ *  been built successfully. The member functions described below return \c MEDIA_RTP_ERR_RESOURCE_ERROR
  *  if the action would cause the maximum allowed size to be exceeded.
  */
 class RTCPCompoundPacketBuilder : public RTCPCompoundPacket
@@ -252,7 +252,7 @@ private:
 		{
 			SDESSource *s = new SDESSource(ssrc);
 			if (s == 0)
-				return ERR_RTP_OUTOFMEM;
+				return MEDIA_RTP_ERR_RESOURCE_ERROR;
 			sdessources.push_back(s);
 			sdesit = sdessources.end();
 			sdesit--;
@@ -262,7 +262,7 @@ private:
 		int AddItem(uint8_t *buf,size_t len)
 		{
 			if (sdessources.empty())
-				return ERR_RTP_RTCPCOMPPACKBUILDER_NOCURRENTSOURCE;
+				return MEDIA_RTP_ERR_INVALID_STATE;
 			(*sdesit)->AddItem(buf,len);
 			return 0;
 		}

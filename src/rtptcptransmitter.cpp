@@ -46,7 +46,7 @@ RTPTCPTransmitter::~RTPTCPTransmitter()
 int RTPTCPTransmitter::Init(bool tsafe)
 {
 	if (m_init)
-		return ERR_RTP_TCPTRANS_ALREADYINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 #ifdef RTP_SUPPORT_THREAD
 	m_threadsafe = tsafe;
@@ -56,14 +56,14 @@ int RTPTCPTransmitter::Init(bool tsafe)
 		
 		status = m_mainMutex.Init();
 		if (status < 0)
-			return ERR_RTP_TCPTRANS_CANTINITMUTEX;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 		status = m_waitMutex.Init();
 		if (status < 0)
-			return ERR_RTP_TCPTRANS_CANTINITMUTEX;
+			return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 #else
 	if (tsafe)
-		return ERR_RTP_NOTHREADSUPPORT;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 #endif // RTP_SUPPORT_THREAD
 
 	m_maxPackSize = RTPTCPTRANS_MAXPACKSIZE;
@@ -78,14 +78,14 @@ int RTPTCPTransmitter::Create(size_t maximumpacketsize, const RTPTransmissionPar
 	int status;
 
 	if (!m_init)
-		return ERR_RTP_TCPTRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 
 	if (m_created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_ALREADYCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	
 	// 获取传输参数
@@ -97,7 +97,7 @@ int RTPTCPTransmitter::Create(size_t maximumpacketsize, const RTPTransmissionPar
 		if (transparams->GetTransmissionProtocol() != RTPTransmitter::TCPProto)
 		{
 			MAINMUTEX_UNLOCK
-			return ERR_RTP_TCPTRANS_ILLEGALPARAMETERS;
+			return MEDIA_RTP_ERR_INVALID_PARAMETER;
 		}
 		params = static_cast<const RTPTCPTransmissionParams *>(transparams);
 	}
@@ -117,7 +117,7 @@ int RTPTCPTransmitter::Create(size_t maximumpacketsize, const RTPTransmissionPar
 		if (!m_pAbortDesc->IsInitialized())
 		{
 			MAINMUTEX_UNLOCK
-			return ERR_RTP_ABORTDESC_NOTINIT;
+			return MEDIA_RTP_ERR_INVALID_STATE;
 		}
 	}
 
@@ -179,13 +179,13 @@ void RTPTCPTransmitter::DeleteTransmissionInfo(RTPTransmissionInfo *i)
 int RTPTCPTransmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 {
 	if (!m_init)
-		return ERR_RTP_TCPTRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_LOCK
 	if (!m_created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 
 	if (m_localHostname.size() == 0)
@@ -201,7 +201,7 @@ int RTPTCPTransmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 	{
 		*bufferlength = m_localHostname.size(); // 告诉应用程序所需的缓冲区大小
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TRANS_BUFFERLENGTHTOOSMALL;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	}
 
 	memcpy(buffer,&m_localHostname[0], m_localHostname.size());
@@ -240,13 +240,13 @@ bool RTPTCPTransmitter::ComesFromThisTransmitter(const RTPAddress *addr)
 int RTPTCPTransmitter::Poll()
 {
 	if (!m_init)
-		return ERR_RTP_TCPTRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_LOCK
 	if (!m_created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 
 	std::map<SocketType, SocketData>::iterator it = m_destSockets.begin();
@@ -262,7 +262,7 @@ int RTPTCPTransmitter::Poll()
 		if (status < 0)
 		{
 			// 内存不足时立即停止
-			if (status == ERR_RTP_OUTOFMEM)
+			if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
 				break;
 			else
 			{
@@ -286,19 +286,19 @@ int RTPTCPTransmitter::Poll()
 int RTPTCPTransmitter::WaitForIncomingData(const RTPTime &delay,bool *dataavailable)
 {
 	if (!m_init)
-		return ERR_RTP_TCPTRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	
 	if (!m_created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (m_waitingForData)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_ALREADYWAITING;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	
 	m_tmpSocks.resize(m_destSockets.size()+1);
@@ -377,18 +377,18 @@ int RTPTCPTransmitter::WaitForIncomingData(const RTPTime &delay,bool *dataavaila
 int RTPTCPTransmitter::AbortWait()
 {
 	if (!m_init)
-		return ERR_RTP_TCPTRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	if (!m_created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (!m_waitingForData)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_NOTWAITING;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 
 	m_pAbortDesc->SendAbortSignal();
@@ -410,20 +410,20 @@ int RTPTCPTransmitter::SendRTCPData(const void *data,size_t len)
 int RTPTCPTransmitter::AddDestination(const RTPAddress &addr)
 {
 	if (!m_init)
-		return ERR_RTP_TCPTRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 
 	if (!m_created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 
 	if (addr.GetAddressType() != RTPAddress::TCPAddress)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 
 	const RTPTCPAddress &a = static_cast<const RTPTCPAddress &>(addr);
@@ -431,7 +431,7 @@ int RTPTCPTransmitter::AddDestination(const RTPAddress &addr)
 	if (s == 0)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_NOSOCKETSPECIFIED;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 
 	int status = ValidateSocket(s);
@@ -445,7 +445,7 @@ int RTPTCPTransmitter::AddDestination(const RTPAddress &addr)
 	if (it != m_destSockets.end())
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_SOCKETALREADYINDESTINATIONS;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	m_destSockets[s] = SocketData();
 
@@ -460,20 +460,20 @@ int RTPTCPTransmitter::AddDestination(const RTPAddress &addr)
 int RTPTCPTransmitter::DeleteDestination(const RTPAddress &addr)
 {
 	if (!m_init)
-		return ERR_RTP_TCPTRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	
 	if (!m_created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	
 	if (addr.GetAddressType() != RTPAddress::TCPAddress)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_INVALIDADDRESSTYPE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 
 	const RTPTCPAddress &a = static_cast<const RTPTCPAddress &>(addr);
@@ -481,14 +481,14 @@ int RTPTCPTransmitter::DeleteDestination(const RTPAddress &addr)
 	if (s == 0)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_NOSOCKETSPECIFIED;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 
 	std::map<SocketType, SocketData>::iterator it = m_destSockets.find(s);
 	if (it == m_destSockets.end())
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_SOCKETNOTFOUNDINDESTINATIONS;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 
 	// 清理可能分配的内存
@@ -520,12 +520,12 @@ bool RTPTCPTransmitter::SupportsMulticasting()
 
 int RTPTCPTransmitter::JoinMulticastGroup(const RTPAddress &)
 {
-	return ERR_RTP_TCPTRANS_NOMULTICASTSUPPORT;
+	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
 
 int RTPTCPTransmitter::LeaveMulticastGroup(const RTPAddress &)
 {
-	return ERR_RTP_TCPTRANS_NOMULTICASTSUPPORT;
+	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
 
 void RTPTCPTransmitter::LeaveAllMulticastGroups()
@@ -535,18 +535,18 @@ void RTPTCPTransmitter::LeaveAllMulticastGroups()
 int RTPTCPTransmitter::SetReceiveMode(RTPTransmitter::ReceiveMode m)
 {
 	if (m != RTPTransmitter::AcceptAll)
-		return ERR_RTP_TCPTRANS_RECEIVEMODENOTSUPPORTED;
+		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	return 0;
 }
 
 int RTPTCPTransmitter::AddToIgnoreList(const RTPAddress &)
 {
-	return ERR_RTP_TCPTRANS_RECEIVEMODENOTSUPPORTED;
+	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
 
 int RTPTCPTransmitter::DeleteFromIgnoreList(const RTPAddress &)
 {
-	return ERR_RTP_TCPTRANS_RECEIVEMODENOTSUPPORTED;
+	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
 
 void RTPTCPTransmitter::ClearIgnoreList()
@@ -555,12 +555,12 @@ void RTPTCPTransmitter::ClearIgnoreList()
 
 int RTPTCPTransmitter::AddToAcceptList(const RTPAddress &)
 {
-	return ERR_RTP_TCPTRANS_RECEIVEMODENOTSUPPORTED;
+	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
 
 int RTPTCPTransmitter::DeleteFromAcceptList(const RTPAddress &)
 {
-	return ERR_RTP_TCPTRANS_RECEIVEMODENOTSUPPORTED;
+	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
 
 void RTPTCPTransmitter::ClearAcceptList()
@@ -570,18 +570,18 @@ void RTPTCPTransmitter::ClearAcceptList()
 int RTPTCPTransmitter::SetMaximumPacketSize(size_t s)	
 {
 	if (!m_init)
-		return ERR_RTP_TCPTRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_LOCK
 	if (!m_created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (s > RTPTCPTRANS_MAXPACKSIZE)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_SPECIFIEDSIZETOOBIG;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	}
 	m_maxPackSize = s;
 	MAINMUTEX_UNLOCK
@@ -687,7 +687,7 @@ int RTPTCPTransmitter::PollSocket(SocketType sock, SocketData &sdata)
 
 					RTPTCPAddress *pAddr = new RTPTCPAddress(sock);
 					if (pAddr == 0)
-						return ERR_RTP_OUTOFMEM;
+						return MEDIA_RTP_ERR_RESOURCE_ERROR;
 
 					bool isrtp = true;
 					if (dataLength > (int)sizeof(RTCPCommonHeader))
@@ -704,7 +704,7 @@ int RTPTCPTransmitter::PollSocket(SocketType sock, SocketData &sdata)
 					{
 						delete pAddr;
 						delete [] pBuf;
-						return ERR_RTP_OUTOFMEM;
+						return MEDIA_RTP_ERR_RESOURCE_ERROR;
 					}
 					m_rawpacketlist.push_back(pPack);	
 				}
@@ -720,19 +720,19 @@ int RTPTCPTransmitter::PollSocket(SocketType sock, SocketData &sdata)
 int RTPTCPTransmitter::SendRTPRTCPData(const void *data, size_t len)
 {
 	if (!m_init)
-		return ERR_RTP_TCPTRANS_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_LOCK
 	
 	if (!m_created)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_NOTCREATED;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	if (len > RTPTCPTRANS_MAXPACKSIZE)
 	{
 		MAINMUTEX_UNLOCK
-		return ERR_RTP_TCPTRANS_SPECIFIEDSIZETOOBIG;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	}
 	
 	std::map<SocketType, SocketData>::iterator it = m_destSockets.begin();
@@ -824,7 +824,7 @@ int RTPTCPTransmitter::SocketData::ProcessAvailableBytes(SocketType sock, int av
 		{
 			r = (int)recv(sock, (char *)(m_lengthBuffer+m_lengthBufferOffset), num, 0);
 			if (r < 0)
-				return ERR_RTP_TCPTRANS_ERRORINRECV;
+				return MEDIA_RTP_ERR_OPERATION_FAILED;
 		}
 
 		m_lengthBufferOffset += r;
@@ -849,7 +849,7 @@ int RTPTCPTransmitter::SocketData::ProcessAvailableBytes(SocketType sock, int av
 			// 我们还不知道它是 RTP 还是 RTCP 包，所以我们暂时当做 RTP 处理
 			m_pDataBuffer = new uint8_t[l];
 			if (m_pDataBuffer == 0)
-				return ERR_RTP_OUTOFMEM;
+				return MEDIA_RTP_ERR_RESOURCE_ERROR;
 		}
 	}
 
@@ -866,7 +866,7 @@ int RTPTCPTransmitter::SocketData::ProcessAvailableBytes(SocketType sock, int av
 			{
 				r = (int)recv(sock, (char *)(m_pDataBuffer+m_dataBufferOffset), num, 0);
 				if (r < 0)
-					return ERR_RTP_TCPTRANS_ERRORINRECV;
+					return MEDIA_RTP_ERR_OPERATION_FAILED;
 			}
 
 			m_dataBufferOffset += r;

@@ -1,6 +1,4 @@
-#ifndef RTPDEFINES_H
-
-#define RTPDEFINES_H
+#pragma once
 
 #define RTP_VERSION							2
 #define RTP_MAXCSRCS							15
@@ -39,6 +37,3 @@
 #define RTCP_DEFAULTHALFATSTARTUP					true
 #define RTCP_DEFAULTIMMEDIATEBYE					true
 #define RTCP_DEFAULTSRBYE						true
-
-#endif // RTPDEFINES_H
-

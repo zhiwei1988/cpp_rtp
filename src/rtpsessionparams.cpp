@@ -45,7 +45,7 @@ int RTPSessionParams::SetUsePollThread(bool usethread)
 {
 #ifndef RTP_SUPPORT_THREAD
 	MEDIA_RTP_UNUSED(usethread);
-	return ERR_RTP_NOTHREADSUPPORT;
+	return MEDIA_RTP_ERR_OPERATION_FAILED;
 #else
 	usepollthread = usethread;
 	return 0;
@@ -56,7 +56,7 @@ int RTPSessionParams::SetNeedThreadSafety(bool s)
 {
 #ifndef RTP_SUPPORT_THREAD
 	MEDIA_RTP_UNUSED(s);
-	return ERR_RTP_NOTHREADSUPPORT;
+	return MEDIA_RTP_ERR_OPERATION_FAILED;
 #else
 	m_needThreadSafety = s;
 	return 0;

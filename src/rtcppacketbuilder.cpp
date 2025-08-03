@@ -22,11 +22,11 @@ RTCPPacketBuilder::~RTCPPacketBuilder()
 int RTCPPacketBuilder::Init(size_t maxpacksize,double tsunit,const void *cname,size_t cnamelen)
 {
 	if (init)
-		return ERR_RTP_RTCPPACKETBUILDER_ALREADYINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 	if (maxpacksize < RTP_MINPACKETSIZE)
-		return ERR_RTP_RTCPPACKETBUILDER_ILLEGALMAXPACKSIZE;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	if (tsunit < 0.0)
-		return ERR_RTP_RTCPPACKETBUILDER_ILLEGALTIMESTAMPUNIT;
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 
 	if (cnamelen>255)
 		cnamelen = 255;
@@ -68,7 +68,7 @@ void RTCPPacketBuilder::Destroy()
 int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 {
 	if (!init)
-		return ERR_RTP_RTCPPACKETBUILDER_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	RTCPCompoundPacketBuilder *rtcpcomppack;
 	int status;
@@ -79,7 +79,7 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 	
 	rtcpcomppack = new RTCPCompoundPacketBuilder();
 	if (rtcpcomppack == 0)
-		return ERR_RTP_OUTOFMEM;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	
 	if ((status = rtcpcomppack->InitBuild(maxpacketsize)) < 0)
 	{
@@ -113,8 +113,8 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 		if ((status = rtcpcomppack->StartSenderReport(ssrc,ntptimestamp,rtptimestamp,packcount,octetcount)) < 0)
 		{
 			delete rtcpcomppack;
-			if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
-				return ERR_RTP_RTCPPACKETBUILDER_PACKETFILLEDTOOSOON;
+			if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
+				return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 			return status;
 		}
 	}
@@ -123,8 +123,8 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 		if ((status = rtcpcomppack->StartReceiverReport(ssrc)) < 0)
 		{
 			delete rtcpcomppack;
-			if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
-				return ERR_RTP_RTCPPACKETBUILDER_PACKETFILLEDTOOSOON;
+			if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
+				return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 			return status;
 		}
 	}
@@ -137,15 +137,15 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 	if ((status = rtcpcomppack->AddSDESSource(ssrc)) < 0)
 	{
 		delete rtcpcomppack;
-		if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
-			return ERR_RTP_RTCPPACKETBUILDER_PACKETFILLEDTOOSOON;
+		if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
+			return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 		return status;
 	}
 	if ((status = rtcpcomppack->AddSDESNormalItem(RTCPSDESPacket::CNAME,owncname,owncnamelen)) < 0)
 	{
 		delete rtcpcomppack;
-		if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
-			return ERR_RTP_RTCPPACKETBUILDER_PACKETFILLEDTOOSOON;
+		if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
+			return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 		return status;
 	}
 
@@ -163,7 +163,7 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 		if (full && added == 0)
 		{
 			delete rtcpcomppack;
-			return ERR_RTP_RTCPPACKETBUILDER_PACKETFILLEDTOOSOON;
+			return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 		}
 	
 		if (!full)
@@ -231,7 +231,7 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 		if (itemcount == 0) // 大问题：数据包大小太小，无法取得任何进展
 		{
 			delete rtcpcomppack;
-			return ERR_RTP_RTCPPACKETBUILDER_PACKETFILLEDTOOSOON;
+			return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 		}
 
 		if (processedall)
@@ -376,7 +376,7 @@ int RTCPPacketBuilder::FillInReportBlocks(RTCPCompoundPacketBuilder *rtcpcomppac
 					status = rtcpcomppack->AddReportBlock(rr_ssrc,fraclost,*packlost,curseq,jitter,lsr,dlsr);
 					if (status < 0)
 					{
-						if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
+						if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
 						{
 							done = true;
 							filled = true;
@@ -481,7 +481,7 @@ int RTCPPacketBuilder::FillInSDES(RTCPCompoundPacketBuilder *rtcpcomppack,bool *
 			data = ownsdesinfo.GetName(&datalen);
 			if ((status = rtcpcomppack->AddSDESNormalItem(RTCPSDESPacket::NAME,data,datalen)) < 0)
 			{
-				if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
+				if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
 				{
 					*full = true;
 					return 0;
@@ -498,7 +498,7 @@ int RTCPPacketBuilder::FillInSDES(RTCPCompoundPacketBuilder *rtcpcomppack,bool *
 			data = ownsdesinfo.GetEMail(&datalen);
 			if ((status = rtcpcomppack->AddSDESNormalItem(RTCPSDESPacket::EMAIL,data,datalen)) < 0)
 			{
-				if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
+				if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
 				{
 					*full = true;
 					return 0;
@@ -515,7 +515,7 @@ int RTCPPacketBuilder::FillInSDES(RTCPCompoundPacketBuilder *rtcpcomppack,bool *
 			data = ownsdesinfo.GetLocation(&datalen);
 			if ((status = rtcpcomppack->AddSDESNormalItem(RTCPSDESPacket::LOC,data,datalen)) < 0)
 			{
-				if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
+				if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
 				{
 					*full = true;
 					return 0;
@@ -532,7 +532,7 @@ int RTCPPacketBuilder::FillInSDES(RTCPCompoundPacketBuilder *rtcpcomppack,bool *
 			data = ownsdesinfo.GetPhone(&datalen);
 			if ((status = rtcpcomppack->AddSDESNormalItem(RTCPSDESPacket::PHONE,data,datalen)) < 0)
 			{
-				if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
+				if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
 				{
 					*full = true;
 					return 0;
@@ -549,7 +549,7 @@ int RTCPPacketBuilder::FillInSDES(RTCPCompoundPacketBuilder *rtcpcomppack,bool *
 			data = ownsdesinfo.GetTool(&datalen);
 			if ((status = rtcpcomppack->AddSDESNormalItem(RTCPSDESPacket::TOOL,data,datalen)) < 0)
 			{
-				if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
+				if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
 				{
 					*full = true;
 					return 0;
@@ -566,7 +566,7 @@ int RTCPPacketBuilder::FillInSDES(RTCPCompoundPacketBuilder *rtcpcomppack,bool *
 			data = ownsdesinfo.GetNote(&datalen);
 			if ((status = rtcpcomppack->AddSDESNormalItem(RTCPSDESPacket::NOTE,data,datalen)) < 0)
 			{
-				if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
+				if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
 				{
 					*full = true;
 					return 0;
@@ -589,7 +589,7 @@ void RTCPPacketBuilder::ClearAllSDESFlags()
 int RTCPPacketBuilder::BuildBYEPacket(RTCPCompoundPacket **pack,const void *reason,size_t reasonlength,bool useSRifpossible)
 {
 	if (!init)
-		return ERR_RTP_RTCPPACKETBUILDER_NOTINIT;
+		return MEDIA_RTP_ERR_INVALID_STATE;
 
 	RTCPCompoundPacketBuilder *rtcpcomppack;
 	int status;
@@ -601,7 +601,7 @@ int RTCPPacketBuilder::BuildBYEPacket(RTCPCompoundPacket **pack,const void *reas
 	
 	rtcpcomppack = new RTCPCompoundPacketBuilder();
 	if (rtcpcomppack == 0)
-		return ERR_RTP_OUTOFMEM;
+		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	
 	if ((status = rtcpcomppack->InitBuild(maxpacketsize)) < 0)
 	{
@@ -640,8 +640,8 @@ int RTCPPacketBuilder::BuildBYEPacket(RTCPCompoundPacket **pack,const void *reas
 		if ((status = rtcpcomppack->StartSenderReport(ssrc,ntptimestamp,rtptimestamp,packcount,octetcount)) < 0)
 		{
 			delete rtcpcomppack;
-			if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
-				return ERR_RTP_RTCPPACKETBUILDER_PACKETFILLEDTOOSOON;
+			if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
+				return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 			return status;
 		}
 	}
@@ -650,8 +650,8 @@ int RTCPPacketBuilder::BuildBYEPacket(RTCPCompoundPacket **pack,const void *reas
 		if ((status = rtcpcomppack->StartReceiverReport(ssrc)) < 0)
 		{
 			delete rtcpcomppack;
-			if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
-				return ERR_RTP_RTCPPACKETBUILDER_PACKETFILLEDTOOSOON;
+			if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
+				return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 			return status;
 		}
 	}
@@ -664,15 +664,15 @@ int RTCPPacketBuilder::BuildBYEPacket(RTCPCompoundPacket **pack,const void *reas
 	if ((status = rtcpcomppack->AddSDESSource(ssrc)) < 0)
 	{
 		delete rtcpcomppack;
-		if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
-			return ERR_RTP_RTCPPACKETBUILDER_PACKETFILLEDTOOSOON;
+		if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
+			return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 		return status;
 	}
 	if ((status = rtcpcomppack->AddSDESNormalItem(RTCPSDESPacket::CNAME,owncname,owncnamelen)) < 0)
 	{
 		delete rtcpcomppack;
-		if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
-			return ERR_RTP_RTCPPACKETBUILDER_PACKETFILLEDTOOSOON;
+		if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
+			return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 		return status;
 	}
 
@@ -683,8 +683,8 @@ int RTCPPacketBuilder::BuildBYEPacket(RTCPCompoundPacket **pack,const void *reas
 	if ((status = rtcpcomppack->AddBYEPacket(ssrcs,1,(const uint8_t *)reason,reasonlength)) < 0)
 	{
 		delete rtcpcomppack;
-		if (status == ERR_RTP_RTCPCOMPPACKBUILDER_NOTENOUGHBYTESLEFT)
-			return ERR_RTP_RTCPPACKETBUILDER_PACKETFILLEDTOOSOON;
+		if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
+			return MEDIA_RTP_ERR_PROTOCOL_ERROR;
 		return status;
 	}
 	
