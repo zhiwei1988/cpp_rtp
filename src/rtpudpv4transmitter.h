@@ -9,8 +9,8 @@
 #include "rtpconfig.h"
 #include "rtptransmitter.h"
 #include "rtpipv4destination.h"
-#include "rtphashtable.h"
-#include "rtpkeyhashtable.h"
+#include <unordered_map>
+#include <unordered_set>
 #include "rtpsocketutil.h"
 #include "rtpabortdescriptors.h"
 #include <list>
@@ -19,7 +19,6 @@
 	#include <jthread/jmutex.h>
 #endif // RTP_SUPPORT_THREAD
 
-#define RTPUDPV4TRANS_HASHSIZE									8317
 #define RTPUDPV4TRANS_DEFAULTPORTBASE								5000
 
 #define RTPUDPV4TRANS_RTPRECEIVEBUFFER							32768
@@ -198,17 +197,6 @@ private:
 	uint16_t m_rtpPort, m_rtcpPort;
 };
 	
-class MEDIA_RTP_IMPORTEXPORT RTPUDPv4Trans_GetHashIndex_IPv4Dest
-{
-public:
-	static int GetIndex(const RTPIPv4Destination &d)							{ return d.GetIP()%RTPUDPV4TRANS_HASHSIZE; }
-};
-
-class MEDIA_RTP_IMPORTEXPORT RTPUDPv4Trans_GetHashIndex_uint32_t
-{
-public:
-	static int GetIndex(const uint32_t &k)									{ return k%RTPUDPV4TRANS_HASHSIZE; }
-};
 
 #define RTPUDPV4TRANS_HEADERSIZE						(20+8)
 	
@@ -292,9 +280,9 @@ private:
 	uint8_t *localhostname;
 	size_t localhostnamelength;
 	
-	RTPHashTable<const RTPIPv4Destination,RTPUDPv4Trans_GetHashIndex_IPv4Dest,RTPUDPV4TRANS_HASHSIZE> destinations;
+	std::unordered_set<RTPIPv4Destination> destinations;
 #ifdef RTP_SUPPORT_IPV4MULTICAST
-	RTPHashTable<const uint32_t,RTPUDPv4Trans_GetHashIndex_uint32_t,RTPUDPV4TRANS_HASHSIZE> multicastgroups;
+	std::unordered_set<uint32_t> multicastgroups;
 #endif // RTP_SUPPORT_IPV4MULTICAST
 	std::list<RTPRawPacket*> rawpacketlist;
 
@@ -310,7 +298,7 @@ private:
 		std::list<uint16_t> portlist;
 	};
 
-	RTPKeyHashTable<const uint32_t,PortInfo*,RTPUDPv4Trans_GetHashIndex_uint32_t,RTPUDPV4TRANS_HASHSIZE> acceptignoreinfo;
+	std::unordered_map<uint32_t,PortInfo*> acceptignoreinfo;
 
 	bool closesocketswhendone;
 	RTPAbortDescriptors m_abortDesc;

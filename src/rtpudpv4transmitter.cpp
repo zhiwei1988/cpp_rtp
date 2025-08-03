@@ -50,11 +50,7 @@
 } while(0)
 		
 
-RTPUDPv4Transmitter::RTPUDPv4Transmitter(RTPMemoryManager *mgr) : RTPTransmitter(mgr),destinations(mgr,RTPMEM_TYPE_CLASS_DESTINATIONLISTHASHELEMENT),
-#ifdef RTP_SUPPORT_IPV4MULTICAST
-								  multicastgroups(mgr,RTPMEM_TYPE_CLASS_MULTICASTHASHELEMENT),
-#endif // RTP_SUPPORT_IPV4MULTICAST
-								  acceptignoreinfo(mgr,RTPMEM_TYPE_CLASS_ACCEPTIGNOREHASHELEMENT)
+RTPUDPv4Transmitter::RTPUDPv4Transmitter(RTPMemoryManager *mgr) : RTPTransmitter(mgr)
 {
 	created = false;
 	init = false;
@@ -518,9 +514,9 @@ void RTPUDPv4Transmitter::Destroy()
 	}
 	
 	CLOSESOCKETS;
-	destinations.Clear();
+	destinations.clear();
 #ifdef RTP_SUPPORT_IPV4MULTICAST
-	multicastgroups.Clear();
+	multicastgroups.clear();
 #endif // RTP_SUPPORT_IPV4MULTICAST
 	FlushPackets();
 	ClearAcceptIgnoreInfo();
@@ -870,11 +866,9 @@ int RTPUDPv4Transmitter::SendRTPData(const void *data,size_t len)
 		return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
 	}
 	
-	destinations.GotoFirstElement();
-	while (destinations.HasCurrentElement())
+	for (const auto& dest : destinations)
 	{
-		sendto(rtpsock,(const char *)data,len,0,(const struct sockaddr *)destinations.GetCurrentElement().GetRTPSockAddr(),sizeof(struct sockaddr_in));
-		destinations.GotoNextElement();
+		sendto(rtpsock,(const char *)data,len,0,(const struct sockaddr *)dest.GetRTPSockAddr(),sizeof(struct sockaddr_in));
 	}
 	
 	MAINMUTEX_UNLOCK
@@ -899,11 +893,9 @@ int RTPUDPv4Transmitter::SendRTCPData(const void *data,size_t len)
 		return ERR_RTP_UDPV4TRANS_SPECIFIEDSIZETOOBIG;
 	}
 	
-	destinations.GotoFirstElement();
-	while (destinations.HasCurrentElement())
+	for (const auto& dest : destinations)
 	{
-		sendto(rtcpsock,(const char *)data,len,0,(const struct sockaddr *)destinations.GetCurrentElement().GetRTCPSockAddr(),sizeof(struct sockaddr_in));
-		destinations.GotoNextElement();
+		sendto(rtcpsock,(const char *)data,len,0,(const struct sockaddr *)dest.GetRTCPSockAddr(),sizeof(struct sockaddr_in));
 	}
 	
 	MAINMUTEX_UNLOCK
@@ -930,7 +922,8 @@ int RTPUDPv4Transmitter::AddDestination(const RTPAddress &addr)
 		return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
 	}
 	
-	int status = destinations.AddElement(dest);
+	auto result = destinations.insert(dest);
+	int status = result.second ? 0 : ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
 
 	MAINMUTEX_UNLOCK
 	return status;
@@ -955,7 +948,8 @@ int RTPUDPv4Transmitter::DeleteDestination(const RTPAddress &addr)
 		return ERR_RTP_UDPV4TRANS_INVALIDADDRESSTYPE;
 	}
 	
-	int status = destinations.DeleteElement(dest);
+	size_t erased = destinations.erase(dest);
+	int status = erased > 0 ? 0 : ERR_RTP_HASHTABLE_ELEMENTNOTFOUND;
 	
 	MAINMUTEX_UNLOCK
 	return status;
@@ -968,7 +962,7 @@ void RTPUDPv4Transmitter::ClearDestinations()
 	
 	MAINMUTEX_LOCK
 	if (created)
-		destinations.Clear();
+		destinations.clear();
 	MAINMUTEX_UNLOCK
 }
 
@@ -1021,13 +1015,14 @@ int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 		return ERR_RTP_UDPV4TRANS_NOTAMULTICASTADDRESS;
 	}
 	
-	status = multicastgroups.AddElement(mcastIP);
+	auto result = multicastgroups.insert(mcastIP);
+	status = result.second ? 0 : ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
 	if (status >= 0)
 	{
 		RTPUDPV4TRANS_MCASTMEMBERSHIP(rtpsock,IP_ADD_MEMBERSHIP,mcastIP,status);
 		if (status != 0)
 		{
-			multicastgroups.DeleteElement(mcastIP);
+			multicastgroups.erase(mcastIP);
 			MAINMUTEX_UNLOCK
 			return ERR_RTP_UDPV4TRANS_COULDNTJOINMULTICASTGROUP;
 		}
@@ -1038,7 +1033,7 @@ int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 			if (status != 0)
 			{
 				RTPUDPV4TRANS_MCASTMEMBERSHIP(rtpsock,IP_DROP_MEMBERSHIP,mcastIP,status);
-				multicastgroups.DeleteElement(mcastIP);
+				multicastgroups.erase(mcastIP);
 				MAINMUTEX_UNLOCK
 				return ERR_RTP_UDPV4TRANS_COULDNTJOINMULTICASTGROUP;
 			}
@@ -1077,7 +1072,8 @@ int RTPUDPv4Transmitter::LeaveMulticastGroup(const RTPAddress &addr)
 		return ERR_RTP_UDPV4TRANS_NOTAMULTICASTADDRESS;
 	}
 	
-	status = multicastgroups.DeleteElement(mcastIP);
+	size_t erased = multicastgroups.erase(mcastIP);
+	status = erased > 0 ? 0 : ERR_RTP_HASHTABLE_ELEMENTNOTFOUND;
 	if (status >= 0)
 	{	
 		RTPUDPV4TRANS_MCASTMEMBERSHIP(rtpsock,IP_DROP_MEMBERSHIP,mcastIP,status);
@@ -1099,22 +1095,16 @@ void RTPUDPv4Transmitter::LeaveAllMulticastGroups()
 	MAINMUTEX_LOCK
 	if (created)
 	{
-		multicastgroups.GotoFirstElement();
-		while (multicastgroups.HasCurrentElement())
+		for (uint32_t mcastIP : multicastgroups)
 		{
-			uint32_t mcastIP;
 			int status = 0;
-
-			mcastIP = multicastgroups.GetCurrentElement();
 			
 			RTPUDPV4TRANS_MCASTMEMBERSHIP(rtpsock,IP_DROP_MEMBERSHIP,mcastIP,status);
 			if (rtpsock != rtcpsock) // 多路复用时无需离开多播组两次
 				RTPUDPV4TRANS_MCASTMEMBERSHIP(rtcpsock,IP_DROP_MEMBERSHIP,mcastIP,status);
 			MEDIA_RTP_UNUSED(status);
-
-			multicastgroups.GotoNextElement();
 		}
-		multicastgroups.Clear();
+		multicastgroups.clear();
 	}
 	MAINMUTEX_UNLOCK
 }
@@ -1151,7 +1141,7 @@ int RTPUDPv4Transmitter::SetReceiveMode(RTPTransmitter::ReceiveMode m)
 	if (m != receivemode)
 	{
 		receivemode = m;
-		acceptignoreinfo.Clear();
+		acceptignoreinfo.clear();
 	}
 	MAINMUTEX_UNLOCK
 	return 0;
@@ -1513,10 +1503,10 @@ int RTPUDPv4Transmitter::PollSocket(bool rtp)
 
 int RTPUDPv4Transmitter::ProcessAddAcceptIgnoreEntry(uint32_t ip,uint16_t port)
 {
-	acceptignoreinfo.GotoElement(ip);
-	if (acceptignoreinfo.HasCurrentElement()) // 该 IP 地址的条目已存在
+	auto it = acceptignoreinfo.find(ip);
+	if (it != acceptignoreinfo.end()) // 该 IP 地址的条目已存在
 	{
-		PortInfo *portinf = acceptignoreinfo.GetCurrentElement();
+		PortInfo *portinf = it->second;
 		
 		if (port == 0) // 选择所有端口
 		{
@@ -1540,7 +1530,6 @@ int RTPUDPv4Transmitter::ProcessAddAcceptIgnoreEntry(uint32_t ip,uint16_t port)
 	else // 需要为此 IP 地址创建条目
 	{
 		PortInfo *portinf;
-		int status;
 		
 		portinf = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_ACCEPTIGNOREPORTINFO) PortInfo();
 		if (port == 0) // 选择所有端口
@@ -1548,7 +1537,8 @@ int RTPUDPv4Transmitter::ProcessAddAcceptIgnoreEntry(uint32_t ip,uint16_t port)
 		else
 			portinf->portlist.push_front(port);
 		
-		status = acceptignoreinfo.AddElement(ip,portinf);
+		auto result = acceptignoreinfo.emplace(ip, portinf);
+		int status = result.second ? 0 : ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
 		if (status < 0)
 		{
 			RTPDelete(portinf,GetMemoryManager());
@@ -1561,27 +1551,21 @@ int RTPUDPv4Transmitter::ProcessAddAcceptIgnoreEntry(uint32_t ip,uint16_t port)
 
 void RTPUDPv4Transmitter::ClearAcceptIgnoreInfo()
 {
-	acceptignoreinfo.GotoFirstElement();
-	while (acceptignoreinfo.HasCurrentElement())
+	for (auto& pair : acceptignoreinfo)
 	{
-		PortInfo *inf;
-
-		inf = acceptignoreinfo.GetCurrentElement();
+		PortInfo *inf = pair.second;
 		RTPDelete(inf,GetMemoryManager());
-		acceptignoreinfo.GotoNextElement();
 	}
-	acceptignoreinfo.Clear();
+	acceptignoreinfo.clear();
 }
 	
 int RTPUDPv4Transmitter::ProcessDeleteAcceptIgnoreEntry(uint32_t ip,uint16_t port)
 {
-	acceptignoreinfo.GotoElement(ip);
-	if (!acceptignoreinfo.HasCurrentElement())
+	auto it = acceptignoreinfo.find(ip);
+	if (it == acceptignoreinfo.end())
 		return ERR_RTP_UDPV4TRANS_NOSUCHENTRY;
 	
-	PortInfo *inf;
-
-	inf = acceptignoreinfo.GetCurrentElement();
+	PortInfo *inf = it->second;
 	if (port == 0) // 删除所有条目
 	{
 		inf->all = false;
@@ -1630,11 +1614,11 @@ bool RTPUDPv4Transmitter::ShouldAcceptData(uint32_t srcip,uint16_t srcport)
 	{
 		PortInfo *inf;
 
-		acceptignoreinfo.GotoElement(srcip);
-		if (!acceptignoreinfo.HasCurrentElement())
+		auto it = acceptignoreinfo.find(srcip);
+		if (it == acceptignoreinfo.end())
 			return false;
 		
-		inf = acceptignoreinfo.GetCurrentElement();
+		inf = it->second;
 		if (!inf->all) // 只接受列表中的
 		{
 			std::list<uint16_t>::const_iterator it,begin,end;
@@ -1666,11 +1650,11 @@ bool RTPUDPv4Transmitter::ShouldAcceptData(uint32_t srcip,uint16_t srcport)
 	{
 		PortInfo *inf;
 
-		acceptignoreinfo.GotoElement(srcip);
-		if (!acceptignoreinfo.HasCurrentElement())
+		auto it = acceptignoreinfo.find(srcip);
+		if (it == acceptignoreinfo.end())
 			return true;
 		
-		inf = acceptignoreinfo.GetCurrentElement();
+		inf = it->second;
 		if (!inf->all) // 忽略列表中的端口
 		{
 			std::list<uint16_t>::const_iterator it,begin,end;
@@ -1714,10 +1698,6 @@ int RTPUDPv4Transmitter::CreateLocalIPList()
 	return 0;
 }
 
-// 使用 getifaddrs 或 ioctl
-
-#ifdef RTP_SUPPORT_IFADDRS
-
 bool RTPUDPv4Transmitter::GetLocalIPList_Interfaces()
 {
 	struct ifaddrs *addrs,*tmp;
@@ -1741,74 +1721,6 @@ bool RTPUDPv4Transmitter::GetLocalIPList_Interfaces()
 		return false;
 	return true;
 }
-
-#else // 用户 ioctl
-
-bool RTPUDPv4Transmitter::GetLocalIPList_Interfaces()
-{
-	int status;
-	char buffer[RTPUDPV4TRANS_IFREQBUFSIZE];
-	struct ifconf ifc;
-	struct ifreq *ifr;
-	struct sockaddr *sa;
-	char *startptr,*endptr;
-	int remlen;
-	
-	ifc.ifc_len = RTPUDPV4TRANS_IFREQBUFSIZE;
-	ifc.ifc_buf = buffer;
-	status = ioctl(rtpsock,SIOCGIFCONF,&ifc);
-	if (status < 0)
-		return false;
-	
-	startptr = (char *)ifc.ifc_req;
-	endptr = startptr + ifc.ifc_len;
-	remlen = ifc.ifc_len;
-	while((startptr < endptr) && remlen >= (int)sizeof(struct ifreq))
-	{
-		ifr = (struct ifreq *)startptr;
-		sa = &(ifr->ifr_addr);
-#ifdef RTP_HAVE_SOCKADDR_LEN
-		if (sa->sa_len <= sizeof(struct sockaddr))
-		{
-			if (sa->sa_len == sizeof(struct sockaddr_in) && sa->sa_family == PF_INET)
-			{
-				uint32_t ip;
-				struct sockaddr_in *addr = (struct sockaddr_in *)sa;
-				
-				ip = ntohl(addr->sin_addr.s_addr);
-				localIPs.push_back(ip);
-			}
-			remlen -= sizeof(struct ifreq);
-			startptr += sizeof(struct ifreq);
-		}
-		else
-		{
-			int l = sa->sa_len-sizeof(struct sockaddr)+sizeof(struct ifreq);
-			
-			remlen -= l;
-			startptr += l;
-		}
-#else // 在 struct sockaddr 中没有 sa_len
-		if (sa->sa_family == PF_INET)
-		{
-			uint32_t ip;
-			struct sockaddr_in *addr = (struct sockaddr_in *)sa;
-		
-			ip = ntohl(addr->sin_addr.s_addr);
-			localIPs.push_back(ip);
-		}
-		remlen -= sizeof(struct ifreq);
-		startptr += sizeof(struct ifreq);
-	
-#endif // RTP_HAVE_SOCKADDR_LEN
-	}
-
-	if (localIPs.empty())
-		return false;
-	return true;
-}
-
-#endif // RTP_SUPPORT_IFADDRS
 
 void RTPUDPv4Transmitter::GetLocalIPList_DNS()
 {

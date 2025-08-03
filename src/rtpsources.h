@@ -7,18 +7,11 @@
 #define RTPSOURCES_H
 
 #include "rtpconfig.h"
-#include "rtpkeyhashtable.h"
+#include <unordered_map>
 #include "rtcpsdespacket.h"
 #include "rtptypes.h"
 #include "rtpmemoryobject.h"
 
-#define RTPSOURCES_HASHSIZE							8317
-
-class MEDIA_RTP_IMPORTEXPORT RTPSources_GetHashIndex
-{
-public:
-	static int GetIndex(const uint32_t &ssrc)				{ return ssrc%RTPSOURCES_HASHSIZE; }
-};
 	
 class RTPNTPTime;
 class RTPTransmitter;
@@ -329,7 +322,8 @@ private:
 	int GetRTCPSourceData(uint32_t ssrc,const RTPAddress *senderaddress,RTPInternalSourceData **srcdat,bool *newsource);
 	bool CheckCollision(RTPInternalSourceData *srcdat,const RTPAddress *senderaddress,bool isrtp);
 	
-	RTPKeyHashTable<const uint32_t,RTPInternalSourceData*,RTPSources_GetHashIndex,RTPSOURCES_HASHSIZE> sourcelist;
+	std::unordered_map<uint32_t,RTPInternalSourceData*> sourcelist;
+	std::unordered_map<uint32_t,RTPInternalSourceData*>::iterator current_it;
 	
 	int sendercount;
 	int totalcount;

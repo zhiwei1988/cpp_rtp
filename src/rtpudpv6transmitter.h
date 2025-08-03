@@ -12,8 +12,8 @@
 
 #include "rtptransmitter.h"
 #include "rtpipv6destination.h"
-#include "rtphashtable.h"
-#include "rtpkeyhashtable.h"
+#include <unordered_map>
+#include <unordered_set>
 #include "rtpsocketutil.h"
 #include "rtpabortdescriptors.h"
 #include <string.h>
@@ -23,7 +23,6 @@
 	#include <jthread/jmutex.h>
 #endif // RTP_SUPPORT_THREAD
 
-#define RTPUDPV6TRANS_HASHSIZE										8317
 #define RTPUDPV6TRANS_DEFAULTPORTBASE								5000
 
 #define RTPUDPV6TRANS_RTPRECEIVEBUFFER							32768
@@ -165,17 +164,6 @@ private:
 	uint16_t m_rtpPort, m_rtcpPort;
 };
 		
-class MEDIA_RTP_IMPORTEXPORT RTPUDPv6Trans_GetHashIndex_IPv6Dest
-{
-public:
-	static int GetIndex(const RTPIPv6Destination &d)					{ in6_addr ip = d.GetIP(); return ((((uint32_t)ip.s6_addr[12])<<24)|(((uint32_t)ip.s6_addr[13])<<16)|(((uint32_t)ip.s6_addr[14])<<8)|((uint32_t)ip.s6_addr[15]))%RTPUDPV6TRANS_HASHSIZE; }
-};
-
-class MEDIA_RTP_IMPORTEXPORT RTPUDPv6Trans_GetHashIndex_in6_addr
-{
-public:
-	static int GetIndex(const in6_addr &ip)							{ return ((((uint32_t)ip.s6_addr[12])<<24)|(((uint32_t)ip.s6_addr[13])<<16)|(((uint32_t)ip.s6_addr[14])<<8)|((uint32_t)ip.s6_addr[15]))%RTPUDPV6TRANS_HASHSIZE; }
-};
 
 #define RTPUDPV6TRANS_HEADERSIZE								(40+8)
 	
@@ -260,9 +248,9 @@ private:
 	uint8_t *localhostname;
 	size_t localhostnamelength;
 	
-	RTPHashTable<const RTPIPv6Destination,RTPUDPv6Trans_GetHashIndex_IPv6Dest,RTPUDPV6TRANS_HASHSIZE> destinations;
+	std::unordered_set<RTPIPv6Destination> destinations;
 #ifdef RTP_SUPPORT_IPV6MULTICAST
-	RTPHashTable<const in6_addr,RTPUDPv6Trans_GetHashIndex_in6_addr,RTPUDPV6TRANS_HASHSIZE> multicastgroups;
+	std::unordered_set<in6_addr> multicastgroups;
 #endif // RTP_SUPPORT_IPV6MULTICAST
 	std::list<RTPRawPacket*> rawpacketlist;
 
@@ -278,7 +266,7 @@ private:
 		std::list<uint16_t> portlist;
 	};
 
-	RTPKeyHashTable<const in6_addr,PortInfo*,RTPUDPv6Trans_GetHashIndex_in6_addr,RTPUDPV6TRANS_HASHSIZE> acceptignoreinfo;
+	std::unordered_map<in6_addr,PortInfo*> acceptignoreinfo;
 	RTPAbortDescriptors m_abortDesc;
 	RTPAbortDescriptors *m_pAbortDesc;
 

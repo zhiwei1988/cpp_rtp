@@ -46,6 +46,33 @@ private:
 	struct sockaddr_in6 rtcpaddr;
 };
 
+// in6_addr 相等比较运算符
+inline bool operator==(const in6_addr& lhs, const in6_addr& rhs) {
+    return memcmp(&lhs, &rhs, sizeof(in6_addr)) == 0;
+}
+
+// std::hash 特化用于 std::unordered_map/set
+namespace std {
+    template<>
+    struct hash<RTPIPv6Destination> {
+        std::size_t operator()(const RTPIPv6Destination& dest) const noexcept {
+            // 使用 IPv6 地址的最后 4 字节和端口进行哈希
+            const in6_addr& ip = dest.GetIP();
+            uint32_t last4bytes = *reinterpret_cast<const uint32_t*>(&ip.s6_addr[12]);
+            return std::hash<uint32_t>{}(last4bytes);
+        }
+    };
+    
+    template<>
+    struct hash<in6_addr> {
+        std::size_t operator()(const in6_addr& addr) const noexcept {
+            // 使用 IPv6 地址的最后 4 字节进行哈希
+            uint32_t last4bytes = *reinterpret_cast<const uint32_t*>(&addr.s6_addr[12]);
+            return std::hash<uint32_t>{}(last4bytes);
+        }
+    };
+}
+
 #endif // RTP_SUPPORT_IPV6
 
 #endif // RTPIPV6DESTINATION_H

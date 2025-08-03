@@ -75,5 +75,18 @@ private:
 	struct sockaddr_in rtcpaddr;
 };
 
+// std::hash 特化用于 std::unordered_map/set
+namespace std {
+    template<>
+    struct hash<RTPIPv4Destination> {
+        std::size_t operator()(const RTPIPv4Destination& dest) const noexcept {
+            // 使用 IP 地址和 RTP 端口进行哈希
+            return std::hash<uint64_t>{}(
+                (static_cast<uint64_t>(dest.GetIP()) << 16) | dest.GetRTPPort_NBO()
+            );
+        }
+    };
+}
+
 #endif // RTPIPV4DESTINATION_H
 

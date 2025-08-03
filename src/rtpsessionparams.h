@@ -11,6 +11,7 @@
 #include "rtptransmitter.h"
 #include "rtptimeutilities.h"
 #include "rtpsources.h"
+#include <string>
 
 /** Describes the parameters for to be used by an RTPSession instance. 
  *  Describes the parameters for to be used by an RTPSession instance. Note that the own timestamp 

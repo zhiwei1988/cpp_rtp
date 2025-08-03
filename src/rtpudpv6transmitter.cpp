@@ -39,17 +39,8 @@
 	#define WAITMUTEX_UNLOCK
 #endif // RTP_SUPPORT_THREAD
 	
-inline bool operator==(const in6_addr &ip1,const in6_addr &ip2)
-{
-	if (memcmp(&ip1,&ip2,sizeof(in6_addr)) == 0)
-		return true;
-	return false;
-}
 
-RTPUDPv6Transmitter::RTPUDPv6Transmitter(RTPMemoryManager *mgr) : RTPTransmitter(mgr),
-								  destinations(GetMemoryManager(),RTPMEM_TYPE_CLASS_DESTINATIONLISTHASHELEMENT),
-								  multicastgroups(GetMemoryManager(),RTPMEM_TYPE_CLASS_MULTICASTHASHELEMENT),
-								  acceptignoreinfo(GetMemoryManager(),RTPMEM_TYPE_CLASS_ACCEPTIGNOREHASHELEMENT)
+RTPUDPv6Transmitter::RTPUDPv6Transmitter(RTPMemoryManager *mgr) : RTPTransmitter(mgr)
 {
 	created = false;
 	init = false;
@@ -297,9 +288,9 @@ void RTPUDPv6Transmitter::Destroy()
 	
 	RTPCLOSE(rtpsock);
 	RTPCLOSE(rtcpsock);
-	destinations.Clear();
+	destinations.clear();
 #ifdef RTP_SUPPORT_IPV6MULTICAST
-	multicastgroups.Clear();
+	multicastgroups.clear();
 #endif // RTP_SUPPORT_IPV6MULTICAST
 	FlushPackets();
 	ClearAcceptIgnoreInfo();
@@ -652,11 +643,9 @@ int RTPUDPv6Transmitter::SendRTPData(const void *data,size_t len)
 		return ERR_RTP_UDPV6TRANS_SPECIFIEDSIZETOOBIG;
 	}
 	
-	destinations.GotoFirstElement();
-	while (destinations.HasCurrentElement())
+	for (const auto& dest : destinations)
 	{
-		sendto(rtpsock,(const char *)data,len,0,(const struct sockaddr *)destinations.GetCurrentElement().GetRTPSockAddr(),sizeof(struct sockaddr_in6));
-		destinations.GotoNextElement();
+		sendto(rtpsock,(const char *)data,len,0,(const struct sockaddr *)dest.GetRTPSockAddr(),sizeof(struct sockaddr_in6));
 	}
 	
 	MAINMUTEX_UNLOCK
@@ -681,11 +670,9 @@ int RTPUDPv6Transmitter::SendRTCPData(const void *data,size_t len)
 		return ERR_RTP_UDPV6TRANS_SPECIFIEDSIZETOOBIG;
 	}
 	
-	destinations.GotoFirstElement();
-	while (destinations.HasCurrentElement())
+	for (const auto& dest : destinations)
 	{
-		sendto(rtcpsock,(const char *)data,len,0,(const struct sockaddr *)destinations.GetCurrentElement().GetRTCPSockAddr(),sizeof(struct sockaddr_in6));
-		destinations.GotoNextElement();
+		sendto(rtcpsock,(const char *)data,len,0,(const struct sockaddr *)dest.GetRTCPSockAddr(),sizeof(struct sockaddr_in6));
 	}
 	
 	MAINMUTEX_UNLOCK
@@ -712,7 +699,8 @@ int RTPUDPv6Transmitter::AddDestination(const RTPAddress &addr)
 	
 	RTPIPv6Address &address = (RTPIPv6Address &)addr;
 	RTPIPv6Destination dest(address.GetIP(),address.GetPort());
-	int status = destinations.AddElement(dest);
+	auto result = destinations.insert(dest);
+	int status = result.second ? 0 : ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
 
 	MAINMUTEX_UNLOCK
 	return status;
@@ -738,7 +726,8 @@ int RTPUDPv6Transmitter::DeleteDestination(const RTPAddress &addr)
 	
 	RTPIPv6Address &address = (RTPIPv6Address &)addr;	
 	RTPIPv6Destination dest(address.GetIP(),address.GetPort());
-	int status = destinations.DeleteElement(dest);
+	size_t erased = destinations.erase(dest);
+	int status = erased > 0 ? 0 : ERR_RTP_HASHTABLE_ELEMENTNOTFOUND;
 	
 	MAINMUTEX_UNLOCK
 	return status;
@@ -751,7 +740,7 @@ void RTPUDPv6Transmitter::ClearDestinations()
 	
 	MAINMUTEX_LOCK
 	if (created)
-		destinations.Clear();
+		destinations.clear();
 	MAINMUTEX_UNLOCK
 }
 
@@ -804,13 +793,14 @@ int RTPUDPv6Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 		return ERR_RTP_UDPV6TRANS_NOTAMULTICASTADDRESS;
 	}
 	
-	status = multicastgroups.AddElement(mcastIP);
+	auto result = multicastgroups.insert(mcastIP);
+	status = result.second ? 0 : ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
 	if (status >= 0)
 	{
 		RTPUDPV6TRANS_MCASTMEMBERSHIP(rtpsock,IPV6_JOIN_GROUP,mcastIP,status);
 		if (status != 0)
 		{
-			multicastgroups.DeleteElement(mcastIP);
+			multicastgroups.erase(mcastIP);
 			MAINMUTEX_UNLOCK
 			return ERR_RTP_UDPV6TRANS_COULDNTJOINMULTICASTGROUP;
 		}
@@ -818,7 +808,7 @@ int RTPUDPv6Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 		if (status != 0)
 		{
 			RTPUDPV6TRANS_MCASTMEMBERSHIP(rtpsock,IPV6_LEAVE_GROUP,mcastIP,status);
-			multicastgroups.DeleteElement(mcastIP);
+			multicastgroups.erase(mcastIP);
 			MAINMUTEX_UNLOCK
 			return ERR_RTP_UDPV6TRANS_COULDNTJOINMULTICASTGROUP;
 		}
@@ -856,7 +846,8 @@ int RTPUDPv6Transmitter::LeaveMulticastGroup(const RTPAddress &addr)
 		return ERR_RTP_UDPV6TRANS_NOTAMULTICASTADDRESS;
 	}
 	
-	status = multicastgroups.DeleteElement(mcastIP);
+	size_t erased = multicastgroups.erase(mcastIP);
+	status = erased > 0 ? 0 : ERR_RTP_HASHTABLE_ELEMENTNOTFOUND;
 	if (status >= 0)
 	{	
 		RTPUDPV6TRANS_MCASTMEMBERSHIP(rtpsock,IPV6_LEAVE_GROUP,mcastIP,status);
@@ -876,19 +867,14 @@ void RTPUDPv6Transmitter::LeaveAllMulticastGroups()
 	MAINMUTEX_LOCK
 	if (created)
 	{
-		multicastgroups.GotoFirstElement();
-		while (multicastgroups.HasCurrentElement())
+		for (const in6_addr& mcastIP : multicastgroups)
 		{
-			in6_addr mcastIP;
 			int status = 0;
-
-			mcastIP = multicastgroups.GetCurrentElement();
 			RTPUDPV6TRANS_MCASTMEMBERSHIP(rtpsock,IPV6_LEAVE_GROUP,mcastIP,status);
 			RTPUDPV6TRANS_MCASTMEMBERSHIP(rtcpsock,IPV6_LEAVE_GROUP,mcastIP,status);
-			multicastgroups.GotoNextElement();
 			MEDIA_RTP_UNUSED(status);
 		}
-		multicastgroups.Clear();
+		multicastgroups.clear();
 	}
 	MAINMUTEX_UNLOCK
 }
@@ -925,7 +911,7 @@ int RTPUDPv6Transmitter::SetReceiveMode(RTPTransmitter::ReceiveMode m)
 	if (m != receivemode)
 	{
 		receivemode = m;
-		acceptignoreinfo.Clear();
+		acceptignoreinfo.clear();
 	}
 	MAINMUTEX_UNLOCK
 	return 0;
@@ -1277,10 +1263,10 @@ int RTPUDPv6Transmitter::PollSocket(bool rtp)
 
 int RTPUDPv6Transmitter::ProcessAddAcceptIgnoreEntry(in6_addr ip,uint16_t port)
 {
-	acceptignoreinfo.GotoElement(ip);
-	if (acceptignoreinfo.HasCurrentElement()) // 该 IP 地址的条目已存在
+	auto it = acceptignoreinfo.find(ip);
+	if (it != acceptignoreinfo.end()) // 该 IP 地址的条目已存在
 	{
-		PortInfo *portinf = acceptignoreinfo.GetCurrentElement();
+		PortInfo *portinf = it->second;
 		
 		if (port == 0) // 选择所有端口
 		{
@@ -1312,7 +1298,8 @@ int RTPUDPv6Transmitter::ProcessAddAcceptIgnoreEntry(in6_addr ip,uint16_t port)
 		else
 			portinf->portlist.push_front(port);
 		
-		status = acceptignoreinfo.AddElement(ip,portinf);
+		auto result = acceptignoreinfo.emplace(ip, portinf);
+		status = result.second ? 0 : ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
 		if (status < 0)
 		{
 			RTPDelete(portinf,GetMemoryManager());
@@ -1324,27 +1311,21 @@ int RTPUDPv6Transmitter::ProcessAddAcceptIgnoreEntry(in6_addr ip,uint16_t port)
 
 void RTPUDPv6Transmitter::ClearAcceptIgnoreInfo()
 {
-	acceptignoreinfo.GotoFirstElement();
-	while (acceptignoreinfo.HasCurrentElement())
+	for (auto& pair : acceptignoreinfo)
 	{
-		PortInfo *inf;
-
-		inf = acceptignoreinfo.GetCurrentElement();
+		PortInfo *inf = pair.second;
 		RTPDelete(inf,GetMemoryManager());
-		acceptignoreinfo.GotoNextElement();
 	}
-	acceptignoreinfo.Clear();
+	acceptignoreinfo.clear();
 }
 	
 int RTPUDPv6Transmitter::ProcessDeleteAcceptIgnoreEntry(in6_addr ip,uint16_t port)
 {
-	acceptignoreinfo.GotoElement(ip);
-	if (!acceptignoreinfo.HasCurrentElement())
+	auto it = acceptignoreinfo.find(ip);
+	if (it == acceptignoreinfo.end())
 		return ERR_RTP_UDPV6TRANS_NOSUCHENTRY;
 	
-	PortInfo *inf;
-
-	inf = acceptignoreinfo.GetCurrentElement();
+	PortInfo *inf = it->second;
 			if (port == 0) // 删除所有条目
 	{
 		inf->all = false;
@@ -1393,11 +1374,11 @@ bool RTPUDPv6Transmitter::ShouldAcceptData(in6_addr srcip,uint16_t srcport)
 	{
 		PortInfo *inf;
 
-		acceptignoreinfo.GotoElement(srcip);
-		if (!acceptignoreinfo.HasCurrentElement())
+		auto it = acceptignoreinfo.find(srcip);
+		if (it == acceptignoreinfo.end())
 			return false;
 		
-		inf = acceptignoreinfo.GetCurrentElement();
+		inf = it->second;
 		if (!inf->all) // 只接受列表中的
 		{
 			std::list<uint16_t>::const_iterator it,begin,end;
@@ -1429,11 +1410,11 @@ bool RTPUDPv6Transmitter::ShouldAcceptData(in6_addr srcip,uint16_t srcport)
 	{
 		PortInfo *inf;
 
-		acceptignoreinfo.GotoElement(srcip);
-		if (!acceptignoreinfo.HasCurrentElement())
+		auto it = acceptignoreinfo.find(srcip);
+		if (it == acceptignoreinfo.end())
 			return true;
 		
-		inf = acceptignoreinfo.GetCurrentElement();
+		inf = it->second;
 		if (!inf->all) // 忽略列表中的端口
 		{
 			std::list<uint16_t>::const_iterator it,begin,end;

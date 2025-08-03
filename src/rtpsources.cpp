@@ -15,7 +15,7 @@
 
 
 
-RTPSources::RTPSources(ProbationType probtype,RTPMemoryManager *mgr) : RTPMemoryObject(mgr),sourcelist(mgr,RTPMEM_TYPE_CLASS_SOURCETABLEHASHELEMENT)
+RTPSources::RTPSources(ProbationType probtype,RTPMemoryManager *mgr) : RTPMemoryObject(mgr)
 {
 	MEDIA_RTP_UNUSED(probtype); // 可能未使用
 
@@ -23,6 +23,7 @@ RTPSources::RTPSources(ProbationType probtype,RTPMemoryManager *mgr) : RTPMemory
 	sendercount = 0;
 	activecount = 0;
 	owndata = 0;
+	current_it = sourcelist.end();
 #ifdef RTP_SUPPORT_PROBATION
 	probationtype = probtype;
 #endif // RTP_SUPPORT_PROBATION
@@ -40,16 +41,12 @@ void RTPSources::Clear()
 
 void RTPSources::ClearSourceList()
 {
-	sourcelist.GotoFirstElement();
-	while (sourcelist.HasCurrentElement())
+	for (auto& pair : sourcelist)
 	{
-		RTPInternalSourceData *sourcedata;
-
-		sourcedata = sourcelist.GetCurrentElement();
+		RTPInternalSourceData *sourcedata = pair.second;
 		RTPDelete(sourcedata,GetMemoryManager());
-		sourcelist.GotoNextElement();
 	}
-	sourcelist.Clear();
+	sourcelist.clear();
 	owndata = 0;
 	totalcount = 0;
 	sendercount = 0;
@@ -90,8 +87,7 @@ int RTPSources::DeleteOwnSSRC()
 
 	uint32_t ssrc = owndata->GetSSRC();
 
-	sourcelist.GotoElement(ssrc);
-	sourcelist.DeleteCurrentElement();
+	sourcelist.erase(ssrc);
 
 	totalcount--;
 	if (owndata->IsSender())
@@ -502,112 +498,79 @@ int RTPSources::ProcessRTCPCompoundPacket(RTCPCompoundPacket *rtcpcomppack,const
 
 bool RTPSources::GotoFirstSource()
 {
-	sourcelist.GotoFirstElement();
-	if (sourcelist.HasCurrentElement())
-		return true;
-	return false;
+	current_it = sourcelist.begin();
+	return current_it != sourcelist.end();
 }
 
 bool RTPSources::GotoNextSource()
 {
-	sourcelist.GotoNextElement();
-	if (sourcelist.HasCurrentElement())
-		return true;
-	return false;
+	if (current_it != sourcelist.end())
+		++current_it;
+	return current_it != sourcelist.end();
 }
 
 bool RTPSources::GotoPreviousSource()
 {
-	sourcelist.GotoPreviousElement();
-	if (sourcelist.HasCurrentElement())
-		return true;
+	// std::unordered_map 不支持反向遍历
+	// 这个功能需要重新设计或者使用其他容器
 	return false;
 }
 
 bool RTPSources::GotoFirstSourceWithData()
 {
-	bool found = false;
-	
-	sourcelist.GotoFirstElement();
-	while (!found && sourcelist.HasCurrentElement())
+	for (current_it = sourcelist.begin(); current_it != sourcelist.end(); ++current_it)
 	{
-		RTPInternalSourceData *srcdat;
-
-		srcdat = sourcelist.GetCurrentElement();
-		if (srcdat->HasData())
-			found = true;
-		else
-			sourcelist.GotoNextElement();
+		if (current_it->second->HasData())
+			return true;
 	}
-			
-	return found;
+	return false;
 }
 
 bool RTPSources::GotoNextSourceWithData()
 {
-	bool found = false;
+	if (current_it != sourcelist.end())
+		++current_it;
 	
-	sourcelist.GotoNextElement();
-	while (!found && sourcelist.HasCurrentElement())
+	for (; current_it != sourcelist.end(); ++current_it)
 	{
-		RTPInternalSourceData *srcdat;
-
-		srcdat = sourcelist.GetCurrentElement();
-		if (srcdat->HasData())
-			found = true;
-		else
-			sourcelist.GotoNextElement();
+		if (current_it->second->HasData())
+			return true;
 	}
-			
-	return found;
+	return false;
 }
 
 bool RTPSources::GotoPreviousSourceWithData()
 {
-	bool found = false;
-	
-	sourcelist.GotoPreviousElement();
-	while (!found && sourcelist.HasCurrentElement())
-	{
-		RTPInternalSourceData *srcdat;
-
-		srcdat = sourcelist.GetCurrentElement();
-		if (srcdat->HasData())
-			found = true;
-		else
-			sourcelist.GotoPreviousElement();
-	}
-			
-	return found;
+	// std::unordered_map 不支持反向遍历
+	return false;
 }
 
 RTPSourceData *RTPSources::GetCurrentSourceInfo()
 {
-	if (!sourcelist.HasCurrentElement())
+	if (current_it == sourcelist.end())
 		return 0;
-	return sourcelist.GetCurrentElement();
+	return current_it->second;
 }
 
 RTPSourceData *RTPSources::GetSourceInfo(uint32_t ssrc)
 {
-	if (sourcelist.GotoElement(ssrc) < 0)
+	auto it = sourcelist.find(ssrc);
+	if (it == sourcelist.end())
 		return 0;
-	if (!sourcelist.HasCurrentElement())
-		return 0;
-	return sourcelist.GetCurrentElement();
+	return it->second;
 }
 
 bool RTPSources::GotEntry(uint32_t ssrc)
 {
-	return sourcelist.HasElement(ssrc);
+	return sourcelist.find(ssrc) != sourcelist.end();
 }
 
 RTPPacket *RTPSources::GetNextPacket()
 {
-	if (!sourcelist.HasCurrentElement())
+	if (current_it == sourcelist.end())
 		return 0;
 	
-	RTPInternalSourceData *srcdat = sourcelist.GetCurrentElement();
+	RTPInternalSourceData *srcdat = current_it->second;
 	RTPPacket *pack = srcdat->GetNextPacket();
 	return pack;
 }
@@ -783,7 +746,8 @@ int RTPSources::ObtainSourceDataInstance(uint32_t ssrc,RTPInternalSourceData **s
 	RTPInternalSourceData *srcdat2;
 	int status;
 	
-	if (sourcelist.GotoElement(ssrc) < 0) // 此源无条目
+	auto it = sourcelist.find(ssrc);
+	if (it == sourcelist.end()) // 此源无条目
 	{
 #ifdef RTP_SUPPORT_PROBATION
 		srcdat2 = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPINTERNALSOURCEDATA) RTPInternalSourceData(ssrc,probationtype,GetMemoryManager());
@@ -792,10 +756,11 @@ int RTPSources::ObtainSourceDataInstance(uint32_t ssrc,RTPInternalSourceData **s
 #endif // RTP_SUPPORT_PROBATION
 		if (srcdat2 == 0)
 			return ERR_RTP_OUTOFMEM;
-		if ((status = sourcelist.AddElement(ssrc,srcdat2)) < 0)
+		auto result = sourcelist.emplace(ssrc, srcdat2);
+		if (!result.second)
 		{
 			RTPDelete(srcdat2,GetMemoryManager());
-			return status;
+			return ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
 		}
 		*srcdat = srcdat2;
 		*created = true;
@@ -803,7 +768,7 @@ int RTPSources::ObtainSourceDataInstance(uint32_t ssrc,RTPInternalSourceData **s
 	}
 	else
 	{
-		*srcdat = sourcelist.GetCurrentElement();
+		*srcdat = it->second;
 		*created = false;
 	}
 	return 0;
@@ -869,27 +834,24 @@ void RTPSources::Timeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 	RTPTime checktime = curtime;
 	checktime -= timeoutdelay;
 	
-	sourcelist.GotoFirstElement();
-	while (sourcelist.HasCurrentElement())
+	for (auto it = sourcelist.begin(); it != sourcelist.end();)
 	{
-		RTPInternalSourceData *srcdat = sourcelist.GetCurrentElement();
+		RTPInternalSourceData *srcdat = it->second;
 		RTPTime lastmsgtime = srcdat->INF_GetLastMessageTime();
 
 		// 我们不想让自己超时
 		if ((srcdat != owndata) && (lastmsgtime < checktime)) // timeout
 		{
-			
 			totalcount--;
 			if (srcdat->IsSender())
 				sendercount--;
 			if (srcdat->IsActive())
 				activecount--;
 			
-			sourcelist.DeleteCurrentElement();
-
 			OnTimeout(srcdat);
 			OnRemoveSource(srcdat);
 			RTPDelete(srcdat,GetMemoryManager());
+			it = sourcelist.erase(it);
 		}
 		else
 		{
@@ -898,7 +860,7 @@ void RTPSources::Timeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 				newsendercount++;
 			if (srcdat->IsActive())
 				newactivecount++;
-			sourcelist.GotoNextElement();
+			++it;
 		}
 	}
 	
@@ -915,10 +877,9 @@ void RTPSources::SenderTimeout(const RTPTime &curtime,const RTPTime &timeoutdela
 	RTPTime checktime = curtime;
 	checktime -= timeoutdelay;
 	
-	sourcelist.GotoFirstElement();
-	while (sourcelist.HasCurrentElement())
+	for (auto& pair : sourcelist)
 	{
-		RTPInternalSourceData *srcdat = sourcelist.GetCurrentElement();
+		RTPInternalSourceData *srcdat = pair.second;
 
 		newtotalcount++;
 		if (srcdat->IsActive())
@@ -936,7 +897,6 @@ void RTPSources::SenderTimeout(const RTPTime &curtime,const RTPTime &timeoutdela
 			else
 				newsendercount++;
 		}
-		sourcelist.GotoNextElement();
 	}
 	
 
@@ -954,10 +914,9 @@ void RTPSources::BYETimeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 	RTPTime checktime = curtime;
 	checktime -= timeoutdelay;
 	
-	sourcelist.GotoFirstElement();
-	while (sourcelist.HasCurrentElement())
+	for (auto it = sourcelist.begin(); it != sourcelist.end();)
 	{
-		RTPInternalSourceData *srcdat = sourcelist.GetCurrentElement();
+		RTPInternalSourceData *srcdat = it->second;
 		
 		if (srcdat->ReceivedBYE())
 		{
@@ -970,10 +929,10 @@ void RTPSources::BYETimeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 					sendercount--;
 				if (srcdat->IsActive())
 					activecount--;
-				sourcelist.DeleteCurrentElement();
 				OnBYETimeout(srcdat);
 				OnRemoveSource(srcdat);
 				RTPDelete(srcdat,GetMemoryManager());
+				it = sourcelist.erase(it);
 			}
 			else
 			{
@@ -982,7 +941,7 @@ void RTPSources::BYETimeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 					newsendercount++;
 				if (srcdat->IsActive())
 					newactivecount++;
-				sourcelist.GotoNextElement();
+				++it;
 			}
 		}
 		else
@@ -992,7 +951,7 @@ void RTPSources::BYETimeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 				newsendercount++;
 			if (srcdat->IsActive())
 				newactivecount++;
-			sourcelist.GotoNextElement();
+			++it;
 		}
 	}
 	
@@ -1011,10 +970,9 @@ void RTPSources::NoteTimeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 	RTPTime checktime = curtime;
 	checktime -= timeoutdelay;
 	
-	sourcelist.GotoFirstElement();
-	while (sourcelist.HasCurrentElement())
+	for (auto& pair : sourcelist)
 	{
-		RTPInternalSourceData *srcdat = sourcelist.GetCurrentElement();
+		RTPInternalSourceData *srcdat = pair.second;
 		size_t notelen;
 
         	srcdat->SDES_GetNote(&notelen);
@@ -1034,7 +992,6 @@ void RTPSources::NoteTimeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 			newsendercount++;
 		if (srcdat->IsActive())
 			newactivecount++;
-		sourcelist.GotoNextElement();
 	}
 	
 
@@ -1059,10 +1016,10 @@ void RTPSources::MultipleTimeouts(const RTPTime &curtime,const RTPTime &senderti
 	generaltchecktime -= generaltimeout;
 	notechecktime -= notetimeout;
 	
-	sourcelist.GotoFirstElement();
-	while (sourcelist.HasCurrentElement())
+	// 遍历所有源进行多重超时检查
+	for (auto it = sourcelist.begin(); it != sourcelist.end();)
 	{
-		RTPInternalSourceData *srcdat = sourcelist.GetCurrentElement();
+		RTPInternalSourceData *srcdat = it->second;
 		bool deleted,issender,isactive;
 		bool byetimeout,normaltimeout,notetimeout;
 		
@@ -1093,7 +1050,8 @@ void RTPSources::MultipleTimeouts(const RTPTime &curtime,const RTPTime &senderti
 
 			if ((srcdat != owndata) && (byechecktime > byetime))
 			{
-				sourcelist.DeleteCurrentElement();
+				it = sourcelist.erase(it);
+				continue;
 				deleted = true;
 				byetimeout = true;
 			}
@@ -1105,7 +1063,8 @@ void RTPSources::MultipleTimeouts(const RTPTime &curtime,const RTPTime &senderti
 
 			if ((srcdat != owndata) && (lastmsgtime < generaltchecktime))
 			{
-				sourcelist.DeleteCurrentElement();
+				it = sourcelist.erase(it);
+				continue;
 				deleted = true;
 				normaltimeout = true;
 			}
@@ -1134,7 +1093,7 @@ void RTPSources::MultipleTimeouts(const RTPTime &curtime,const RTPTime &senderti
 			if (notetimeout)
 				OnNoteTimeout(srcdat);
 
-			sourcelist.GotoNextElement();
+			++it;
 		}
 		else // deleted entry
 		{
