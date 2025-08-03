@@ -1,3 +1,0 @@
-#include "rtpconfig.h"
-
-${RTP_INTTYPE_HEADERS}
