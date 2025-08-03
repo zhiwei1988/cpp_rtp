@@ -24,7 +24,7 @@
 class RTPTransmitter;
 class RTPSessionParams;
 class RTPTransmissionParams;
-class RTPAddress;
+class RTPEndpoint;
 class RTPSourceData;
 class RTPPacket;
 class RTPPollThread;
@@ -82,10 +82,10 @@ public:
 	uint32_t GetLocalSSRC();
 	
 	/** Adds \c addr to the list of destinations. */
-	int AddDestination(const RTPAddress &addr);
+	int AddDestination(const RTPEndpoint &addr);
 
 	/** Deletes \c addr from the list of destinations. */
-	int DeleteDestination(const RTPAddress &addr);
+	int DeleteDestination(const RTPEndpoint &addr);
 
 	/** Clears the list of destinations. */
 	void ClearDestinations();
@@ -94,10 +94,10 @@ public:
 	bool SupportsMulticasting();
 
 	/** Joins the multicast group specified by \c addr. */
-	int JoinMulticastGroup(const RTPAddress &addr);
+	int JoinMulticastGroup(const RTPEndpoint &addr);
 
 	/** Leaves the multicast group specified by \c addr. */
-	int LeaveMulticastGroup(const RTPAddress &addr);
+	int LeaveMulticastGroup(const RTPEndpoint &addr);
 
 	/** Leaves all multicast groups. */
 	void LeaveAllMulticastGroups();
@@ -309,19 +309,19 @@ public:
 	int SetReceiveMode(RTPTransmitter::ReceiveMode m);
 
 	/** Adds \c addr to the list of addresses to ignore. */
-	int AddToIgnoreList(const RTPAddress &addr);
+	int AddToIgnoreList(const RTPEndpoint &addr);
 
 	/** Deletes \c addr from the list of addresses to ignore. */
-	int DeleteFromIgnoreList(const RTPAddress &addr);
+	int DeleteFromIgnoreList(const RTPEndpoint &addr);
 
 	/** Clears the list of addresses to ignore. */
 	void ClearIgnoreList();
 
 	/** Adds \c addr to the list of addresses to accept. */
-	int AddToAcceptList(const RTPAddress &addr);
+	int AddToAcceptList(const RTPEndpoint &addr);
 
 	/** Deletes \c addr from the list of addresses to accept. */
-	int DeleteFromAcceptList(const RTPAddress &addr);
+	int DeleteFromAcceptList(const RTPEndpoint &addr);
 
 	/** Clears the list of addresses to accept. */
 	void ClearAcceptList();
@@ -414,21 +414,21 @@ protected:
 	 *  over the sources using the GotoFirst/GotoNext functions. In that case, the
 	 *  RTPSession::OnValidatedRTPPacket function should be used.
 	 */
-	virtual void OnRTPPacket(RTPPacket *pack,const RTPTime &receivetime, const RTPAddress *senderaddress);
+	virtual void OnRTPPacket(RTPPacket *pack,const RTPTime &receivetime, const RTPEndpoint *senderaddress);
 
 	/** Is called when an incoming RTCP packet is about to be processed. */
 	virtual void OnRTCPCompoundPacket(RTCPCompoundPacket *pack,const RTPTime &receivetime,
-	                                  const RTPAddress *senderaddress);
+	                                  const RTPEndpoint *senderaddress);
 
 	/** Is called when an SSRC collision was detected. 
 	 *  Is called when an SSRC collision was detected. The instance \c srcdat is the one present in 
 	 *  the table, the address \c senderaddress is the one that collided with one of the addresses 
 	 *  and \c isrtp indicates against which address of \c srcdat the check failed.
 	 */
-	virtual void OnSSRCCollision(RTPSourceData *srcdat,const RTPAddress *senderaddress,bool isrtp);
+	virtual void OnSSRCCollision(RTPSourceData *srcdat,const RTPEndpoint *senderaddress,bool isrtp);
 
 	/** Is called when another CNAME was received than the one already present for source \c srcdat. */
-	virtual void OnCNAMECollision(RTPSourceData *srcdat,const RTPAddress *senderaddress,
+	virtual void OnCNAMECollision(RTPSourceData *srcdat,const RTPEndpoint *senderaddress,
 	                              const uint8_t *cname,size_t cnamelength);
 
 	/** Is called when a new entry \c srcdat is added to the source table. */
@@ -447,15 +447,15 @@ protected:
 	 *  from address \c senderaddress.
 	 */
 	virtual void OnAPPPacket(RTCPAPPPacket *apppacket,const RTPTime &receivetime,
-	                         const RTPAddress *senderaddress);
+	                         const RTPEndpoint *senderaddress);
 	
 	/** Is called when an unknown RTCP packet type was detected. */
 	virtual void OnUnknownPacketType(RTCPPacket *rtcppack,const RTPTime &receivetime,
-	                                 const RTPAddress *senderaddress);
+	                                 const RTPEndpoint *senderaddress);
 
 	/** Is called when an unknown packet format for a known packet type was detected. */
 	virtual void OnUnknownPacketFormat(RTCPPacket *rtcppack,const RTPTime &receivetime,
-	                                   const RTPAddress *senderaddress);
+	                                   const RTPEndpoint *senderaddress);
 
 	/** Is called when the SDES NOTE item for source \c srcdat has been timed out. */
 	virtual void OnNoteTimeout(RTPSourceData *srcdat);
@@ -591,17 +591,17 @@ private:
 	friend class RTCPSessionPacketBuilder;
 };
 
-inline void RTPSession::OnRTPPacket(RTPPacket *, const RTPTime &, const RTPAddress *)                   { }
-inline void RTPSession::OnRTCPCompoundPacket(RTCPCompoundPacket *, const RTPTime &, const RTPAddress *) { }
-inline void RTPSession::OnSSRCCollision(RTPSourceData *, const RTPAddress *, bool )                     { }
-inline void RTPSession::OnCNAMECollision(RTPSourceData *, const RTPAddress *, const uint8_t *, size_t ) { }
+inline void RTPSession::OnRTPPacket(RTPPacket *, const RTPTime &, const RTPEndpoint *)                   { }
+inline void RTPSession::OnRTCPCompoundPacket(RTCPCompoundPacket *, const RTPTime &, const RTPEndpoint *) { }
+inline void RTPSession::OnSSRCCollision(RTPSourceData *, const RTPEndpoint *, bool )                     { }
+inline void RTPSession::OnCNAMECollision(RTPSourceData *, const RTPEndpoint *, const uint8_t *, size_t ) { }
 inline void RTPSession::OnNewSource(RTPSourceData *)                                                    { }
 inline void RTPSession::OnRemoveSource(RTPSourceData *)                                                 { }
 inline void RTPSession::OnTimeout(RTPSourceData *)                                                      { }
 inline void RTPSession::OnBYETimeout(RTPSourceData *)                                                   { }
-inline void RTPSession::OnAPPPacket(RTCPAPPPacket *, const RTPTime &, const RTPAddress *)               { }
-inline void RTPSession::OnUnknownPacketType(RTCPPacket *, const RTPTime &, const RTPAddress *)          { }
-inline void RTPSession::OnUnknownPacketFormat(RTCPPacket *, const RTPTime &, const RTPAddress *)        { }
+inline void RTPSession::OnAPPPacket(RTCPAPPPacket *, const RTPTime &, const RTPEndpoint *)               { }
+inline void RTPSession::OnUnknownPacketType(RTCPPacket *, const RTPTime &, const RTPEndpoint *)          { }
+inline void RTPSession::OnUnknownPacketFormat(RTCPPacket *, const RTPTime &, const RTPEndpoint *)        { }
 inline void RTPSession::OnNoteTimeout(RTPSourceData *)                                                  { }
 inline void RTPSession::OnRTCPSenderReport(RTPSourceData *)                                             { }
 inline void RTPSession::OnRTCPReceiverReport(RTPSourceData *)                                           { }

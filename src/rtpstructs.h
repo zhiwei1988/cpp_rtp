@@ -7,7 +7,7 @@
 #define RTPSTRUCTS_H
 
 #include "rtpconfig.h"
-#include "rtptypes.h"
+#include <cstdint>
 
 struct RTPHeader
 {

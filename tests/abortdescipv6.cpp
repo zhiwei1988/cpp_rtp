@@ -13,7 +13,7 @@ using namespace std;
 
 #include "rtpsession.h"
 #include "rtpudpv6transmitter.h"
-#include "rtpipv6address.h"
+#include "rtpendpoint.h"
 #include "rtpsessionparams.h"
 #include "rtperrors.h"
 #include "rtpsourcedata.h"
@@ -205,11 +205,12 @@ int main(void)
 	pollSockets.push_back(abortDesc.GetAbortSocket());
 
 	// Let each session send to the next
-	uint8_t localHost[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
+	struct in6_addr localHost;
+	inet_pton(AF_INET6, "::1", &localHost); // IPv6 loopback
 	for (int i = 0 ; i < sessions.size() ; i++)
 	{
 		uint16_t destPortbase = portBases[(i+1)%portBases.size()];
-		checkerror(sessions[i]->AddDestination(RTPIPv6Address(localHost, destPortbase)));
+		checkerror(sessions[i]->AddDestination(RTPEndpoint(localHost, destPortbase)));
 	}
 
 	MyPollThread myPollThread(pollSockets, sessions);

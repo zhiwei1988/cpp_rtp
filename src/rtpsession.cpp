@@ -484,14 +484,14 @@ uint32_t RTPSession::GetLocalSSRC()
 	return ssrc;
 }
 
-int RTPSession::AddDestination(const RTPAddress &addr)
+int RTPSession::AddDestination(const RTPEndpoint &addr)
 {
 	if (!created)
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	return rtptrans->AddDestination(addr);
 }
 
-int RTPSession::DeleteDestination(const RTPAddress &addr)
+int RTPSession::DeleteDestination(const RTPEndpoint &addr)
 {
 	if (!created)
 		return MEDIA_RTP_ERR_INVALID_STATE;
@@ -512,14 +512,14 @@ bool RTPSession::SupportsMulticasting()
 	return rtptrans->SupportsMulticasting();
 }
 
-int RTPSession::JoinMulticastGroup(const RTPAddress &addr)
+int RTPSession::JoinMulticastGroup(const RTPEndpoint &addr)
 {
 	if (!created)
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	return rtptrans->JoinMulticastGroup(addr);
 }
 
-int RTPSession::LeaveMulticastGroup(const RTPAddress &addr)
+int RTPSession::LeaveMulticastGroup(const RTPEndpoint &addr)
 {
 	if (!created)
 		return MEDIA_RTP_ERR_INVALID_STATE;
@@ -1078,14 +1078,14 @@ int RTPSession::SetReceiveMode(RTPTransmitter::ReceiveMode m)
 	return rtptrans->SetReceiveMode(m);
 }
 
-int RTPSession::AddToIgnoreList(const RTPAddress &addr)
+int RTPSession::AddToIgnoreList(const RTPEndpoint &addr)
 {
 	if (!created)
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	return rtptrans->AddToIgnoreList(addr);
 }
 
-int RTPSession::DeleteFromIgnoreList(const RTPAddress &addr)
+int RTPSession::DeleteFromIgnoreList(const RTPEndpoint &addr)
 {
 	if (!created)
 		return MEDIA_RTP_ERR_INVALID_STATE;
@@ -1099,14 +1099,14 @@ void RTPSession::ClearIgnoreList()
 	rtptrans->ClearIgnoreList();
 }
 
-int RTPSession::AddToAcceptList(const RTPAddress &addr)
+int RTPSession::AddToAcceptList(const RTPEndpoint &addr)
 {
 	if (!created)
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	return rtptrans->AddToAcceptList(addr);
 }
 
-int RTPSession::DeleteFromAcceptList(const RTPAddress &addr)
+int RTPSession::DeleteFromAcceptList(const RTPEndpoint &addr)
 {
 	if (!created)
 		return MEDIA_RTP_ERR_INVALID_STATE;

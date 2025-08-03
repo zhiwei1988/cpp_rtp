@@ -4,26 +4,26 @@
 
 
 
-void RTPSessionSources::OnRTPPacket(RTPPacket *pack,const RTPTime &receivetime,const RTPAddress *senderaddress)
+void RTPSessionSources::OnRTPPacket(RTPPacket *pack,const RTPTime &receivetime,const RTPEndpoint *senderaddress)
 {
 	rtpsession.OnRTPPacket(pack,receivetime,senderaddress);
 }
 
-void RTPSessionSources::OnRTCPCompoundPacket(RTCPCompoundPacket *pack,const RTPTime &receivetime,const RTPAddress *senderaddress)
+void RTPSessionSources::OnRTCPCompoundPacket(RTCPCompoundPacket *pack,const RTPTime &receivetime,const RTPEndpoint *senderaddress)
 {
 	if (senderaddress != 0) // 不要再次分析自己的 RTCP 包（它们在发送时已经分析过了）
 		rtpsession.rtcpsched.AnalyseIncoming(*pack);
 	rtpsession.OnRTCPCompoundPacket(pack,receivetime,senderaddress);
 }
 
-void RTPSessionSources::OnSSRCCollision(RTPSourceData *srcdat,const RTPAddress *senderaddress,bool isrtp)
+void RTPSessionSources::OnSSRCCollision(RTPSourceData *srcdat,const RTPEndpoint *senderaddress,bool isrtp)
 {
 	if (srcdat->IsOwnSSRC())
 		owncollision = true;
 	rtpsession.OnSSRCCollision(srcdat,senderaddress,isrtp);
 }
 
-void RTPSessionSources::OnCNAMECollision(RTPSourceData *srcdat,const RTPAddress *senderaddress,const uint8_t *cname,size_t cnamelength)
+void RTPSessionSources::OnCNAMECollision(RTPSourceData *srcdat,const RTPEndpoint *senderaddress,const uint8_t *cname,size_t cnamelength)
 {
 	rtpsession.OnCNAMECollision(srcdat,senderaddress,cname,cnamelength);
 }
@@ -55,17 +55,17 @@ void RTPSessionSources::OnBYEPacket(RTPSourceData *srcdat)
 	rtpsession.OnBYEPacket(srcdat);
 }
 
-void RTPSessionSources::OnAPPPacket(RTCPAPPPacket *apppacket,const RTPTime &receivetime,const RTPAddress *senderaddress)
+void RTPSessionSources::OnAPPPacket(RTCPAPPPacket *apppacket,const RTPTime &receivetime,const RTPEndpoint *senderaddress)
 {
 	rtpsession.OnAPPPacket(apppacket,receivetime,senderaddress);
 }
 
-void RTPSessionSources::OnUnknownPacketType(RTCPPacket *rtcppack,const RTPTime &receivetime, const RTPAddress *senderaddress)
+void RTPSessionSources::OnUnknownPacketType(RTCPPacket *rtcppack,const RTPTime &receivetime, const RTPEndpoint *senderaddress)
 {
 	rtpsession.OnUnknownPacketType(rtcppack,receivetime,senderaddress);
 }
 
-void RTPSessionSources::OnUnknownPacketFormat(RTCPPacket *rtcppack,const RTPTime &receivetime,const RTPAddress *senderaddress)
+void RTPSessionSources::OnUnknownPacketFormat(RTCPPacket *rtcppack,const RTPTime &receivetime,const RTPEndpoint *senderaddress)
 {
 	rtpsession.OnUnknownPacketFormat(rtcppack,receivetime,senderaddress);
 }

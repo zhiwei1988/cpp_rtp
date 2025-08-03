@@ -1,6 +1,6 @@
 #include "rtpsession.h"
 #include "rtpudpv4transmitter.h"
-#include "rtpipv4address.h"
+#include "rtpendpoint.h"
 #include "rtpsessionparams.h"
 #include "rtperrors.h"
 #include "rtpsourcedata.h"
@@ -56,7 +56,7 @@ public:
 		DeletePacket(rtppack);
 	}
 
-	void OnRTCPCompoundPacket(RTCPCompoundPacket *pack, const RTPTime &receivetime, const RTPAddress *senderaddress)
+	void OnRTCPCompoundPacket(RTCPCompoundPacket *pack, const RTPTime &receivetime, const RTPEndpoint *senderaddress)
 	{
 		m_packets.push_back(PacketData(pack->GetCompoundPacketData(), pack->GetCompoundPacketLength()));
 	}
@@ -120,7 +120,7 @@ int main(void)
 	
 	// We're assuming that the destination is also using RTCP multiplexing 
 	// ('true' means that the same port will be used for RTCP)
-	RTPIPv4Address addr(destip,destport,true); 
+	RTPEndpoint addr(destip,destport,true); 
 	
 	status = sess.AddDestination(addr);
 	checkerror(status);
@@ -155,7 +155,7 @@ int main(void)
 		size_t len = it->m_data.size();
 
 		RTPTime t = RTPTime::CurrentTime();
-		RTPRawPacket rawPack(pData, len, new RTPIPv4Address(), t);
+		RTPRawPacket rawPack(pData, len, new RTPEndpoint(0, 0), t);
 
 		if (rawPack.IsRTP())
 		{

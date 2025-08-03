@@ -13,16 +13,11 @@ set (HEADERS
 	rtcpsdespacket.h
 	rtcpsrpacket.h
 	rtcpunknownpacket.h
-	rtpaddress.h
 	rtpcollisionlist.h
 	${PROJECT_BINARY_DIR}/src/rtpconfig.h
 	rtpdefines.h
 	rtperrors.h
 	rtpinternalsourcedata.h
-	rtpipv4address.h
-	rtpipv4destination.h
-	rtpipv6address.h
-	rtpipv6destination.h
 	rtppacket.h
 	rtppacketbuilder.h
 	rtppollthread.h
@@ -36,14 +31,12 @@ set (HEADERS
 	rtpstructs.h
 	rtptimeutilities.h
 	rtptransmitter.h
-	${PROJECT_BINARY_DIR}/src/rtptypes.h
 	rtpudpv4transmitter.h
 	rtpudpv6transmitter.h  
-	rtpbyteaddress.h
+	rtpendpoint.h
 	rtpsocketutil.h
 	rtpabortdescriptors.h
 	rtpselect.h
-	rtptcpaddress.h
 	rtptcptransmitter.h
 	)
 
@@ -61,10 +54,6 @@ set(SOURCES
 	rtcpsrpacket.cpp
 	rtpcollisionlist.cpp
 	rtpinternalsourcedata.cpp
-	rtpipv4address.cpp
-	rtpipv6address.cpp
-	rtpipv4destination.cpp
-	rtpipv6destination.cpp
 	rtppacket.cpp
 	rtppacketbuilder.cpp
 	rtppollthread.cpp
@@ -77,9 +66,8 @@ set(SOURCES
 	rtptimeutilities.cpp
 	rtpudpv4transmitter.cpp
 	rtpudpv6transmitter.cpp 
-	rtpbyteaddress.cpp
+	rtpendpoint.cpp
 	rtpabortdescriptors.cpp
-	rtptcpaddress.cpp
 	rtptcptransmitter.cpp
 	)
 

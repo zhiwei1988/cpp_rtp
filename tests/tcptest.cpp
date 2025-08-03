@@ -5,7 +5,7 @@
 #include "rtpsessionparams.h"
 #include "rtperrors.h"
 #include "rtpsourcedata.h"
-#include "rtptcpaddress.h"
+#include "rtpendpoint.h"
 #include "rtptcptransmitter.h"
 #include "rtppacket.h"
 #include <string.h>
@@ -58,13 +58,13 @@ public:
 	void OnSendError(SocketType sock)
 	{
 		cout << m_name << ": Error sending over socket " << sock << ", removing destination" << endl;
-		DeleteDestination(RTPTCPAddress(sock));
+		DeleteDestination(RTPEndpoint(sock));
 	}
 	
 	void OnReceiveError(SocketType sock)
 	{
 		cout << m_name << ": Error receiving from socket " << sock << ", removing destination" << endl;
-		DeleteDestination(RTPTCPAddress(sock));
+		DeleteDestination(RTPEndpoint(sock));
 	}
 private:
 	string m_name;
@@ -96,8 +96,8 @@ void runTest(int sock1, int sock2)
 	checkerror(sess2.Create(sessParams, &trans2));
 	cout << "Session 2 created " << endl;
 
-	checkerror(sess1.AddDestination(RTPTCPAddress(sock1)));
-	checkerror(sess2.AddDestination(RTPTCPAddress(sock2)));
+	checkerror(sess1.AddDestination(RTPEndpoint(sock1)));
+	checkerror(sess2.AddDestination(RTPEndpoint(sock2)));
 
 	vector<uint8_t> pack(packSize);
 

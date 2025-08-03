@@ -18,7 +18,7 @@ void RTPCollisionList::Clear()
 	addresslist.clear();
 }
 
-int RTPCollisionList::UpdateAddress(const RTPAddress *addr,const RTPTime &receivetime,bool *created)
+int RTPCollisionList::UpdateAddress(const RTPEndpoint *addr,const RTPTime &receivetime,bool *created)
 {
 	if (addr == 0)
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
@@ -27,7 +27,7 @@ int RTPCollisionList::UpdateAddress(const RTPAddress *addr,const RTPTime &receiv
 	
 	for (it = addresslist.begin() ; it != addresslist.end() ; it++)
 	{
-		if (((*it).addr)->IsSameAddress(addr))
+		if (*((*it).addr) == *addr)
 		{
 			(*it).recvtime = receivetime;
 			*created = false;
@@ -35,7 +35,7 @@ int RTPCollisionList::UpdateAddress(const RTPAddress *addr,const RTPTime &receiv
 		}
 	}
 
-	RTPAddress *newaddr = addr->CreateCopy();
+	RTPEndpoint *newaddr = new RTPEndpoint(*addr);
 	if (newaddr == 0)
 		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	
@@ -44,13 +44,13 @@ int RTPCollisionList::UpdateAddress(const RTPAddress *addr,const RTPTime &receiv
 	return 0;
 }
 
-bool RTPCollisionList::HasAddress(const RTPAddress *addr) const
+bool RTPCollisionList::HasAddress(const RTPEndpoint *addr) const
 {
 	std::list<AddressAndTime>::const_iterator it;
 	
 	for (it = addresslist.begin() ; it != addresslist.end() ; it++)
 	{
-		if (((*it).addr)->IsSameAddress(addr))
+		if (*((*it).addr) == *addr)
 			return true;
 	}
 

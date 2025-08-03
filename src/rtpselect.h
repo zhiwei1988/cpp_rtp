@@ -7,7 +7,8 @@
 #define RTPSELECT_H
 
 #include "rtpconfig.h"
-#include "rtptypes.h"
+#include <cstdint>
+#include <cstddef>
 #include "rtperrors.h"
 #include "rtptimeutilities.h"
 #include "rtpsocketutil.h"

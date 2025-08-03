@@ -1,6 +1,5 @@
 #include "rtpudpv4transmitter.h"
 #include "rtprawpacket.h"
-#include "rtpipv4address.h"
 #include "rtptimeutilities.h"
 #include "rtpdefines.h"
 #include "rtpstructs.h"
@@ -20,6 +19,7 @@
 #define RTPUDPV4TRANS_IFREQBUFSIZE							8192
 
 #define RTPUDPV4TRANS_IS_MCASTADDR(x)							(((x)&0xF0000000) == 0xE0000000)
+
 
 #define RTPUDPV4TRANS_MCASTMEMBERSHIP(socket,type,mcastip,status)	{\
 										struct ip_mreq mreq;\
@@ -691,7 +691,7 @@ int RTPUDPv4Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 	return 0;
 }
 
-bool RTPUDPv4Transmitter::ComesFromThisTransmitter(const RTPAddress *addr)
+bool RTPUDPv4Transmitter::ComesFromThisTransmitter(const RTPEndpoint *addr)
 {
 	if (!init)
 		return false;
@@ -703,16 +703,15 @@ bool RTPUDPv4Transmitter::ComesFromThisTransmitter(const RTPAddress *addr)
 	
 	bool v;
 		
-	if (created && addr->GetAddressType() == RTPAddress::IPv4Address)
+	if (created && addr->GetType() == RTPEndpoint::IPv4)
 	{	
-		const RTPIPv4Address *addr2 = (const RTPIPv4Address *)addr;
 		bool found = false;
 		std::list<uint32_t>::const_iterator it;
 	
 		it = localIPs.begin();
 		while (!found && it != localIPs.end())
 		{
-			if (addr2->GetIP() == *it)
+			if (addr->GetIPv4() == *it)
 				found = true;
 			else
 				++it;
@@ -722,7 +721,7 @@ bool RTPUDPv4Transmitter::ComesFromThisTransmitter(const RTPAddress *addr)
 			v = false;
 		else
 		{
-			if (addr2->GetPort() == m_rtpPort || addr2->GetPort() == m_rtcpPort) // 检查 RTP 端口和 RTCP 端口
+			if (addr->GetRtpPort() == m_rtpPort || addr->GetRtpPort() == m_rtcpPort) // 检查 RTP 端口和 RTCP 端口
 				v = true;
 			else 
 				v = false;
@@ -868,7 +867,7 @@ int RTPUDPv4Transmitter::SendRTPData(const void *data,size_t len)
 	
 	for (const auto& dest : destinations)
 	{
-		sendto(rtpsock,(const char *)data,len,0,(const struct sockaddr *)dest.GetRTPSockAddr(),sizeof(struct sockaddr_in));
+		sendto(rtpsock,(const char *)data,len,0,dest.GetRtpSockAddr(),dest.GetSockAddrLen());
 	}
 	
 	MAINMUTEX_UNLOCK
@@ -895,14 +894,14 @@ int RTPUDPv4Transmitter::SendRTCPData(const void *data,size_t len)
 	
 	for (const auto& dest : destinations)
 	{
-		sendto(rtcpsock,(const char *)data,len,0,(const struct sockaddr *)dest.GetRTCPSockAddr(),sizeof(struct sockaddr_in));
+		sendto(rtcpsock,(const char *)data,len,0,dest.GetRtcpSockAddr(),dest.GetSockAddrLen());
 	}
 	
 	MAINMUTEX_UNLOCK
 	return 0;
 }
 
-int RTPUDPv4Transmitter::AddDestination(const RTPAddress &addr)
+int RTPUDPv4Transmitter::AddDestination(const RTPEndpoint &addr)
 {
 	if (!init)
 		return MEDIA_RTP_ERR_INVALID_STATE;
@@ -915,21 +914,20 @@ int RTPUDPv4Transmitter::AddDestination(const RTPAddress &addr)
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 
-	RTPIPv4Destination dest;
-	if (!RTPIPv4Destination::AddressToDestination(addr, dest))
+	if (addr.GetType() != RTPEndpoint::IPv4)
 	{
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	
-	auto result = destinations.insert(dest);
+	auto result = destinations.insert(addr);
 	int status = result.second ? 0 : MEDIA_RTP_ERR_INVALID_STATE;
 
 	MAINMUTEX_UNLOCK
 	return status;
 }
 
-int RTPUDPv4Transmitter::DeleteDestination(const RTPAddress &addr)
+int RTPUDPv4Transmitter::DeleteDestination(const RTPEndpoint &addr)
 {
 	if (!init)
 		return MEDIA_RTP_ERR_INVALID_STATE;
@@ -941,14 +939,13 @@ int RTPUDPv4Transmitter::DeleteDestination(const RTPAddress &addr)
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
-	RTPIPv4Destination dest;
-	if (!RTPIPv4Destination::AddressToDestination(addr, dest))
+	if (addr.GetType() != RTPEndpoint::IPv4)
 	{
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	
-	size_t erased = destinations.erase(dest);
+	size_t erased = destinations.erase(addr);
 	int status = erased > 0 ? 0 : MEDIA_RTP_ERR_INVALID_STATE;
 	
 	MAINMUTEX_UNLOCK
@@ -986,7 +983,7 @@ bool RTPUDPv4Transmitter::SupportsMulticasting()
 
 #ifdef RTP_SUPPORT_IPV4MULTICAST
 
-int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPAddress &addr)
+int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPEndpoint &addr)
 {
 	if (!init)
 		return MEDIA_RTP_ERR_INVALID_STATE;
@@ -1000,14 +997,13 @@ int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
-	if (addr.GetAddressType() != RTPAddress::IPv4Address)
+	if (addr.GetType() != RTPEndpoint::IPv4)
 	{
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	
-	const RTPIPv4Address &address = (const RTPIPv4Address &)addr;
-	uint32_t mcastIP = address.GetIP();
+		uint32_t mcastIP = addr.GetIPv4();
 	
 	if (!RTPUDPV4TRANS_IS_MCASTADDR(mcastIP))
 	{
@@ -1043,7 +1039,7 @@ int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPAddress &addr)
 	return status;
 }
 
-int RTPUDPv4Transmitter::LeaveMulticastGroup(const RTPAddress &addr)
+int RTPUDPv4Transmitter::LeaveMulticastGroup(const RTPEndpoint &addr)
 {
 	if (!init)
 		return MEDIA_RTP_ERR_INVALID_STATE;
@@ -1057,14 +1053,13 @@ int RTPUDPv4Transmitter::LeaveMulticastGroup(const RTPAddress &addr)
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
-	if (addr.GetAddressType() != RTPAddress::IPv4Address)
+	if (addr.GetType() != RTPEndpoint::IPv4)
 	{
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	
-	const RTPIPv4Address &address = (const RTPIPv4Address &)addr;
-	uint32_t mcastIP = address.GetIP();
+		uint32_t mcastIP = addr.GetIPv4();
 	
 	if (!RTPUDPV4TRANS_IS_MCASTADDR(mcastIP))
 	{
@@ -1111,12 +1106,12 @@ void RTPUDPv4Transmitter::LeaveAllMulticastGroups()
 
 #else // 无多播支持
 
-int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPAddress &addr)
+int RTPUDPv4Transmitter::JoinMulticastGroup(const RTPEndpoint &addr)
 {
 	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
 
-int RTPUDPv4Transmitter::LeaveMulticastGroup(const RTPAddress &addr)
+int RTPUDPv4Transmitter::LeaveMulticastGroup(const RTPEndpoint &addr)
 {
 	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
@@ -1147,7 +1142,7 @@ int RTPUDPv4Transmitter::SetReceiveMode(RTPTransmitter::ReceiveMode m)
 	return 0;
 }
 
-int RTPUDPv4Transmitter::AddToIgnoreList(const RTPAddress &addr)
+int RTPUDPv4Transmitter::AddToIgnoreList(const RTPEndpoint &addr)
 {
 	if (!init)
 		return MEDIA_RTP_ERR_INVALID_STATE;
@@ -1161,7 +1156,7 @@ int RTPUDPv4Transmitter::AddToIgnoreList(const RTPAddress &addr)
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
-	if (addr.GetAddressType() != RTPAddress::IPv4Address)
+	if (addr.GetType() != RTPEndpoint::IPv4)
 	{
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
@@ -1172,14 +1167,13 @@ int RTPUDPv4Transmitter::AddToIgnoreList(const RTPAddress &addr)
 		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
-	const RTPIPv4Address &address = (const RTPIPv4Address &)addr;
-	status = ProcessAddAcceptIgnoreEntry(address.GetIP(),address.GetPort());
+		status = ProcessAddAcceptIgnoreEntry(addr.GetIPv4(),addr.GetRtpPort());
 	
 	MAINMUTEX_UNLOCK
 	return status;
 }
 
-int RTPUDPv4Transmitter::DeleteFromIgnoreList(const RTPAddress &addr)
+int RTPUDPv4Transmitter::DeleteFromIgnoreList(const RTPEndpoint &addr)
 {
 	if (!init)
 		return MEDIA_RTP_ERR_INVALID_STATE;
@@ -1193,7 +1187,7 @@ int RTPUDPv4Transmitter::DeleteFromIgnoreList(const RTPAddress &addr)
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
-	if (addr.GetAddressType() != RTPAddress::IPv4Address)
+	if (addr.GetType() != RTPEndpoint::IPv4)
 	{
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
@@ -1204,8 +1198,7 @@ int RTPUDPv4Transmitter::DeleteFromIgnoreList(const RTPAddress &addr)
 		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
-	const RTPIPv4Address &address = (const RTPIPv4Address &)addr;	
-	status = ProcessDeleteAcceptIgnoreEntry(address.GetIP(),address.GetPort());
+	status = ProcessDeleteAcceptIgnoreEntry(addr.GetIPv4(),addr.GetRtpPort());
 
 	MAINMUTEX_UNLOCK
 	return status;
@@ -1222,7 +1215,7 @@ void RTPUDPv4Transmitter::ClearIgnoreList()
 	MAINMUTEX_UNLOCK
 }
 
-int RTPUDPv4Transmitter::AddToAcceptList(const RTPAddress &addr)
+int RTPUDPv4Transmitter::AddToAcceptList(const RTPEndpoint &addr)
 {
 	if (!init)
 		return MEDIA_RTP_ERR_INVALID_STATE;
@@ -1236,7 +1229,7 @@ int RTPUDPv4Transmitter::AddToAcceptList(const RTPAddress &addr)
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
-	if (addr.GetAddressType() != RTPAddress::IPv4Address)
+	if (addr.GetType() != RTPEndpoint::IPv4)
 	{
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
@@ -1247,14 +1240,13 @@ int RTPUDPv4Transmitter::AddToAcceptList(const RTPAddress &addr)
 		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
-	const RTPIPv4Address &address = (const RTPIPv4Address &)addr;
-	status = ProcessAddAcceptIgnoreEntry(address.GetIP(),address.GetPort());
+		status = ProcessAddAcceptIgnoreEntry(addr.GetIPv4(),addr.GetRtpPort());
 
 	MAINMUTEX_UNLOCK
 	return status;
 }
 
-int RTPUDPv4Transmitter::DeleteFromAcceptList(const RTPAddress &addr)
+int RTPUDPv4Transmitter::DeleteFromAcceptList(const RTPEndpoint &addr)
 {
 	if (!init)
 		return MEDIA_RTP_ERR_INVALID_STATE;
@@ -1268,7 +1260,7 @@ int RTPUDPv4Transmitter::DeleteFromAcceptList(const RTPAddress &addr)
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
-	if (addr.GetAddressType() != RTPAddress::IPv4Address)
+	if (addr.GetType() != RTPEndpoint::IPv4)
 	{
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
@@ -1279,8 +1271,7 @@ int RTPUDPv4Transmitter::DeleteFromAcceptList(const RTPAddress &addr)
 		return MEDIA_RTP_ERR_OPERATION_FAILED;
 	}
 	
-	const RTPIPv4Address &address = (const RTPIPv4Address &)addr;
-	status = ProcessDeleteAcceptIgnoreEntry(address.GetIP(),address.GetPort());
+		status = ProcessDeleteAcceptIgnoreEntry(addr.GetIPv4(),addr.GetRtpPort());
 
 	MAINMUTEX_UNLOCK
 	return status;
@@ -1456,10 +1447,10 @@ int RTPUDPv4Transmitter::PollSocket(bool rtp)
 				if (acceptdata)
 				{
 					RTPRawPacket *pack;
-					RTPIPv4Address *addr;
+					RTPEndpoint *addr;
 					uint8_t *datacopy;
 
-					addr = new RTPIPv4Address(ntohl(srcaddr.sin_addr.s_addr),ntohs(srcaddr.sin_port));
+					addr = new RTPEndpoint(ntohl(srcaddr.sin_addr.s_addr),ntohs(srcaddr.sin_port));
 					if (addr == 0)
 						return MEDIA_RTP_ERR_RESOURCE_ERROR;
 					datacopy = new uint8_t[recvlen];

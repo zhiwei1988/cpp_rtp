@@ -8,7 +8,7 @@
 
 #include "rtpconfig.h"
 #include "rtpsourcedata.h"
-#include "rtpaddress.h"
+#include "rtpendpoint.h"
 #include "rtptimeutilities.h"
 #include "rtpsources.h"
 
@@ -31,8 +31,8 @@ public:
 #endif // RTP_SUPPORT_SDESPRIV
 	int ProcessBYEPacket(const uint8_t *reason,size_t reasonlen,const RTPTime &receivetime);
 		
-	int SetRTPDataAddress(const RTPAddress *a);
-	int SetRTCPDataAddress(const RTPAddress *a);
+	int SetRTPDataAddress(const RTPEndpoint *a);
+	int SetRTCPDataAddress(const RTPEndpoint *a);
 
 	void ClearSenderFlag()										{ issender = false; }
 	void SentRTPPacket()										{ if (!ownssrc) return; RTPTime t = RTPTime::CurrentTime(); issender = true; stats.SetLastRTPPacketTime(t); stats.SetLastMessageTime(t); }
@@ -46,7 +46,7 @@ private:
 #endif // RTP_SUPPORT_PROBATION
 };
 
-inline int RTPInternalSourceData::SetRTPDataAddress(const RTPAddress *a)
+inline int RTPInternalSourceData::SetRTPDataAddress(const RTPEndpoint *a)
 {
 	if (a == 0)
 	{
@@ -58,7 +58,7 @@ inline int RTPInternalSourceData::SetRTPDataAddress(const RTPAddress *a)
 	}
 	else
 	{
-		RTPAddress *newaddr = a->CreateCopy();
+		RTPEndpoint *newaddr = new RTPEndpoint(*a);
 		if (newaddr == 0)
 			return MEDIA_RTP_ERR_RESOURCE_ERROR;
 		
@@ -70,7 +70,7 @@ inline int RTPInternalSourceData::SetRTPDataAddress(const RTPAddress *a)
 	return 0;
 }
 
-inline int RTPInternalSourceData::SetRTCPDataAddress(const RTPAddress *a)
+inline int RTPInternalSourceData::SetRTCPDataAddress(const RTPEndpoint *a)
 {
 	if (a == 0)
 	{
@@ -82,7 +82,7 @@ inline int RTPInternalSourceData::SetRTCPDataAddress(const RTPAddress *a)
 	}
 	else
 	{
-		RTPAddress *newaddr = a->CreateCopy();
+		RTPEndpoint *newaddr = new RTPEndpoint(*a);
 		if (newaddr == 0)
 			return MEDIA_RTP_ERR_RESOURCE_ERROR;
 		

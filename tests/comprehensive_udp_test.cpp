@@ -6,8 +6,7 @@
 #include "rtpsession.h"
 #include "rtpudpv4transmitter.h"
 #include "rtpudpv6transmitter.h"
-#include "rtpipv4address.h"
-#include "rtpipv6address.h"
+#include "rtpendpoint.h"
 #include "rtpsessionparams.h"
 #include "rtperrors.h"
 #include "rtpsourcedata.h"
@@ -136,7 +135,7 @@ public:
             checkError(session.Create(sessParams, &transParams), "创建IPv4会话");
             
             // 添加本地目标 - 需要指定RTCP端口
-            RTPIPv4Address dest(ntohl(inet_addr("127.0.0.1")), (uint16_t)5000, (uint16_t)5001);
+            RTPEndpoint dest(ntohl(inet_addr("127.0.0.1")), (uint16_t)5000, (uint16_t)5001);
             checkError(session.AddDestination(dest), "添加IPv4目标");
             
             // 发送测试数据包
@@ -179,8 +178,8 @@ public:
             checkError(receiver.Create(sessParams, &receiverParams), "创建接收会话");
             
             // 相互添加为目标
-            RTPIPv4Address senderAddr(ntohl(inet_addr("127.0.0.1")), (uint16_t)5010, (uint16_t)5011);
-            RTPIPv4Address receiverAddr(ntohl(inet_addr("127.0.0.1")), (uint16_t)5020, (uint16_t)5021);
+            RTPEndpoint senderAddr(ntohl(inet_addr("127.0.0.1")), (uint16_t)5010, (uint16_t)5011);
+            RTPEndpoint receiverAddr(ntohl(inet_addr("127.0.0.1")), (uint16_t)5020, (uint16_t)5021);
             
             checkError(sender.AddDestination(receiverAddr), "发送方添加目标");
             checkError(receiver.AddDestination(senderAddr), "接收方添加目标");
@@ -231,7 +230,7 @@ public:
             checkError(session.Create(sessParams, &transParams), "创建RTCP复用会话");
             
             // 添加目标，第三个参数true表示使用相同端口进行RTCP
-            RTPIPv4Address dest(ntohl(inet_addr("127.0.0.1")), 5030, true);
+            RTPEndpoint dest(ntohl(inet_addr("127.0.0.1")), 5030, true);
             checkError(session.AddDestination(dest), "添加RTCP复用目标");
             
             // 发送数据包
@@ -300,7 +299,7 @@ public:
             cout << "使用端口 - RTP: " << rtpPort << ", RTCP: " << rtcpPort << endl;
             
             // 添加目标
-            RTPIPv4Address dest(inet_addr("127.0.0.1"), rtpPort, rtcpPort);
+            RTPEndpoint dest(ntohl(inet_addr("127.0.0.1")), rtpPort, rtcpPort);
             checkError(session.AddDestination(dest), "添加现有套接字目标");
             
             // 发送数据包
@@ -344,7 +343,7 @@ public:
             // 使用IPv6本地地址
             struct in6_addr ipv6addr;
             inet_pton(AF_INET6, "::1", &ipv6addr); // IPv6 loopback
-            RTPIPv6Address dest(ipv6addr, 5040);
+            RTPEndpoint dest(ipv6addr, 5040);
             checkError(session.AddDestination(dest), "添加IPv6目标");
             
             // 发送数据包
@@ -415,7 +414,7 @@ public:
             
             checkError(session.Create(sessParams, &transParams), "创建性能测试会话");
             
-            RTPIPv4Address dest(ntohl(inet_addr("127.0.0.1")), (uint16_t)5050, (uint16_t)5051);
+            RTPEndpoint dest(ntohl(inet_addr("127.0.0.1")), (uint16_t)5050, (uint16_t)5051);
             checkError(session.AddDestination(dest), "添加性能测试目标");
             
             // 发送大量数据包

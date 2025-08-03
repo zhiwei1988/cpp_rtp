@@ -1,10 +1,11 @@
 #include "rtptcptransmitter.h"
 #include "rtprawpacket.h"
-#include "rtptcpaddress.h"
+#include "rtpendpoint.h"
 #include "rtptimeutilities.h"
 #include "rtpdefines.h"
 #include "rtpstructs.h"
 #include "rtpsocketutilinternal.h"
+
 #include "rtpinternalutils.h"
 #include "rtpselect.h"
 #include <stdio.h>
@@ -211,7 +212,7 @@ int RTPTCPTransmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 	return 0;
 }
 
-bool RTPTCPTransmitter::ComesFromThisTransmitter(const RTPAddress *addr)
+bool RTPTCPTransmitter::ComesFromThisTransmitter(const RTPEndpoint *addr)
 {
 	if (!m_init)
 		return false;
@@ -224,13 +225,16 @@ bool RTPTCPTransmitter::ComesFromThisTransmitter(const RTPAddress *addr)
 	if (!m_created)
 		return false;
 
-	if (addr->GetAddressType() != RTPAddress::TCPAddress)
+	if (addr->GetType() != RTPEndpoint::TCP)
+	{
+		MAINMUTEX_UNLOCK
 		return false;
+	}
 
-	const RTPTCPAddress *pAddr = static_cast<const RTPTCPAddress *>(addr);
 	bool v = false;
+	SocketType socket = addr->GetSocket();
 
-	MEDIA_RTP_UNUSED(pAddr);
+	MEDIA_RTP_UNUSED(socket);
 	// TODO: 目前，我们假设我们不能只发送到同一个发送器
 
 	MAINMUTEX_UNLOCK
@@ -407,7 +411,7 @@ int RTPTCPTransmitter::SendRTCPData(const void *data,size_t len)
 	return SendRTPRTCPData(data, len);
 }
 
-int RTPTCPTransmitter::AddDestination(const RTPAddress &addr)
+int RTPTCPTransmitter::AddDestination(const RTPEndpoint &addr)
 {
 	if (!m_init)
 		return MEDIA_RTP_ERR_INVALID_STATE;
@@ -420,14 +424,19 @@ int RTPTCPTransmitter::AddDestination(const RTPAddress &addr)
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 
-	if (addr.GetAddressType() != RTPAddress::TCPAddress)
+	if (addr.GetType() != RTPEndpoint::TCP)
 	{
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 
-	const RTPTCPAddress &a = static_cast<const RTPTCPAddress &>(addr);
-	SocketType s = a.GetSocket();
+	if (addr.GetType() != RTPEndpoint::TCP)
+	{
+		MAINMUTEX_UNLOCK
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
+	}
+	
+	SocketType s = addr.GetSocket();
 	if (s == 0)
 	{
 		MAINMUTEX_UNLOCK
@@ -457,7 +466,7 @@ int RTPTCPTransmitter::AddDestination(const RTPAddress &addr)
 	return 0;
 }
 
-int RTPTCPTransmitter::DeleteDestination(const RTPAddress &addr)
+int RTPTCPTransmitter::DeleteDestination(const RTPEndpoint &addr)
 {
 	if (!m_init)
 		return MEDIA_RTP_ERR_INVALID_STATE;
@@ -470,14 +479,19 @@ int RTPTCPTransmitter::DeleteDestination(const RTPAddress &addr)
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	
-	if (addr.GetAddressType() != RTPAddress::TCPAddress)
+	if (addr.GetType() != RTPEndpoint::TCP)
 	{
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 
-	const RTPTCPAddress &a = static_cast<const RTPTCPAddress &>(addr);
-	SocketType s = a.GetSocket();
+	if (addr.GetType() != RTPEndpoint::TCP)
+	{
+		MAINMUTEX_UNLOCK
+		return MEDIA_RTP_ERR_INVALID_PARAMETER;
+	}
+	
+	SocketType s = addr.GetSocket();
 	if (s == 0)
 	{
 		MAINMUTEX_UNLOCK
@@ -518,12 +532,12 @@ bool RTPTCPTransmitter::SupportsMulticasting()
 	return false;
 }
 
-int RTPTCPTransmitter::JoinMulticastGroup(const RTPAddress &)
+int RTPTCPTransmitter::JoinMulticastGroup(const RTPEndpoint &)
 {
 	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
 
-int RTPTCPTransmitter::LeaveMulticastGroup(const RTPAddress &)
+int RTPTCPTransmitter::LeaveMulticastGroup(const RTPEndpoint &)
 {
 	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
@@ -539,12 +553,12 @@ int RTPTCPTransmitter::SetReceiveMode(RTPTransmitter::ReceiveMode m)
 	return 0;
 }
 
-int RTPTCPTransmitter::AddToIgnoreList(const RTPAddress &)
+int RTPTCPTransmitter::AddToIgnoreList(const RTPEndpoint &)
 {
 	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
 
-int RTPTCPTransmitter::DeleteFromIgnoreList(const RTPAddress &)
+int RTPTCPTransmitter::DeleteFromIgnoreList(const RTPEndpoint &)
 {
 	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
@@ -553,12 +567,12 @@ void RTPTCPTransmitter::ClearIgnoreList()
 {
 }
 
-int RTPTCPTransmitter::AddToAcceptList(const RTPAddress &)
+int RTPTCPTransmitter::AddToAcceptList(const RTPEndpoint &)
 {
 	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
 
-int RTPTCPTransmitter::DeleteFromAcceptList(const RTPAddress &)
+int RTPTCPTransmitter::DeleteFromAcceptList(const RTPEndpoint &)
 {
 	return MEDIA_RTP_ERR_OPERATION_FAILED;
 }
@@ -685,7 +699,7 @@ int RTPTCPTransmitter::PollSocket(SocketType sock, SocketData &sdata)
 					int dataLength = sdata.m_dataLength;
 					sdata.Reset();
 
-					RTPTCPAddress *pAddr = new RTPTCPAddress(sock);
+					RTPEndpoint *pAddr = new RTPEndpoint(sock);
 					if (pAddr == 0)
 						return MEDIA_RTP_ERR_RESOURCE_ERROR;
 

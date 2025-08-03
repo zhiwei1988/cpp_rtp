@@ -1,5 +1,5 @@
 #include "rtpsession.h"
-#include "rtpipv4address.h"
+#include "rtpendpoint.h"
 #include "rtpsessionparams.h"
 #include "rtpudpv4transmitter.h"
 #include "rtperrors.h"
@@ -66,9 +66,9 @@ protected:
 		return true;
 	}
 
-	void OnRTCPCompoundPacket(RTCPCompoundPacket *p, const RTPTime &receivetime, const RTPAddress *senderaddress)
+	void OnRTCPCompoundPacket(RTCPCompoundPacket *p, const RTPTime &receivetime, const RTPEndpoint *senderaddress)
 	{	
-		printf("%lld.%06u RECEIVED\n",receivetime.GetSeconds(),receivetime.GetMicroSeconds());
+		printf("%ld.%06u RECEIVED\n",receivetime.GetSeconds(),receivetime.GetMicroSeconds());
 		
 		DumpCompoundPacket(stdout,p);
 	}
@@ -77,7 +77,7 @@ protected:
 	{	
 		RTPTime t = RTPTime::CurrentTime();
 		
-		printf("%lld.%06u SENDING\n",t.GetSeconds(),t.GetMicroSeconds());
+		printf("%ld.%06u SENDING\n",t.GetSeconds(),t.GetMicroSeconds());
 		
 		DumpCompoundPacket(stdout,p);
 	}
@@ -96,7 +96,7 @@ protected:
 				RTPTime t(p->GetNTPTimestamp());
 				
 				fprintf(f,"  SR packet\n    SSRC %27u\n",p->GetSenderSSRC());
-				fprintf(f,"    NTP timestamp: %10lld.%06u\n    RTP timestamp: %17u\n    Packets sent: %18u\n    Octets sent: %19u\n",t.GetSeconds(),t.GetMicroSeconds(),p->GetRTPTimestamp(),p->GetSenderPacketCount(),p->GetSenderOctetCount());
+				fprintf(f,"    NTP timestamp: %10ld.%06u\n    RTP timestamp: %17u\n    Packets sent: %18u\n    Octets sent: %19u\n",t.GetSeconds(),t.GetMicroSeconds(),p->GetRTPTimestamp(),p->GetSenderPacketCount(),p->GetSenderOctetCount());
 					
 				for (int i = 0 ; i < p->GetReceptionReportCount() ; i++)
 					fprintf(f,"    RR block %d\n      SSRC %25u\n      Fraction lost: %15d\n      Packets lost: %16d\n      Ext. high. seq. nr: %10u\n      Jitter: %22u\n      LSR: %25u\n      DLSR: %24u\n",(i+1),
@@ -212,13 +212,12 @@ int main(int argc, char *argv[])
 	int destPort = atoi(argv[3]);
 	std::string destIP(argv[2]);
 
-	RTPIPv4Address dest;
+	RTPEndpoint dest;
 	RTPUDPv4TransmissionParams transParams;
 	RTPSessionParams sessParams;
 	MyRTPSession session;
 
-	dest.SetIP(ntohl(inet_addr(destIP.c_str())));
-	dest.SetPort((uint16_t)destPort);
+	dest = RTPEndpoint(ntohl(inet_addr(destIP.c_str())), (uint16_t)destPort);
 
 	transParams.SetPortbase((uint16_t)portBase);
 	transParams.SetRTPReceiveBuffer(1024*1024);

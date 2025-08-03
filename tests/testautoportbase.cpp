@@ -3,6 +3,7 @@
 #include "rtpudpv4transmitter.h"
 #include "rtperrors.h"
 #include "rtpsourcedata.h"
+#include "rtpendpoint.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
@@ -75,7 +76,7 @@ int main(void)
 
 	// We're assuming that the destination is also using RTCP multiplexing 
 	// ('true' means that the same port will be used for RTCP)
-	RTPIPv4Address addr(destip,rtpPort,rtcpPort); 
+	RTPEndpoint addr(destip,rtpPort,rtcpPort); 
 	
 	status = sess.AddDestination(addr);
 	checkerror(status);

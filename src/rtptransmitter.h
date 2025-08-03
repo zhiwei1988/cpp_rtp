@@ -7,11 +7,11 @@
 #define RTPTRANSMITTER_H
 
 #include "rtpconfig.h"
-#include "rtptypes.h"
+#include <cstdint>
 #include "rtptimeutilities.h"
 
 class RTPRawPacket;
-class RTPAddress;
+class RTPEndpoint;
 class RTPTransmissionParams;
 class RTPTime;
 class RTPTransmissionInfo;
@@ -97,7 +97,7 @@ public:
 	virtual int GetLocalHostName(uint8_t *buffer,size_t *bufferlength) = 0;
 
 	/** Returns \c true if the address specified by \c addr is one of the addresses of the transmitter. */
-	virtual bool ComesFromThisTransmitter(const RTPAddress *addr) = 0;
+	virtual bool ComesFromThisTransmitter(const RTPEndpoint *addr) = 0;
 
 	/** Returns the amount of bytes that will be added to the RTP packet by the underlying layers (excluding 
 	 *  the link layer). */
@@ -122,10 +122,10 @@ public:
 	virtual int SendRTCPData(const void *data,size_t len) = 0;
 
 	/** Adds the address specified by \c addr to the list of destinations. */
-	virtual int AddDestination(const RTPAddress &addr) = 0;
+	virtual int AddDestination(const RTPEndpoint &addr) = 0;
 
 	/** Deletes the address specified by \c addr from the list of destinations. */
-	virtual int DeleteDestination(const RTPAddress &addr) = 0;
+	virtual int DeleteDestination(const RTPEndpoint &addr) = 0;
 
 	/** Clears the list of destinations. */
 	virtual void ClearDestinations() = 0;
@@ -134,10 +134,10 @@ public:
 	virtual bool SupportsMulticasting() = 0;
 
 	/** Joins the multicast group specified by \c addr. */
-	virtual int JoinMulticastGroup(const RTPAddress &addr) = 0;
+	virtual int JoinMulticastGroup(const RTPEndpoint &addr) = 0;
 
 	/** Leaves the multicast group specified by \c addr. */
-	virtual int LeaveMulticastGroup(const RTPAddress &addr) = 0;
+	virtual int LeaveMulticastGroup(const RTPEndpoint &addr) = 0;
 
 	/** Leaves all the multicast groups that have been joined. */
 	virtual void LeaveAllMulticastGroups() = 0;
@@ -150,19 +150,19 @@ public:
 	virtual int SetReceiveMode(RTPTransmitter::ReceiveMode m) = 0;
 
 	/** Adds \c addr to the list of addresses to ignore. */
-	virtual int AddToIgnoreList(const RTPAddress &addr) = 0;
+	virtual int AddToIgnoreList(const RTPEndpoint &addr) = 0;
 
 	/** Deletes \c addr from the list of addresses to accept. */
-	virtual int DeleteFromIgnoreList(const RTPAddress &addr)= 0;
+	virtual int DeleteFromIgnoreList(const RTPEndpoint &addr)= 0;
 
 	/** Clears the list of addresses to ignore. */
 	virtual void ClearIgnoreList() = 0;
 
 	/** Adds \c addr to the list of addresses to accept. */
-	virtual int AddToAcceptList(const RTPAddress &addr) = 0;
+	virtual int AddToAcceptList(const RTPEndpoint &addr) = 0;
 
 	/** Deletes \c addr from the list of addresses to accept. */
-	virtual int DeleteFromAcceptList(const RTPAddress &addr) = 0;
+	virtual int DeleteFromAcceptList(const RTPEndpoint &addr) = 0;
 
 	/** Clears the list of addresses to accept. */
 	virtual void ClearAcceptList() = 0;

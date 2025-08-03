@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rtptypes.h"
+#include <cstdint>
 
 /** Generate a random 8-bit value */
 uint8_t RTPGenerateRandom8();

@@ -9,7 +9,8 @@
 #include "rtpconfig.h"
 #include <unordered_map>
 #include "rtcpsdespacket.h"
-#include "rtptypes.h"
+#include <cstdint>
+#include "rtpendpoint.h"
 
 	
 class RTPNTPTime;
@@ -19,7 +20,7 @@ class RTPInternalSourceData;
 class RTPRawPacket;
 class RTPPacket;
 class RTPTime;
-class RTPAddress;
+class RTPEndpoint;
 class RTPSourceData;
 
 /** Represents a table in which information about the participating sources is kept.
@@ -84,14 +85,14 @@ public:
 	 *  the packet was sent by the local participant. The flag \c stored indicates whether the packet 
 	 *  was stored in the table or not.  If so, the \c rtppack instance may not be deleted.
 	 */
-	int ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &receivetime,const RTPAddress *senderaddress,bool *stored);
+	int ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &receivetime,const RTPEndpoint *senderaddress,bool *stored);
 
 	/** Processes the RTCP compound packet \c rtcpcomppack which was received at time \c receivetime from \c senderaddress.
 	 *  Processes the RTCP compound packet \c rtcpcomppack which was received at time \c receivetime from \c senderaddress.
 	 *  The \c senderaddress parameter must be NULL if the packet was sent by the local participant.
 	 */
 	int ProcessRTCPCompoundPacket(RTCPCompoundPacket *rtcpcomppack,const RTPTime &receivetime,
-	                              const RTPAddress *senderaddress);
+	                              const RTPEndpoint *senderaddress);
 	
 	/** Process the sender information of SSRC \c ssrc into the source table. 
 	 *  Process the sender information of SSRC \c ssrc into the source table. The information was received
@@ -100,7 +101,7 @@ public:
 	 */
 	int ProcessRTCPSenderInfo(uint32_t ssrc,const RTPNTPTime &ntptime,uint32_t rtptime,
 	                          uint32_t packetcount,uint32_t octetcount,const RTPTime &receivetime,
-				  const RTPAddress *senderaddress);
+				  const RTPEndpoint *senderaddress);
 
     /** Processes the report block information which was sent by participant \c ssrc into the source table.
 	 *  Processes the report block information which was sent by participant \c ssrc into the source table.
@@ -109,7 +110,7 @@ public:
 	 */
 	int ProcessRTCPReportBlock(uint32_t ssrc,uint8_t fractionlost,int32_t lostpackets,
 	                           uint32_t exthighseqnr,uint32_t jitter,uint32_t lsr,
-	                           uint32_t dlsr,const RTPTime &receivetime,const RTPAddress *senderaddress);
+	                           uint32_t dlsr,const RTPTime &receivetime,const RTPEndpoint *senderaddress);
 
 	/** Processes the non-private SDES item from source \c ssrc into the source table. 
 	 *  Processes the non-private SDES item from source \c ssrc into the source table. The information was
@@ -117,7 +118,7 @@ public:
 	 *  be NULL if the packet was sent by the local participant.
 	 */
 	int ProcessSDESNormalItem(uint32_t ssrc,RTCPSDESPacket::ItemType t,size_t itemlength,
-	                          const void *itemdata,const RTPTime &receivetime,const RTPAddress *senderaddress);
+	                          const void *itemdata,const RTPTime &receivetime,const RTPEndpoint *senderaddress);
 #ifdef RTP_SUPPORT_SDESPRIV
 	/** Processes the SDES private item from source \c ssrc into the source table. 
 	 *  Processes the SDES private item from source \c ssrc into the source table. The information was 
@@ -126,7 +127,7 @@ public:
 	 */
 	int ProcessSDESPrivateItem(uint32_t ssrc,size_t prefixlen,const void *prefixdata,
 	                           size_t valuelen,const void *valuedata,const RTPTime &receivetime,
-	                           const RTPAddress *senderaddress);
+	                           const RTPEndpoint *senderaddress);
 #endif //RTP_SUPPORT_SDESPRIV
 	/** Processes the BYE message for SSRC \c ssrc. 
 	 *  Processes the BYE message for SSRC \c ssrc. The information was received at time \c receivetime from
@@ -134,7 +135,7 @@ public:
 	 *  local participant.
 	 */
 	int ProcessBYE(uint32_t ssrc,size_t reasonlength,const void *reasondata,const RTPTime &receivetime,
-	               const RTPAddress *senderaddress);
+	               const RTPEndpoint *senderaddress);
 
 	/** If we heard from source \c ssrc, but no actual data was added to the source table (for example, if
 	 *  no report block was meant for us), this function can e used to indicate that something was received from
@@ -145,7 +146,7 @@ public:
 	 *  \c receivetime from address \c senderaddress. The \c senderaddress parameter must be NULL if the 
 	 *  packet was sent by the local participant.
 	 */
-	int UpdateReceiveTime(uint32_t ssrc,const RTPTime &receivetime,const RTPAddress *senderaddress);
+	int UpdateReceiveTime(uint32_t ssrc,const RTPTime &receivetime,const RTPEndpoint *senderaddress);
 	
 	/** Starts the iteration over the participants by going to the first member in the table.
 	 *  Starts the iteration over the participants by going to the first member in the table.
@@ -245,21 +246,21 @@ public:
 
 protected:
 	/** Is called when an RTP packet is about to be processed. */
-	virtual void OnRTPPacket(RTPPacket *pack,const RTPTime &receivetime, const RTPAddress *senderaddress);
+	virtual void OnRTPPacket(RTPPacket *pack,const RTPTime &receivetime, const RTPEndpoint *senderaddress);
 
 	/** Is called when an RTCP compound packet is about to be processed. */
 	virtual void OnRTCPCompoundPacket(RTCPCompoundPacket *pack,const RTPTime &receivetime,
-	                                  const RTPAddress *senderaddress);
+	                                  const RTPEndpoint *senderaddress);
 
 	/** Is called when an SSRC collision was detected.
 	 *  Is called when an SSRC collision was detected. The instance \c srcdat is the one present in 
 	 *  the table, the address \c senderaddress is the one that collided with one of the addresses 
 	 *  and \c isrtp indicates against which address of \c srcdat the check failed.
 	 */
-	virtual void OnSSRCCollision(RTPSourceData *srcdat,const RTPAddress *senderaddress,bool isrtp);
+	virtual void OnSSRCCollision(RTPSourceData *srcdat,const RTPEndpoint *senderaddress,bool isrtp);
 
 	/** Is called when another CNAME was received than the one already present for source \c srcdat. */
-	virtual void OnCNAMECollision(RTPSourceData *srcdat,const RTPAddress *senderaddress,
+	virtual void OnCNAMECollision(RTPSourceData *srcdat,const RTPEndpoint *senderaddress,
 	                              const uint8_t *cname,size_t cnamelength);
 
 	/** Is called when a new entry \c srcdat is added to the source table. */
@@ -297,15 +298,15 @@ protected:
 	 *  from address \c senderaddress.
 	 */
 	virtual void OnAPPPacket(RTCPAPPPacket *apppacket,const RTPTime &receivetime,
-	                         const RTPAddress *senderaddress);
+	                         const RTPEndpoint *senderaddress);
 
 	/** Is called when an unknown RTCP packet type was detected. */
 	virtual void OnUnknownPacketType(RTCPPacket *rtcppack,const RTPTime &receivetime,
-	                                 const RTPAddress *senderaddress);
+	                                 const RTPEndpoint *senderaddress);
 
 	/** Is called when an unknown packet format for a known packet type was detected. */
 	virtual void OnUnknownPacketFormat(RTCPPacket *rtcppack,const RTPTime &receivetime,
-	                                   const RTPAddress *senderaddress);
+	                                   const RTPEndpoint *senderaddress);
 
 	/** Is called when the SDES NOTE item for source \c srcdat has been timed out. */
 	virtual void OnNoteTimeout(RTPSourceData *srcdat);
@@ -318,8 +319,8 @@ protected:
 private:
 	void ClearSourceList();
 	int ObtainSourceDataInstance(uint32_t ssrc,RTPInternalSourceData **srcdat,bool *created);
-	int GetRTCPSourceData(uint32_t ssrc,const RTPAddress *senderaddress,RTPInternalSourceData **srcdat,bool *newsource);
-	bool CheckCollision(RTPInternalSourceData *srcdat,const RTPAddress *senderaddress,bool isrtp);
+	int GetRTCPSourceData(uint32_t ssrc,const RTPEndpoint *senderaddress,RTPInternalSourceData **srcdat,bool *newsource);
+	bool CheckCollision(RTPInternalSourceData *srcdat,const RTPEndpoint *senderaddress,bool isrtp);
 	
 	std::unordered_map<uint32_t,RTPInternalSourceData*> sourcelist;
 	std::unordered_map<uint32_t,RTPInternalSourceData*>::iterator current_it;
@@ -338,10 +339,10 @@ private:
 };
 
 // Inlining the default implementations to avoid unused-parameter errors.
-inline void RTPSources::OnRTPPacket(RTPPacket *, const RTPTime &, const RTPAddress *)                               { }
-inline void RTPSources::OnRTCPCompoundPacket(RTCPCompoundPacket *, const RTPTime &, const RTPAddress *)             { }
-inline void RTPSources::OnSSRCCollision(RTPSourceData *, const RTPAddress *, bool)                                  { }
-inline void RTPSources::OnCNAMECollision(RTPSourceData *, const RTPAddress *, const uint8_t *, size_t)              { }
+inline void RTPSources::OnRTPPacket(RTPPacket *, const RTPTime &, const RTPEndpoint *)                               { }
+inline void RTPSources::OnRTCPCompoundPacket(RTCPCompoundPacket *, const RTPTime &, const RTPEndpoint *)             { }
+inline void RTPSources::OnSSRCCollision(RTPSourceData *, const RTPEndpoint *, bool)                                  { }
+inline void RTPSources::OnCNAMECollision(RTPSourceData *, const RTPEndpoint *, const uint8_t *, size_t)              { }
 inline void RTPSources::OnNewSource(RTPSourceData *)                                                                { }
 inline void RTPSources::OnRemoveSource(RTPSourceData *)                                                             { }
 inline void RTPSources::OnTimeout(RTPSourceData *)                                                                  { }
@@ -353,9 +354,9 @@ inline void RTPSources::OnRTCPSDESItem(RTPSourceData *, RTCPSDESPacket::ItemType
 #ifdef RTP_SUPPORT_SDESPRIV
 inline void RTPSources::OnRTCPSDESPrivateItem(RTPSourceData *, const void *, size_t, const void *, size_t)          { }
 #endif // RTP_SUPPORT_SDESPRIV
-inline void RTPSources::OnAPPPacket(RTCPAPPPacket *, const RTPTime &, const RTPAddress *)                           { }
-inline void RTPSources::OnUnknownPacketType(RTCPPacket *, const RTPTime &, const RTPAddress *)                      { }
-inline void RTPSources::OnUnknownPacketFormat(RTCPPacket *, const RTPTime &, const RTPAddress *)                    { }
+inline void RTPSources::OnAPPPacket(RTCPAPPPacket *, const RTPTime &, const RTPEndpoint *)                           { }
+inline void RTPSources::OnUnknownPacketType(RTCPPacket *, const RTPTime &, const RTPEndpoint *)                      { }
+inline void RTPSources::OnUnknownPacketFormat(RTCPPacket *, const RTPTime &, const RTPEndpoint *)                    { }
 inline void RTPSources::OnNoteTimeout(RTPSourceData *)                                                              { }
 inline void RTPSources::OnValidatedRTPPacket(RTPSourceData *, RTPPacket *, bool, bool *)                            { }
 

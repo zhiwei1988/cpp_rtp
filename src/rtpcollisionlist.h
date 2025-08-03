@@ -7,11 +7,11 @@
 #define RTPCOLLISIONLIST_H
 
 #include "rtpconfig.h"
-#include "rtpaddress.h"
+#include "rtpendpoint.h"
 #include "rtptimeutilities.h"
 #include <list>
 
-class RTPAddress;
+class RTPEndpoint;
 
 /** This class represents a list of addresses from which SSRC collisions were detected. */
 class RTPCollisionList
@@ -28,10 +28,10 @@ public:
 	 *  Updates the entry for address \c addr to indicate that a collision was detected at time \c receivetime. 
 	 *  If the entry did not exist yet, the flag \c created is set to \c true, otherwise it is set to \c false.
 	 */
-	int UpdateAddress(const RTPAddress *addr,const RTPTime &receivetime,bool *created);
+	int UpdateAddress(const RTPEndpoint *addr,const RTPTime &receivetime,bool *created);
 
 	/** Returns \c true} if the address \c addr appears in the list. */
-	bool HasAddress(const RTPAddress *addr) const;
+	bool HasAddress(const RTPEndpoint *addr) const;
 
 	/** Assuming that the current time is given by \c currenttime, this function times out entries which 
 	 *  haven't been updated in the previous time interval specified by \c timeoutdelay.
@@ -42,9 +42,9 @@ private:
 	class AddressAndTime
 	{
 	public:
-		AddressAndTime(RTPAddress *a,const RTPTime &t) : addr(a),recvtime(t) { }
+		AddressAndTime(RTPEndpoint *a,const RTPTime &t) : addr(a),recvtime(t) { }
 
-		RTPAddress *addr;
+		RTPEndpoint *addr;
 		RTPTime recvtime;
 	};
 

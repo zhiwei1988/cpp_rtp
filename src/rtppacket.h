@@ -7,7 +7,7 @@
 #define RTPPACKET_H
 
 #include "rtpconfig.h"
-#include "rtptypes.h"
+#include <cstdint>
 #include "rtptimeutilities.h"
 
 class RTPRawPacket;

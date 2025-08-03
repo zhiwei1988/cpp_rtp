@@ -8,8 +8,8 @@
 
 #include "rtpconfig.h"
 #include "rtptimeutilities.h"
-#include "rtpaddress.h"
-#include "rtptypes.h"
+#include "rtpendpoint.h"
+#include <cstdint>
 #include "rtpstructs.h"
 
 /** This class is used by the transmission component to store the incoming RTP and RTCP data in. */
@@ -25,7 +25,7 @@ public:
 	 *  If you don't know if it's an RTP or RTCP packet, you can use the other constructor which
 	 *  tries to determine the type based on the header. A memory manager can be installed as well.
 	 */
-	RTPRawPacket(uint8_t *data,size_t datalen,RTPAddress *address,RTPTime &recvtime,bool rtp);
+	RTPRawPacket(uint8_t *data,size_t datalen,RTPEndpoint *address,RTPTime &recvtime,bool rtp);
 
     /** Creates an instance which stores data from \c data with length \c datalen.
 	 *  Creates an instance which stores data from \c data with length \c datalen. Only the pointer 
@@ -35,7 +35,7 @@ public:
 	 *  you have to specify yourself if the packet is supposed to contain RTP or RTCP data. In this version,
 	 *  based on the header information the packet type will be determined.
 	 */
-	RTPRawPacket(uint8_t *data,size_t datalen,RTPAddress *address,RTPTime &recvtime);
+	RTPRawPacket(uint8_t *data,size_t datalen,RTPEndpoint *address,RTPTime &recvtime);
 	~RTPRawPacket();
 	
 	/** Returns the pointer to the data which is contained in this packet. */
@@ -48,7 +48,7 @@ public:
 	RTPTime GetReceiveTime() const											{ return receivetime; }
 
 	/** Returns the address stored in this packet. */
-	const RTPAddress *GetSenderAddress() const								{ return senderaddress; }
+	const RTPEndpoint *GetSenderAddress() const								{ return senderaddress; }
 
 	/** Returns \c true if this data is RTP data, \c false if it is RTCP data. */
 	bool IsRTP() const														{ return isrtp; }
@@ -72,18 +72,18 @@ public:
 
 	/** Deallocates the currently stored RTPAddress instance and replaces it
 	 *  with the one that's specified (you probably don't need this function). */
-	void SetSenderAddress(RTPAddress *address);
+	void SetSenderAddress(RTPEndpoint *address);
 private:
 	void DeleteData();
 
 	uint8_t *packetdata;
 	size_t packetdatalength;
 	RTPTime receivetime;
-	RTPAddress *senderaddress;
+	RTPEndpoint *senderaddress;
 	bool isrtp;
 };
 
-inline RTPRawPacket::RTPRawPacket(uint8_t *data,size_t datalen,RTPAddress *address,RTPTime &recvtime,bool rtp):receivetime(recvtime)
+inline RTPRawPacket::RTPRawPacket(uint8_t *data,size_t datalen,RTPEndpoint *address,RTPTime &recvtime,bool rtp):receivetime(recvtime)
 {
 	packetdata = data;
 	packetdatalength = datalen;
@@ -91,7 +91,7 @@ inline RTPRawPacket::RTPRawPacket(uint8_t *data,size_t datalen,RTPAddress *addre
 	isrtp = rtp;
 }
 
-inline RTPRawPacket::RTPRawPacket(uint8_t *data,size_t datalen,RTPAddress *address,RTPTime &recvtime):receivetime(recvtime)
+inline RTPRawPacket::RTPRawPacket(uint8_t *data,size_t datalen,RTPEndpoint *address,RTPTime &recvtime):receivetime(recvtime)
 {
 	packetdata = data;
 	packetdatalength = datalen;
@@ -139,7 +139,7 @@ inline void RTPRawPacket::SetData(uint8_t *data, size_t datalen)
 	packetdatalength = datalen;
 }
 
-inline void RTPRawPacket::SetSenderAddress(RTPAddress *address)
+inline void RTPRawPacket::SetSenderAddress(RTPEndpoint *address)
 {
 	if (senderaddress)
 		delete senderaddress;

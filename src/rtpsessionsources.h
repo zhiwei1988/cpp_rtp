@@ -21,11 +21,11 @@ public:
 	bool DetectedOwnCollision() const								{ return owncollision; }
 private:
 	void OnRTPPacket(RTPPacket *pack,const RTPTime &receivetime,
-	                 const RTPAddress *senderaddress);
+	                 const RTPEndpoint *senderaddress);
 	void OnRTCPCompoundPacket(RTCPCompoundPacket *pack,const RTPTime &receivetime,
-	                          const RTPAddress *senderaddress);
-	void OnSSRCCollision(RTPSourceData *srcdat,const RTPAddress *senderaddress,bool isrtp);
-	void OnCNAMECollision(RTPSourceData *srcdat,const RTPAddress *senderaddress,
+	                          const RTPEndpoint *senderaddress);
+	void OnSSRCCollision(RTPSourceData *srcdat,const RTPEndpoint *senderaddress,bool isrtp);
+	void OnCNAMECollision(RTPSourceData *srcdat,const RTPEndpoint *senderaddress,
 	                              const uint8_t *cname,size_t cnamelength);
 	void OnNewSource(RTPSourceData *srcdat);
 	void OnRemoveSource(RTPSourceData *srcdat);
@@ -33,11 +33,11 @@ private:
 	void OnBYETimeout(RTPSourceData *srcdat);
 	void OnBYEPacket(RTPSourceData *srcdat);
 	void OnAPPPacket(RTCPAPPPacket *apppacket,const RTPTime &receivetime,
-	                 const RTPAddress *senderaddress);
+	                 const RTPEndpoint *senderaddress);
 	void OnUnknownPacketType(RTCPPacket *rtcppack,const RTPTime &receivetime,
-	                         const RTPAddress *senderaddress);
+	                         const RTPEndpoint *senderaddress);
 	void OnUnknownPacketFormat(RTCPPacket *rtcppack,const RTPTime &receivetime,
-	                           const RTPAddress *senderaddress);
+	                           const RTPEndpoint *senderaddress);
 	void OnNoteTimeout(RTPSourceData *srcdat);
 	void OnValidatedRTPPacket(RTPSourceData *srcdat, RTPPacket *rtppack, bool isonprobation, bool *ispackethandled);
 	void OnRTCPSenderReport(RTPSourceData *srcdat);

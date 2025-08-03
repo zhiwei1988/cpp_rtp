@@ -11,7 +11,7 @@
 #ifdef RTP_SUPPORT_IPV6
 
 #include "rtptransmitter.h"
-#include "rtpipv6destination.h"
+#include "rtpendpoint.h"
 #include <unordered_map>
 #include <unordered_set>
 #include "rtpsocketutil.h"
@@ -170,7 +170,7 @@ private:
 /** An UDP over IPv6 transmitter.
  *  This class inherits the RTPTransmitter interface and implements a transmission component 
  *  which uses UDP over IPv6 to send and receive RTP and RTCP data. The component's parameters 
- *  are described by the class RTPUDPv6TransmissionParams. The functions which have an RTPAddress 
+ *  are described by the class RTPUDPv6TransmissionParams. The functions which have an RTPEndpoint 
  *  argument require an argument of RTPIPv6Address. The GetTransmissionInfo member function
  *  returns an instance of type RTPUDPv6TransmissionInfo.
  */
@@ -188,7 +188,7 @@ public:
 	void DeleteTransmissionInfo(RTPTransmissionInfo *inf);
 
 	int GetLocalHostName(uint8_t *buffer,size_t *bufferlength);
-	bool ComesFromThisTransmitter(const RTPAddress *addr);
+	bool ComesFromThisTransmitter(const RTPEndpoint *addr);
 	size_t GetHeaderOverhead()								{ return RTPUDPV6TRANS_HEADERSIZE; }
 	
 	int Poll();
@@ -198,21 +198,21 @@ public:
 	int SendRTPData(const void *data,size_t len);	
 	int SendRTCPData(const void *data,size_t len);
 
-	int AddDestination(const RTPAddress &addr);
-	int DeleteDestination(const RTPAddress &addr);
+	int AddDestination(const RTPEndpoint &addr);
+	int DeleteDestination(const RTPEndpoint &addr);
 	void ClearDestinations();
 
 	bool SupportsMulticasting();
-	int JoinMulticastGroup(const RTPAddress &addr);
-	int LeaveMulticastGroup(const RTPAddress &addr);
+	int JoinMulticastGroup(const RTPEndpoint &addr);
+	int LeaveMulticastGroup(const RTPEndpoint &addr);
 	void LeaveAllMulticastGroups();
 
 	int SetReceiveMode(RTPTransmitter::ReceiveMode m);
-	int AddToIgnoreList(const RTPAddress &addr);
-	int DeleteFromIgnoreList(const RTPAddress &addr);
+	int AddToIgnoreList(const RTPEndpoint &addr);
+	int DeleteFromIgnoreList(const RTPEndpoint &addr);
 	void ClearIgnoreList();
-	int AddToAcceptList(const RTPAddress &addr);
-	int DeleteFromAcceptList(const RTPAddress &addr);
+	int AddToAcceptList(const RTPEndpoint &addr);
+	int DeleteFromAcceptList(const RTPEndpoint &addr);
 	void ClearAcceptList();
 	int SetMaximumPacketSize(size_t s);	
 	
@@ -248,7 +248,7 @@ private:
 	uint8_t *localhostname;
 	size_t localhostnamelength;
 	
-	std::unordered_set<RTPIPv6Destination> destinations;
+	std::unordered_set<RTPEndpoint> destinations;
 #ifdef RTP_SUPPORT_IPV6MULTICAST
 	std::unordered_set<in6_addr> multicastgroups;
 #endif // RTP_SUPPORT_IPV6MULTICAST

@@ -7,7 +7,7 @@
 #define RTPTIMEUTILITIES_H
 
 #include "rtpconfig.h"
-#include "rtptypes.h"
+#include <cstdint>
 #include <sys/time.h>
 #include <time.h>
 #include <errno.h>

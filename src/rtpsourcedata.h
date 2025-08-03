@@ -10,11 +10,10 @@
 #include "rtptimeutilities.h"
 #include "rtppacket.h"
 #include "rtcpsdesinfo.h"
-#include "rtptypes.h"
+#include <cstdint>
 #include "rtpsources.h"
+#include "rtpendpoint.h"
 #include <list>
-
-class RTPAddress;
 
 class RTCPSenderReportInfo
 {
@@ -191,14 +190,14 @@ public:
 	 *  been set and the returned value is NULL, this indicates that it originated from the local 
 	 *  participant.
 	 */
-	const RTPAddress *GetRTPDataAddress() const				{ return rtpaddr; }
+	const RTPEndpoint *GetRTPDataAddress() const				{ return rtpaddr; }
 
 	/** Returns the address from which this participant's RTCP packets originate. 
 	 *  Returns the address from which this participant's RTCP packets originate. If the address has 
 	 *  been set and the returned value is NULL, this indicates that it originated from the local 
 	 *  participant.
 	 */
-	const RTPAddress *GetRTCPDataAddress() const				{ return rtcpaddr; }
+	const RTPEndpoint *GetRTCPDataAddress() const				{ return rtcpaddr; }
 
 	/** Returns \c true if we received a BYE message for this participant and \c false otherwise. */
 	bool ReceivedBYE() const						{ return receivedbye; }
@@ -406,7 +405,7 @@ protected:
 	RTCPSDESInfo SDESinf;
 	
 	bool isrtpaddrset,isrtcpaddrset;
-	RTPAddress *rtpaddr,*rtcpaddr;
+	RTPEndpoint *rtpaddr,*rtcpaddr;
 	
 	RTPTime byetime;
 	uint8_t *byereason;

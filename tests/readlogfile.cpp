@@ -1,7 +1,7 @@
 #include "rtperrors.h"
 #include "rtpsession.h"
 #include "rtpsessionparams.h"
-#include "rtpbyteaddress.h"
+#include "rtpendpoint.h"
 #include "rtcpcompoundpacket.h"
 #include "rtcpsrpacket.h"
 #include "rtcprrpacket.h"
@@ -212,8 +212,9 @@ int main(void)
 	vector<uint8_t> data;
 	double fileStartTime = 0;
 	double realStartTime = 0;
-	uint8_t host[] = {1, 2, 3, 4};
-	RTPByteAddress addr(host, 4);
+	// Convert byte address {1,2,3,4} to IPv4 address
+	uint32_t hostip = (1 << 24) | (2 << 16) | (3 << 8) | 4; // 1.2.3.4
+	RTPEndpoint addr(hostip, 5000);
 
 	while (true)
 	{
