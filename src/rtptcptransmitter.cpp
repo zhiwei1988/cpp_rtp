@@ -32,7 +32,7 @@ using namespace std;
 	#define WAITMUTEX_UNLOCK
 #endif // RTP_SUPPORT_THREAD
 
-RTPTCPTransmitter::RTPTCPTransmitter(RTPMemoryManager *mgr) : RTPTransmitter(mgr)
+RTPTCPTransmitter::RTPTCPTransmitter() : RTPTransmitter()
 {
 	m_created = false;
 	m_init = false;
@@ -163,7 +163,7 @@ RTPTransmissionInfo *RTPTCPTransmitter::GetTransmissionInfo()
 		return 0;
 
 	MAINMUTEX_LOCK
-	RTPTransmissionInfo *tinf = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMISSIONINFO) RTPTCPTransmissionInfo();
+	RTPTransmissionInfo *tinf = new RTPTCPTransmissionInfo();
 	MAINMUTEX_UNLOCK
 	return tinf;
 }
@@ -173,7 +173,7 @@ void RTPTCPTransmitter::DeleteTransmissionInfo(RTPTransmissionInfo *i)
 	if (!m_init)
 		return;
 
-	RTPDelete(i, GetMemoryManager());
+	delete i;
 }
 
 int RTPTCPTransmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
@@ -494,7 +494,7 @@ int RTPTCPTransmitter::DeleteDestination(const RTPAddress &addr)
 	// 清理可能分配的内存
 	uint8_t *pBuf = it->second.ExtractDataBuffer();
 	if (pBuf)
-		RTPDeleteByteArray(pBuf, GetMemoryManager());
+		delete [] pBuf;
 
 	m_destSockets.erase(it);
 
@@ -645,7 +645,7 @@ void RTPTCPTransmitter::FlushPackets()
 	std::list<RTPRawPacket*>::const_iterator it;
 
 	for (it = m_rawpacketlist.begin() ; it != m_rawpacketlist.end() ; ++it)
-		RTPDelete(*it,GetMemoryManager());
+		delete *it;
 	m_rawpacketlist.clear();
 }
 
@@ -673,7 +673,7 @@ int RTPTCPTransmitter::PollSocket(SocketType sock, SocketData &sdata)
 				relevantLen = (int)len;
 
 			bool complete = false;
-			int status = sdata.ProcessAvailableBytes(sock, relevantLen, complete, GetMemoryManager());
+			int status = sdata.ProcessAvailableBytes(sock, relevantLen, complete);
 			if (status < 0)
 				return status;
 			
@@ -685,7 +685,7 @@ int RTPTCPTransmitter::PollSocket(SocketType sock, SocketData &sdata)
 					int dataLength = sdata.m_dataLength;
 					sdata.Reset();
 
-					RTPTCPAddress *pAddr = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPADDRESS) RTPTCPAddress(sock);
+					RTPTCPAddress *pAddr = new RTPTCPAddress(sock);
 					if (pAddr == 0)
 						return ERR_RTP_OUTOFMEM;
 
@@ -699,11 +699,11 @@ int RTPTCPTransmitter::PollSocket(SocketType sock, SocketData &sdata)
 							isrtp = false;
 					}
 						
-					RTPRawPacket *pPack = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPRAWPACKET) RTPRawPacket(pBuf, dataLength, pAddr, curtime, isrtp, GetMemoryManager());
+					RTPRawPacket *pPack = new RTPRawPacket(pBuf, dataLength, pAddr, curtime, isrtp);
 					if (pPack == 0)
 					{
-						RTPDelete(pAddr,GetMemoryManager());
-						RTPDeleteByteArray(pBuf,GetMemoryManager());
+						delete pAddr;
+						delete [] pBuf;
 						return ERR_RTP_OUTOFMEM;
 					}
 					m_rawpacketlist.push_back(pPack);	
@@ -783,7 +783,7 @@ void RTPTCPTransmitter::ClearDestSockets()
 	{
 		uint8_t *pBuf = it->second.ExtractDataBuffer();
 		if (pBuf)
-			RTPDeleteByteArray(pBuf, GetMemoryManager());
+			delete [] pBuf;
 
 		++it;
 	}
@@ -808,9 +808,8 @@ RTPTCPTransmitter::SocketData::~SocketData()
 	assert(m_pDataBuffer == 0); // 应在外部删除，以避免在类中存储内存管理器
 }
 
-int RTPTCPTransmitter::SocketData::ProcessAvailableBytes(SocketType sock, int availLen, bool &complete, RTPMemoryManager *pMgr)
+int RTPTCPTransmitter::SocketData::ProcessAvailableBytes(SocketType sock, int availLen, bool &complete)
 {
-	MEDIA_RTP_UNUSED(pMgr); // 可能未使用
 
 	const int numLengthBuffer = 2;
 	if (m_lengthBufferOffset < numLengthBuffer) // 首先我们需要获取长度
@@ -848,7 +847,7 @@ int RTPTCPTransmitter::SocketData::ProcessAvailableBytes(SocketType sock, int av
 				l = 1;
 
 			// 我们还不知道它是 RTP 还是 RTCP 包，所以我们暂时当做 RTP 处理
-			m_pDataBuffer = RTPNew(pMgr, RTPMEM_TYPE_BUFFER_RECEIVEDRTPPACKET) uint8_t[l];
+			m_pDataBuffer = new uint8_t[l];
 			if (m_pDataBuffer == 0)
 				return ERR_RTP_OUTOFMEM;
 		}

@@ -23,8 +23,6 @@ set (HEADERS
 	rtpipv4destination.h
 	rtpipv6address.h
 	rtpipv6destination.h
-	rtpmemorymanager.h
-	rtpmemoryobject.h
 	rtppacket.h
 	rtppacketbuilder.h
 	rtppollthread.h

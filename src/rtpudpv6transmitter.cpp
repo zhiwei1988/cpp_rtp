@@ -40,7 +40,7 @@
 #endif // RTP_SUPPORT_THREAD
 	
 
-RTPUDPv6Transmitter::RTPUDPv6Transmitter(RTPMemoryManager *mgr) : RTPTransmitter(mgr)
+RTPUDPv6Transmitter::RTPUDPv6Transmitter() : RTPTransmitter()
 {
 	created = false;
 	init = false;
@@ -281,7 +281,7 @@ void RTPUDPv6Transmitter::Destroy()
 
 	if (localhostname)
 	{
-		RTPDeleteByteArray(localhostname,GetMemoryManager());
+		delete [] localhostname;
 		localhostname = 0;
 		localhostnamelength = 0;
 	}
@@ -317,7 +317,7 @@ RTPTransmissionInfo *RTPUDPv6Transmitter::GetTransmissionInfo()
 		return 0;
 
 	MAINMUTEX_LOCK
-	RTPTransmissionInfo *tinf = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMISSIONINFO) RTPUDPv6TransmissionInfo(localIPs,rtpsock,rtcpsock,portbase,portbase+1);
+	RTPTransmissionInfo *tinf = new RTPUDPv6TransmissionInfo(localIPs,rtpsock,rtcpsock,portbase,portbase+1);
 	MAINMUTEX_UNLOCK
 	return tinf;
 }
@@ -327,7 +327,7 @@ void RTPUDPv6Transmitter::DeleteTransmissionInfo(RTPTransmissionInfo *i)
 	if (!init)
 		return;
 
-	RTPDelete(i, GetMemoryManager());
+	delete i;
 }
 
 int RTPUDPv6Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
@@ -410,7 +410,7 @@ int RTPUDPv6Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 				{
 					found = true;
 					localhostnamelength = (*it).length();
-					localhostname = RTPNew(GetMemoryManager(),RTPMEM_TYPE_OTHER) uint8_t [localhostnamelength+1];
+					localhostname = new uint8_t [localhostnamelength+1];
 					if (localhostname == 0)
 					{
 						MAINMUTEX_UNLOCK
@@ -443,7 +443,7 @@ int RTPUDPv6Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 			len = strlen(str);
 	
 			localhostnamelength = len;
-			localhostname = RTPNew(GetMemoryManager(),RTPMEM_TYPE_OTHER) uint8_t [localhostnamelength+1];
+			localhostname = new uint8_t [localhostnamelength+1];
 			if (localhostname == 0)
 			{
 				MAINMUTEX_UNLOCK
@@ -1161,7 +1161,7 @@ void RTPUDPv6Transmitter::FlushPackets()
 	std::list<RTPRawPacket*>::const_iterator it;
 
 	for (it = rawpacketlist.begin() ; it != rawpacketlist.end() ; ++it)
-		RTPDelete(*it,GetMemoryManager());
+		delete *it;
 	rawpacketlist.clear();
 }
 
@@ -1219,22 +1219,22 @@ int RTPUDPv6Transmitter::PollSocket(bool rtp)
 				RTPIPv6Address *addr;
 				uint8_t *datacopy;
 
-				addr = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPADDRESS) RTPIPv6Address(srcaddr.sin6_addr,ntohs(srcaddr.sin6_port));
+				addr = new RTPIPv6Address(srcaddr.sin6_addr,ntohs(srcaddr.sin6_port));
 				if (addr == 0)
 					return ERR_RTP_OUTOFMEM;
-				datacopy = RTPNew(GetMemoryManager(),(rtp)?RTPMEM_TYPE_BUFFER_RECEIVEDRTPPACKET:RTPMEM_TYPE_BUFFER_RECEIVEDRTCPPACKET) uint8_t[recvlen];
+				datacopy = new uint8_t[recvlen];
 				if (datacopy == 0)
 				{
-					RTPDelete(addr,GetMemoryManager());
+					delete addr;
 					return ERR_RTP_OUTOFMEM;
 				}
 				memcpy(datacopy,packetbuffer,recvlen);
 				
-				pack = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPRAWPACKET) RTPRawPacket(datacopy,recvlen,addr,curtime,rtp,GetMemoryManager());
+				pack = new RTPRawPacket(datacopy,recvlen,addr,curtime,rtp);
 				if (pack == 0)
 				{
-					RTPDelete(addr,GetMemoryManager());
-					RTPDeleteByteArray(datacopy,GetMemoryManager());
+					delete addr;
+					delete [] datacopy;
 					return ERR_RTP_OUTOFMEM;
 				}
 				rawpacketlist.push_back(pack);	
@@ -1292,7 +1292,7 @@ int RTPUDPv6Transmitter::ProcessAddAcceptIgnoreEntry(in6_addr ip,uint16_t port)
 		PortInfo *portinf;
 		int status;
 		
-		portinf = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_ACCEPTIGNOREPORTINFO) PortInfo();
+		portinf = new PortInfo();
 		if (port == 0) // select all ports
 			portinf->all = true;
 		else
@@ -1302,7 +1302,7 @@ int RTPUDPv6Transmitter::ProcessAddAcceptIgnoreEntry(in6_addr ip,uint16_t port)
 		status = result.second ? 0 : ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
 		if (status < 0)
 		{
-			RTPDelete(portinf,GetMemoryManager());
+			delete portinf;
 			return status;
 		}
 	}
@@ -1314,7 +1314,7 @@ void RTPUDPv6Transmitter::ClearAcceptIgnoreInfo()
 	for (auto& pair : acceptignoreinfo)
 	{
 		PortInfo *inf = pair.second;
-		RTPDelete(inf,GetMemoryManager());
+		delete inf;
 	}
 	acceptignoreinfo.clear();
 }

@@ -78,7 +78,7 @@ class RTPTCPTransmitter : public RTPTransmitter
 {
 	MEDIA_RTP_NO_COPY(RTPTCPTransmitter)
 public:
-	RTPTCPTransmitter(RTPMemoryManager *mgr);
+	RTPTCPTransmitter();
 	~RTPTCPTransmitter();
 
 	int Init(bool treadsafe);
@@ -139,7 +139,7 @@ private:
 		uint8_t *m_pDataBuffer;
 
 		uint8_t *ExtractDataBuffer() { uint8_t *pTmp = m_pDataBuffer; m_pDataBuffer = 0; return pTmp; }
-		int ProcessAvailableBytes(SocketType sock, int availLen, bool &complete, RTPMemoryManager *pMgr);
+		int ProcessAvailableBytes(SocketType sock, int availLen, bool &complete);
 	};
 
 	int SendRTPRTCPData(const void *data,size_t len);	

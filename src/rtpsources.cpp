@@ -15,7 +15,7 @@
 
 
 
-RTPSources::RTPSources(ProbationType probtype,RTPMemoryManager *mgr) : RTPMemoryObject(mgr)
+RTPSources::RTPSources(ProbationType probtype)
 {
 	MEDIA_RTP_UNUSED(probtype); // 可能未使用
 
@@ -44,7 +44,7 @@ void RTPSources::ClearSourceList()
 	for (auto& pair : sourcelist)
 	{
 		RTPInternalSourceData *sourcedata = pair.second;
-		RTPDelete(sourcedata,GetMemoryManager());
+		delete sourcedata;
 	}
 	sourcelist.clear();
 	owndata = 0;
@@ -97,7 +97,7 @@ int RTPSources::DeleteOwnSSRC()
 
 	OnRemoveSource(owndata);
 	
-	RTPDelete(owndata,GetMemoryManager());
+	delete owndata;
 	owndata = 0;
 	return 0;
 }
@@ -136,19 +136,19 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack,RTPTransmitter *rtptrans[
 		RTPPacket *rtppack;
 		
 		// 首先，我们将查看数据包是否可以解析
-		rtppack = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPPACKET) RTPPacket(*rawpack,GetMemoryManager());
+		rtppack = new RTPPacket(*rawpack);
 		if (rtppack == 0)
 			return ERR_RTP_OUTOFMEM;
 		if ((status = rtppack->GetCreationError()) < 0)
 		{
 			if (status == ERR_RTP_PACKET_INVALIDPACKET)
 			{
-				RTPDelete(rtppack,GetMemoryManager());
+				delete rtppack;
 				rtppack = 0;
 			}
 			else
 			{
-				RTPDelete(rtppack,GetMemoryManager());
+				delete rtppack;
 				return status;
 			}
 		}
@@ -178,7 +178,7 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack,RTPTransmitter *rtptrans[
 					if ((status = ProcessRTPPacket(rtppack,rawpack->GetReceiveTime(),0,&stored)) < 0)
 					{
 						if (!stored)
-							RTPDelete(rtppack,GetMemoryManager());
+							delete rtppack;
 						return status;
 					}
 				}
@@ -188,17 +188,17 @@ int RTPSources::ProcessRawPacket(RTPRawPacket *rawpack,RTPTransmitter *rtptrans[
 				if ((status = ProcessRTPPacket(rtppack,rawpack->GetReceiveTime(),senderaddress,&stored)) < 0)
 				{
 					if (!stored)
-						RTPDelete(rtppack,GetMemoryManager());
+						delete rtppack;
 					return status;
 				}
 			}
 			if (!stored)
-				RTPDelete(rtppack,GetMemoryManager());
+				delete rtppack;
 		}
 	}
 	else // RTCP 数据包
 	{
-		RTCPCompoundPacket rtcpcomppack(*rawpack,GetMemoryManager());
+		RTCPCompoundPacket rtcpcomppack(*rawpack);
 		bool valid = false;
 		
 		if ((status = rtcpcomppack.GetCreationError()) < 0)
@@ -749,16 +749,16 @@ int RTPSources::ObtainSourceDataInstance(uint32_t ssrc,RTPInternalSourceData **s
 	if (it == sourcelist.end()) // 此源无条目
 	{
 #ifdef RTP_SUPPORT_PROBATION
-		srcdat2 = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPINTERNALSOURCEDATA) RTPInternalSourceData(ssrc,probationtype,GetMemoryManager());
+		srcdat2 = new RTPInternalSourceData(ssrc,probationtype);
 #else
-		srcdat2 = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPINTERNALSOURCEDATA) RTPInternalSourceData(ssrc,RTPSources::NoProbation,GetMemoryManager());
+		srcdat2 = new RTPInternalSourceData(ssrc,RTPSources::NoProbation);
 #endif // RTP_SUPPORT_PROBATION
 		if (srcdat2 == 0)
 			return ERR_RTP_OUTOFMEM;
 		auto result = sourcelist.emplace(ssrc, srcdat2);
 		if (!result.second)
 		{
-			RTPDelete(srcdat2,GetMemoryManager());
+			delete srcdat2;
 			return ERR_RTP_HASHTABLE_ELEMENTALREADYEXISTS;
 		}
 		*srcdat = srcdat2;
@@ -849,7 +849,7 @@ void RTPSources::Timeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 			
 			OnTimeout(srcdat);
 			OnRemoveSource(srcdat);
-			RTPDelete(srcdat,GetMemoryManager());
+			delete srcdat;
 			it = sourcelist.erase(it);
 		}
 		else
@@ -930,7 +930,7 @@ void RTPSources::BYETimeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 					activecount--;
 				OnBYETimeout(srcdat);
 				OnRemoveSource(srcdat);
-				RTPDelete(srcdat,GetMemoryManager());
+				delete srcdat;
 				it = sourcelist.erase(it);
 			}
 			else
@@ -1107,7 +1107,7 @@ void RTPSources::MultipleTimeouts(const RTPTime &curtime,const RTPTime &senderti
 			if (normaltimeout)
 				OnTimeout(srcdat);
 			OnRemoveSource(srcdat);
-			RTPDelete(srcdat,GetMemoryManager());
+			delete srcdat;
 		}
 	}	
 	

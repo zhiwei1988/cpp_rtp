@@ -10,17 +10,16 @@
 #include "rtperrors.h"
 #include "rtpdefines.h"
 #include "rtptypes.h"
-#include "rtpmemoryobject.h"
 #include <string.h>
 #include <list>
 
 /** The class RTCPSDESInfo is a container for RTCP SDES information. */
-class RTCPSDESInfo : public RTPMemoryObject
+class RTCPSDESInfo
 {
 	MEDIA_RTP_NO_COPY(RTCPSDESInfo)
 public:
 	/** Constructs an instance, optionally installing a memory manager. */
-	RTCPSDESInfo(RTPMemoryManager *mgr = 0) : RTPMemoryObject(mgr)		{ for (int i = 0 ; i < RTCP_SDES_NUMITEMS_NONPRIVATE ; i++) nonprivateitems[i].SetMemoryManager(mgr); }
+	RTCPSDESInfo()																	{ }
 	virtual ~RTCPSDESInfo()							{ Clear(); }
 
 	/** Clears all SDES information. */
@@ -104,22 +103,18 @@ private:
 	int SetNonPrivateItem(int itemno,const uint8_t *s,size_t l)		{ if (l > RTCP_SDES_MAXITEMLENGTH) return ERR_RTP_SDES_LENGTHTOOBIG; return nonprivateitems[itemno].SetInfo(s,l); }
 	uint8_t *GetNonPrivateItem(int itemno,size_t *len) const		{ return nonprivateitems[itemno].GetInfo(len); }
 
-	class SDESItem : public RTPMemoryObject
+	class SDESItem
 	{
 	public:
-		SDESItem(RTPMemoryManager *mgr = 0) : RTPMemoryObject(mgr)
+		SDESItem()
 		{  
 			str = 0; 
 			length = 0; 
 		}
-		void SetMemoryManager(RTPMemoryManager *mgr)
-		{
-			RTPMemoryObject::SetMemoryManager(mgr);
-		}
 		~SDESItem() 							
 		{ 
 			if (str) 
-				RTPDeleteByteArray(str,GetMemoryManager());
+				delete [] str;
 		}
 		uint8_t *GetInfo(size_t *len) const				{ *len = length; return str; }
 		int SetInfo(const uint8_t *s,size_t len)			{ return SetString(&str,&length,s,len); }
@@ -129,20 +124,20 @@ private:
 			if (len <= 0)
 			{
 				if (*dest)
-					RTPDeleteByteArray((*dest),GetMemoryManager());
+					delete [] (*dest);
 				*dest = 0;
 				*destlen = 0;
 			}
 			else
 			{
 				len = (len>RTCP_SDES_MAXITEMLENGTH)?RTCP_SDES_MAXITEMLENGTH:len;
-				uint8_t *str2 = RTPNew(GetMemoryManager(),RTPMEM_TYPE_BUFFER_SDESITEM) uint8_t[len];
+				uint8_t *str2 = new uint8_t[len];
 				if (str2 == 0)
 					return ERR_RTP_OUTOFMEM;
 				memcpy(str2,s,len);
 				*destlen = len;
 				if (*dest)
-					RTPDeleteByteArray((*dest),GetMemoryManager());
+					delete [] (*dest);
 				*dest = str2;
 			}
 			return 0;
@@ -158,7 +153,7 @@ private:
 	class SDESPrivateItem : public SDESItem
 	{
 	public:
-		SDESPrivateItem(RTPMemoryManager *mgr) : SDESItem(mgr)
+		SDESPrivateItem() : SDESItem()
 		{ 
 			prefixlen = 0; 
 			prefix = 0; 
@@ -166,7 +161,7 @@ private:
 		~SDESPrivateItem()						
 		{ 
 			if (prefix) 
-				RTPDeleteByteArray(prefix,GetMemoryManager());
+				delete [] prefix;
 		}
 		uint8_t *GetPrefix(size_t *len) const				{ *len = prefixlen; return prefix; }
 		int SetPrefix(const uint8_t *s,size_t len)			{ return SetString(&prefix,&prefixlen,s,len); }

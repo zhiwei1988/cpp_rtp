@@ -9,7 +9,6 @@
 #include "rtpconfig.h"
 #include "rtptypes.h"
 #include "rtptimeutilities.h"
-#include "rtpmemoryobject.h"
 
 class RTPRawPacket;
 
@@ -18,7 +17,7 @@ class RTPRawPacket;
  *  The class can also be used to create a new RTP packet according to the parameters specified by
  *  the user.
  */
-class RTPPacket : public RTPMemoryObject
+class RTPPacket
 {
 	MEDIA_RTP_NO_COPY(RTPPacket)
 public:
@@ -26,7 +25,7 @@ public:
 	 *  Creates an RTPPacket instance based upon the data in \c rawpack, optionally installing a memory manager. 
 	 *  If successful, the data is moved from the raw packet to the RTPPacket instance.
 	 */
-	RTPPacket(RTPRawPacket &rawpack,RTPMemoryManager *mgr = 0);
+	RTPPacket(RTPRawPacket &rawpack);
 
 	/** Creates a new buffer for an RTP packet and fills in the fields according to the specified parameters. 
 	 *  Creates a new buffer for an RTP packet and fills in the fields according to the specified parameters.
@@ -37,16 +36,16 @@ public:
 	RTPPacket(uint8_t payloadtype,const void *payloaddata,size_t payloadlen,uint16_t seqnr,
 		  uint32_t timestamp,uint32_t ssrc,bool gotmarker,uint8_t numcsrcs,const uint32_t *csrcs,
 		  bool gotextension,uint16_t extensionid,uint16_t extensionlen_numwords,const void *extensiondata,
-		  size_t maxpacksize, RTPMemoryManager *mgr = 0);
+		  size_t maxpacksize);
 	
 	/** This constructor is similar to the other constructor, but here data is stored in an external buffer
 	 *  \c buffer with size \c buffersize. */
 	RTPPacket(uint8_t payloadtype,const void *payloaddata,size_t payloadlen,uint16_t seqnr,
 		  uint32_t timestamp,uint32_t ssrc,bool gotmarker,uint8_t numcsrcs,const uint32_t *csrcs,
 		  bool gotextension,uint16_t extensionid,uint16_t extensionlen_numwords,const void *extensiondata,
-		  void *buffer,size_t buffersize,RTPMemoryManager *mgr = 0);
+		  void *buffer,size_t buffersize);
 
-	virtual ~RTPPacket()																{ if (packet && !externalbuffer) RTPDeleteByteArray(packet,GetMemoryManager());  }
+	virtual ~RTPPacket()																{ if (packet && !externalbuffer) delete [] packet;  }
 
 	/** If an error occurred in one of the constructors, this function returns the error code. */
 	int GetCreationError() const														{ return error; }

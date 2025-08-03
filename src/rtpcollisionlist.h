@@ -9,17 +9,16 @@
 #include "rtpconfig.h"
 #include "rtpaddress.h"
 #include "rtptimeutilities.h"
-#include "rtpmemoryobject.h"
 #include <list>
 
 class RTPAddress;
 
 /** This class represents a list of addresses from which SSRC collisions were detected. */
-class RTPCollisionList : public RTPMemoryObject
+class RTPCollisionList
 {
 public:
-	/** Constructs an instance, optionally installing a memory manager. */
-	RTPCollisionList(RTPMemoryManager *mgr = 0);
+	/** Constructs an instance. */
+	RTPCollisionList();
 	~RTPCollisionList()								{ Clear(); }
 	
 	/** Clears the list of addresses. */

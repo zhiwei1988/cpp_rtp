@@ -9,7 +9,6 @@
 #include "rtprawpacket.h"
 #include "rtppacket.h"
 #include "rtptimeutilities.h"
-#include "rtpmemorymanager.h"
 #include "rtprandomrand48.h"
 #include "rtprandomrands.h"
 #include "rtprandomurandom.h"
@@ -44,9 +43,9 @@
 	#define PACKSENT_UNLOCK
 #endif // RTP_SUPPORT_THREAD
 
-RTPSession::RTPSession(RTPRandom *r,RTPMemoryManager *mgr) 
-	: RTPMemoryObject(mgr),rtprnd(GetRandomNumberGenerator(r)),sources(*this,mgr),packetbuilder(*rtprnd,mgr),rtcpsched(sources,*rtprnd),
-	  rtcpbuilder(sources,packetbuilder,mgr),collisionlist(mgr)
+RTPSession::RTPSession(RTPRandom *r) 
+	: rtprnd(GetRandomNumberGenerator(r)),sources(*this),packetbuilder(*rtprnd),rtcpsched(sources,*rtprnd),
+	  rtcpbuilder(sources,packetbuilder),collisionlist()
 {
 	// 我们不打算在 Create 中设置这些标志，以便派生类的构造函数可以更改它们
 	m_changeIncomingData = false;
@@ -93,15 +92,15 @@ int RTPSession::Create(const RTPSessionParams &sessparams,const RTPTransmissionP
 	switch(protocol)
 	{
 	case RTPTransmitter::IPv4UDPProto:
-		rtptrans = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMITTER) RTPUDPv4Transmitter(GetMemoryManager());
+		rtptrans = new RTPUDPv4Transmitter();
 		break;
 #ifdef RTP_SUPPORT_IPV6
 	case RTPTransmitter::IPv6UDPProto:
-		rtptrans = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMITTER) RTPUDPv6Transmitter(GetMemoryManager());
+		rtptrans = new RTPUDPv6Transmitter();
 		break;
 #endif // RTP_SUPPORT_IPV6
 	case RTPTransmitter::TCPProto:
-		rtptrans = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPTRANSMITTER) RTPTCPTransmitter(GetMemoryManager());
+		rtptrans = new RTPTCPTransmitter();
 		break;
 	default:
 		return ERR_RTP_SESSION_UNSUPPORTEDTRANSMISSIONPROTOCOL;
@@ -111,12 +110,12 @@ int RTPSession::Create(const RTPSessionParams &sessparams,const RTPTransmissionP
 		return ERR_RTP_OUTOFMEM;
 	if ((status = rtptrans->Init(needthreadsafety)) < 0)
 	{
-		RTPDelete(rtptrans,GetMemoryManager());
+		delete rtptrans;
 		return status;
 	}
 	if ((status = rtptrans->Create(maxpacksize,transparams)) < 0)
 	{
-		RTPDelete(rtptrans,GetMemoryManager());
+		delete rtptrans;
 		return status;
 	}
 
@@ -162,7 +161,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 	if ((status = packetbuilder.Init(maxpacksize)) < 0)
 	{
 		if (deletetransmitter)
-			RTPDelete(rtptrans,GetMemoryManager());
+			delete rtptrans;
 		return status;
 	}
 
@@ -182,7 +181,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 	{
 		packetbuilder.Destroy();
 		if (deletetransmitter)
-			RTPDelete(rtptrans,GetMemoryManager());
+			delete rtptrans;
 		return status;
 	}
 
@@ -193,7 +192,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 		packetbuilder.Destroy();
 		sources.Clear();
 		if (deletetransmitter)
-			RTPDelete(rtptrans,GetMemoryManager());
+			delete rtptrans;
 		return status;
 	}
 
@@ -211,7 +210,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 			packetbuilder.Destroy();
 			sources.Clear();
 			if (deletetransmitter)
-				RTPDelete(rtptrans,GetMemoryManager());
+				delete rtptrans;
 			return status;
 		}
 	}
@@ -227,7 +226,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 		packetbuilder.Destroy();
 		sources.Clear();
 		if (deletetransmitter)
-			RTPDelete(rtptrans,GetMemoryManager());
+			delete rtptrans;
 		return status;
 	}
 
@@ -244,7 +243,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 	if ((status = schedparams.SetRTCPBandwidth(sessionbandwidth*controlfragment)) < 0)
 	{
 		if (deletetransmitter)
-			RTPDelete(rtptrans,GetMemoryManager());
+			delete rtptrans;
 		packetbuilder.Destroy();
 		sources.Clear();
 		rtcpbuilder.Destroy();
@@ -253,7 +252,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 	if ((status = schedparams.SetSenderBandwidthFraction(sessparams.GetSenderControlBandwidthFraction())) < 0)
 	{
 		if (deletetransmitter)
-			RTPDelete(rtptrans,GetMemoryManager());
+			delete rtptrans;
 		packetbuilder.Destroy();
 		sources.Clear();
 		rtcpbuilder.Destroy();
@@ -262,7 +261,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 	if ((status = schedparams.SetMinimumTransmissionInterval(sessparams.GetMinimumRTCPTransmissionInterval())) < 0)
 	{
 		if (deletetransmitter)
-			RTPDelete(rtptrans,GetMemoryManager());
+			delete rtptrans;
 		packetbuilder.Destroy();
 		sources.Clear();
 		rtcpbuilder.Destroy();
@@ -293,7 +292,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 			if (sourcesmutex.Init() < 0)
 			{
 				if (deletetransmitter)
-					RTPDelete(rtptrans,GetMemoryManager());
+					delete rtptrans;
 				packetbuilder.Destroy();
 				sources.Clear();
 				rtcpbuilder.Destroy();
@@ -305,7 +304,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 			if (buildermutex.Init() < 0)
 			{
 				if (deletetransmitter)
-					RTPDelete(rtptrans,GetMemoryManager());
+					delete rtptrans;
 				packetbuilder.Destroy();
 				sources.Clear();
 				rtcpbuilder.Destroy();
@@ -317,7 +316,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 			if (schedmutex.Init() < 0)
 			{
 				if (deletetransmitter)
-					RTPDelete(rtptrans,GetMemoryManager());
+					delete rtptrans;
 				packetbuilder.Destroy();
 				sources.Clear();
 				rtcpbuilder.Destroy();
@@ -329,7 +328,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 			if (packsentmutex.Init() < 0)
 			{
 				if (deletetransmitter)
-					RTPDelete(rtptrans,GetMemoryManager());
+					delete rtptrans;
 				packetbuilder.Destroy();
 				sources.Clear();
 				rtcpbuilder.Destroy();
@@ -337,11 +336,11 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 			}
 		}
 		
-		pollthread = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTPPOLLTHREAD) RTPPollThread(*this,rtcpsched);
+		pollthread = new RTPPollThread(*this,rtcpsched);
 		if (pollthread == 0)
 		{
 			if (deletetransmitter)
-				RTPDelete(rtptrans,GetMemoryManager());
+				delete rtptrans;
 			packetbuilder.Destroy();
 			sources.Clear();
 			rtcpbuilder.Destroy();
@@ -350,8 +349,8 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 		if ((status = pollthread->Start(rtptrans)) < 0)
 		{
 			if (deletetransmitter)
-				RTPDelete(rtptrans,GetMemoryManager());
-			RTPDelete(pollthread,GetMemoryManager());
+				delete rtptrans;
+			delete pollthread;
 			packetbuilder.Destroy();
 			sources.Clear();
 			rtcpbuilder.Destroy();
@@ -371,11 +370,11 @@ void RTPSession::Destroy()
 
 #ifdef RTP_SUPPORT_THREAD
 	if (pollthread)
-		RTPDelete(pollthread,GetMemoryManager());
+		delete pollthread;
 #endif // RTP_SUPPORT_THREAD
 	
 	if (deletetransmitter)
-		RTPDelete(rtptrans,GetMemoryManager());
+		delete rtptrans;
 	packetbuilder.Destroy();
 	rtcpbuilder.Destroy();
 	rtcpsched.Reset();
@@ -385,7 +384,7 @@ void RTPSession::Destroy()
 	std::list<RTCPCompoundPacket *>::const_iterator it;
 
 	for (it = byepackets.begin() ; it != byepackets.end() ; it++)
-		RTPDelete(*it,GetMemoryManager());
+		delete *it;
 	byepackets.clear();
 	
 	created = false;
@@ -400,7 +399,7 @@ void RTPSession::BYEDestroy(const RTPTime &maxwaittime,const void *reason,size_t
 	
 #ifdef RTP_SUPPORT_THREAD
 	if (pollthread)
-		RTPDelete(pollthread,GetMemoryManager());
+		delete pollthread;
 #endif // RTP_SUPPORT_THREAD
 
 	RTPTime stoptime = RTPTime::CurrentTime();
@@ -445,7 +444,7 @@ void RTPSession::BYEDestroy(const RTPTime &maxwaittime,const void *reason,size_t
 				
 				OnSendRTCPCompoundPacket(pack); // 我们将其放在实际发送之后，以避免篡改
 				
-				RTPDelete(pack,GetMemoryManager());
+				delete pack;
 				if (!byepackets.empty()) // 还有更多 bye 包要发送，请调度它们
 					rtcpsched.ScheduleBYEPacket((*(byepackets.begin()))->GetCompoundPacketLength());
 				else
@@ -457,7 +456,7 @@ void RTPSession::BYEDestroy(const RTPTime &maxwaittime,const void *reason,size_t
 	}
 	
 	if (deletetransmitter)
-		RTPDelete(rtptrans,GetMemoryManager());
+		delete rtptrans;
 	packetbuilder.Destroy();
 	rtcpbuilder.Destroy();
 	rtcpsched.Reset();
@@ -468,7 +467,7 @@ void RTPSession::BYEDestroy(const RTPTime &maxwaittime,const void *reason,size_t
 	std::list<RTCPCompoundPacket *>::const_iterator it;
 
 	for (it = byepackets.begin() ; it != byepackets.end() ; it++)
-		RTPDelete(*it,GetMemoryManager());
+		delete *it;
 	byepackets.clear();
 	
 	created = false;
@@ -674,7 +673,7 @@ int RTPSession::SendRTCPAPPPacket(uint8_t subtype, const uint8_t name[4], const 
 	uint32_t ssrc = packetbuilder.GetSSRC();
 	BUILDER_UNLOCK
 	
-	RTCPCompoundPacketBuilder pb(GetMemoryManager());
+	RTCPCompoundPacketBuilder pb;
 
 	status = pb.InitBuild(maxpacksize);
 	
@@ -734,17 +733,17 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 	uint32_t ssrc = packetbuilder.GetSSRC();
 	BUILDER_UNLOCK
 	
-	RTCPCompoundPacketBuilder* rtcpcomppack = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPCOMPOUNDPACKETBUILDER) RTCPCompoundPacketBuilder(GetMemoryManager());
+	RTCPCompoundPacketBuilder* rtcpcomppack = new RTCPCompoundPacketBuilder(GetMemoryManager());
 	if (rtcpcomppack == 0)
 	{
-		RTPDelete(rtcpcomppack,GetMemoryManager());
+		delete rtcpcomppack;
 		return ERR_RTP_OUTOFMEM;
 	}
 
 	status = rtcpcomppack->InitBuild(maxpacksize);	
 	if(status < 0)
 	{
-		RTPDelete(rtcpcomppack,GetMemoryManager());
+		delete rtcpcomppack;
 		return status;
 	}
 
@@ -769,7 +768,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 		// rtcp 复合包中的第一个包应该总是 SR 或 RR
 		if((status = rtcpcomppack->StartSenderReport(ssrc,ntptimestamp,rtptimestamp,packcount,octetcount)) < 0)
 		{
-			RTPDelete(rtcpcomppack,GetMemoryManager());
+			delete rtcpcomppack;
 			return status;
 		}
 	}
@@ -778,7 +777,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 		// rtcp 复合包中的第一个包应该总是 SR 或 RR
 		if((status = rtcpcomppack->StartReceiverReport(ssrc)) < 0)
 		{
-			RTPDelete(rtcpcomppack,GetMemoryManager());
+			delete rtcpcomppack;
 			return status;
 		}
 
@@ -787,7 +786,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 	// 添加带有 CNAME 项的 SDES 包
 	if ((status = rtcpcomppack->AddSDESSource(ssrc)) < 0)
 	{
-		RTPDelete(rtcpcomppack,GetMemoryManager());
+		delete rtcpcomppack;
 		return status;
 	}
 	
@@ -798,7 +797,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 	if ((status = rtcpcomppack->AddSDESNormalItem(RTCPSDESPacket::CNAME,owncname,owncnamelen)) < 0)
 	{
 		BUILDER_UNLOCK
-		RTPDelete(rtcpcomppack,GetMemoryManager());
+		delete rtcpcomppack;
 		return status;
 	}
 	BUILDER_UNLOCK
@@ -806,13 +805,13 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 	// 添加我们的数据包
 	if((status = rtcpcomppack->AddUnknownPacket(payload_type, subtype, ssrc, data, len)) < 0)
 	{
-		RTPDelete(rtcpcomppack,GetMemoryManager());
+		delete rtcpcomppack;
 		return status;
 	}
 
 	if((status = rtcpcomppack->EndBuild()) < 0)
 	{
-		RTPDelete(rtcpcomppack,GetMemoryManager());
+		delete rtcpcomppack;
 		return status;
 	}
 
@@ -820,7 +819,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 	status = SendRTCPData(rtcpcomppack->GetCompoundPacketData(), rtcpcomppack->GetCompoundPacketLength());
 	if(status < 0)
 	{
-		RTPDelete(rtcpcomppack,GetMemoryManager());
+		delete rtcpcomppack;
 		return status;
 	}
 
@@ -832,7 +831,7 @@ int RTPSession::SendUnknownPacket(bool sr, uint8_t payload_type, uint8_t subtype
 
 	int retlen = rtcpcomppack->GetCompoundPacketLength();
 
-	RTPDelete(rtcpcomppack,GetMemoryManager());
+	delete rtcpcomppack;
 	return retlen;
 }
 
@@ -1068,7 +1067,7 @@ uint16_t RTPSession::GetNextSequenceNumber() const
 
 void RTPSession::DeletePacket(RTPPacket *p)
 {
-	RTPDelete(p,GetMemoryManager());
+	delete p;
 }
 
 int RTPSession::EndDataAccess()
@@ -1332,7 +1331,7 @@ int RTPSession::ProcessPolledData()
 			// 提供一种更改传入数据的方法，例如用于解密
 			if (!OnChangeIncomingData(rawpack))
 			{
-				RTPDelete(rawpack,GetMemoryManager());
+				delete rawpack;
 				continue;
 			}
 		}
@@ -1346,7 +1345,7 @@ int RTPSession::ProcessPolledData()
 		{
 			SCHED_UNLOCK
 			SOURCES_UNLOCK
-			RTPDelete(rawpack,GetMemoryManager());
+			delete rawpack;
 			return status;
 		}
 		SCHED_UNLOCK
@@ -1358,7 +1357,7 @@ int RTPSession::ProcessPolledData()
 			if ((status = collisionlist.UpdateAddress(rawpack->GetSenderAddress(),rawpack->GetReceiveTime(),&created)) < 0)
 			{
 				SOURCES_UNLOCK
-				RTPDelete(rawpack,GetMemoryManager());
+				delete rawpack;
 				return status;
 			}
 
@@ -1379,7 +1378,7 @@ int RTPSession::ProcessPolledData()
 					{
 						BUILDER_UNLOCK
 						SOURCES_UNLOCK
-						RTPDelete(rawpack,GetMemoryManager());
+						delete rawpack;
 						return status;
 					}
 					BUILDER_UNLOCK
@@ -1408,18 +1407,18 @@ int RTPSession::ProcessPolledData()
 				if ((status = sources.DeleteOwnSSRC()) < 0)
 				{
 					SOURCES_UNLOCK
-					RTPDelete(rawpack,GetMemoryManager());
+					delete rawpack;
 					return status;
 				}
 				if ((status = sources.CreateOwnSSRC(newssrc)) < 0)
 				{
 					SOURCES_UNLOCK
-					RTPDelete(rawpack,GetMemoryManager());
+					delete rawpack;
 					return status;
 				}
 			}
 		}
-		RTPDelete(rawpack,GetMemoryManager());
+		delete rawpack;
 	}
 
 	SCHED_LOCK
@@ -1462,7 +1461,7 @@ int RTPSession::ProcessPolledData()
 			if ((status = SendRTCPData(pack->GetCompoundPacketData(),pack->GetCompoundPacketLength())) < 0)
 			{
 				SOURCES_UNLOCK
-				RTPDelete(pack,GetMemoryManager());
+				delete pack;
 				return status;
 			}
 		
@@ -1480,7 +1479,7 @@ int RTPSession::ProcessPolledData()
 			if ((status = SendRTCPData(pack->GetCompoundPacketData(),pack->GetCompoundPacketLength())) < 0)
 			{
 				SOURCES_UNLOCK
-				RTPDelete(pack,GetMemoryManager());
+				delete pack;
 				return status;
 			}
 			
@@ -1502,7 +1501,7 @@ int RTPSession::ProcessPolledData()
 		rtcpsched.AnalyseOutgoing(*pack);
 		SCHED_UNLOCK
 
-		RTPDelete(pack,GetMemoryManager());
+		delete pack;
 	}
 	SOURCES_UNLOCK
 	return 0;

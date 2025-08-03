@@ -25,7 +25,7 @@ class RTCPCompoundPacketBuilder : public RTCPCompoundPacket
 {
 public:
 	/** Constructs an RTCPCompoundPacketBuilder instance, optionally installing a memory manager. */
-	RTCPCompoundPacketBuilder(RTPMemoryManager *memmgr = 0);
+	RTCPCompoundPacketBuilder();
 	~RTCPCompoundPacketBuilder();
 
 	/** Starts building an RTCP compound packet with maximum size \c maxpacketsize.
@@ -112,10 +112,10 @@ private:
 		size_t packetlength;
 	};
 
-	class Report : public RTPMemoryObject
+	class Report
 	{
 	public:
-		Report(RTPMemoryManager *mgr) : RTPMemoryObject(mgr) 
+		Report() 
 		{ 
 			headerdata = (uint8_t *)headerdata32; 
 			isSR = false; 
@@ -129,7 +129,7 @@ private:
 			for (it = reportblocks.begin() ; it != reportblocks.end() ; it++) 
 			{
 				if ((*it).packetdata) 
-					RTPDeleteByteArray((*it).packetdata,GetMemoryManager()); 
+					delete [] (*it).packetdata; 
 			}
 			reportblocks.clear();
 			isSR = false;
@@ -183,17 +183,17 @@ private:
 		std::list<Buffer> reportblocks;
 	};
 
-	class SDESSource : public RTPMemoryObject
+	class SDESSource
 	{
 	public:
-		SDESSource(uint32_t s,RTPMemoryManager *mgr) : RTPMemoryObject(mgr),ssrc(s),totalitemsize(0)  { }
+		SDESSource(uint32_t s) : ssrc(s),totalitemsize(0)  { }
 		~SDESSource()
 		{
 			std::list<Buffer>::const_iterator it;
 			for (it = items.begin() ; it != items.end() ; it++)
 			{
 				if ((*it).packetdata)
-					RTPDeleteByteArray((*it).packetdata,GetMemoryManager());
+					delete [] (*it).packetdata;
 			}
 			items.clear();
 		}
@@ -233,10 +233,10 @@ private:
 		size_t totalitemsize;
 	};
 	
-	class SDES : public RTPMemoryObject
+	class SDES
 	{
 	public:
-		SDES(RTPMemoryManager *mgr) : RTPMemoryObject(mgr) { sdesit = sdessources.end(); }
+		SDES() { sdesit = sdessources.end(); }
 		~SDES() { Clear(); }
 
 		void Clear()
@@ -244,13 +244,13 @@ private:
 			std::list<SDESSource *>::const_iterator it;
 
 			for (it = sdessources.begin() ; it != sdessources.end() ; it++)
-				RTPDelete(*it,GetMemoryManager());
+				delete *it;
 			sdessources.clear();
 		}
 
 		int AddSSRC(uint32_t ssrc)
 		{
-			SDESSource *s = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_SDESSOURCE) SDESSource(ssrc,GetMemoryManager());
+			SDESSource *s = new SDESSource(ssrc);
 			if (s == 0)
 				return ERR_RTP_OUTOFMEM;
 			sdessources.push_back(s);

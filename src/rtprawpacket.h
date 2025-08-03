@@ -10,11 +10,10 @@
 #include "rtptimeutilities.h"
 #include "rtpaddress.h"
 #include "rtptypes.h"
-#include "rtpmemoryobject.h"
 #include "rtpstructs.h"
 
 /** This class is used by the transmission component to store the incoming RTP and RTCP data in. */
-class RTPRawPacket : public RTPMemoryObject
+class RTPRawPacket
 {
 	MEDIA_RTP_NO_COPY(RTPRawPacket)
 public:	
@@ -26,7 +25,7 @@ public:
 	 *  If you don't know if it's an RTP or RTCP packet, you can use the other constructor which
 	 *  tries to determine the type based on the header. A memory manager can be installed as well.
 	 */
-	RTPRawPacket(uint8_t *data,size_t datalen,RTPAddress *address,RTPTime &recvtime,bool rtp,RTPMemoryManager *mgr = 0);
+	RTPRawPacket(uint8_t *data,size_t datalen,RTPAddress *address,RTPTime &recvtime,bool rtp);
 
     /** Creates an instance which stores data from \c data with length \c datalen.
 	 *  Creates an instance which stores data from \c data with length \c datalen. Only the pointer 
@@ -36,7 +35,7 @@ public:
 	 *  you have to specify yourself if the packet is supposed to contain RTP or RTCP data. In this version,
 	 *  based on the header information the packet type will be determined.
 	 */
-	RTPRawPacket(uint8_t *data,size_t datalen,RTPAddress *address,RTPTime &recvtime,RTPMemoryManager *mgr = 0);
+	RTPRawPacket(uint8_t *data,size_t datalen,RTPAddress *address,RTPTime &recvtime);
 	~RTPRawPacket();
 	
 	/** Returns the pointer to the data which is contained in this packet. */
@@ -63,8 +62,7 @@ public:
 	 */
 	void ZeroData()															{ packetdata = 0; packetdatalength = 0; }
 
-	/** Allocates a number of bytes for RTP or RTCP data using the memory manager that
-	 *  was used for this raw packet instance, can be useful if the RTPRawPacket::SetData
+	/** Allocates a number of bytes for RTP or RTCP data, can be useful if the RTPRawPacket::SetData
 	 *  function will be used. */
 	uint8_t *AllocateBytes(bool isrtp, int recvlen) const;
 
@@ -85,7 +83,7 @@ private:
 	bool isrtp;
 };
 
-inline RTPRawPacket::RTPRawPacket(uint8_t *data,size_t datalen,RTPAddress *address,RTPTime &recvtime,bool rtp,RTPMemoryManager *mgr):RTPMemoryObject(mgr),receivetime(recvtime)
+inline RTPRawPacket::RTPRawPacket(uint8_t *data,size_t datalen,RTPAddress *address,RTPTime &recvtime,bool rtp):receivetime(recvtime)
 {
 	packetdata = data;
 	packetdatalength = datalen;
@@ -93,7 +91,7 @@ inline RTPRawPacket::RTPRawPacket(uint8_t *data,size_t datalen,RTPAddress *addre
 	isrtp = rtp;
 }
 
-inline RTPRawPacket::RTPRawPacket(uint8_t *data,size_t datalen,RTPAddress *address,RTPTime &recvtime,RTPMemoryManager *mgr):RTPMemoryObject(mgr),receivetime(recvtime)
+inline RTPRawPacket::RTPRawPacket(uint8_t *data,size_t datalen,RTPAddress *address,RTPTime &recvtime):receivetime(recvtime)
 {
 	packetdata = data;
 	packetdatalength = datalen;
@@ -118,9 +116,9 @@ inline RTPRawPacket::~RTPRawPacket()
 inline void RTPRawPacket::DeleteData()
 {
 	if (packetdata)
-		RTPDeleteByteArray(packetdata,GetMemoryManager());
+		delete [] packetdata;
 	if (senderaddress)
-		RTPDelete(senderaddress,GetMemoryManager());
+		delete senderaddress;
 
 	packetdata = 0;
 	senderaddress = 0;
@@ -129,13 +127,13 @@ inline void RTPRawPacket::DeleteData()
 inline uint8_t *RTPRawPacket::AllocateBytes(bool isrtp, int recvlen) const
 {
 	MEDIA_RTP_UNUSED(isrtp); // possibly unused
-	return RTPNew(GetMemoryManager(),(isrtp)?RTPMEM_TYPE_BUFFER_RECEIVEDRTPPACKET:RTPMEM_TYPE_BUFFER_RECEIVEDRTCPPACKET) uint8_t[recvlen];
+	return new uint8_t[recvlen];
 }
 
 inline void RTPRawPacket::SetData(uint8_t *data, size_t datalen)
 {
 	if (packetdata)
-		RTPDeleteByteArray(packetdata,GetMemoryManager());
+		delete [] packetdata;
 
 	packetdata = data;
 	packetdatalength = datalen;
@@ -144,7 +142,7 @@ inline void RTPRawPacket::SetData(uint8_t *data, size_t datalen)
 inline void RTPRawPacket::SetSenderAddress(RTPAddress *address)
 {
 	if (senderaddress)
-		RTPDelete(senderaddress, GetMemoryManager());
+		delete senderaddress;
 
 	senderaddress = address;
 }

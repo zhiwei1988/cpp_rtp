@@ -8,28 +8,27 @@
 
 #include "rtpconfig.h"
 #include "rtptypes.h"
-#include "rtpmemoryobject.h"
 #include <list>
 
 class RTPRawPacket;
 class RTCPPacket;
 
 /** Represents an RTCP compound packet. */
-class RTCPCompoundPacket : public RTPMemoryObject
+class RTCPCompoundPacket
 {
 	MEDIA_RTP_NO_COPY(RTCPCompoundPacket)
 public:
 	/** Creates an RTCPCompoundPacket instance from the data in \c rawpack, installing a memory manager if specified. */
-	RTCPCompoundPacket(RTPRawPacket &rawpack, RTPMemoryManager *memmgr = 0);
+	RTCPCompoundPacket(RTPRawPacket &rawpack);
 
 	/** Creates an RTCPCompoundPacket instance from the data in \c packet}, with size \c len.
 	 *  Creates an RTCPCompoundPacket instance from the data in \c packet}, with size \c len. The \c deletedata
 	 *  flag specifies if the data in \c packet should be deleted when the compound packet is destroyed. If
 	 *  specified, a memory manager will be installed.
 	 */
-	RTCPCompoundPacket(uint8_t *packet, size_t len, bool deletedata = true, RTPMemoryManager *memmgr = 0);
+	RTCPCompoundPacket(uint8_t *packet, size_t len, bool deletedata = true);
 protected:
-	RTCPCompoundPacket(RTPMemoryManager *memmgr); // this is for the compoundpacket builder
+	RTCPCompoundPacket(); // this is for the compoundpacket builder
 public:
 	virtual ~RTCPCompoundPacket();
 

@@ -96,7 +96,7 @@ public:
 	 *  be the same port as the RTP packets in case RTCP multiplexing is used). */
 	uint16_t GetRTCPSendPort() const																{ return rtcpsendport; }
 
-	RTPAddress *CreateCopy(RTPMemoryManager *mgr) const;
+	RTPAddress *CreateCopy() const;
 
 	// Note that these functions are only used for received packets, and for those
 	// the rtcpsendport variable is not important and should be ignored.

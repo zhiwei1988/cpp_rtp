@@ -15,7 +15,6 @@
 #include "rtcppacketbuilder.h"
 #include "rtptimeutilities.h"
 #include "rtcpcompoundpacketbuilder.h"
-#include "rtpmemoryobject.h"
 #include <list>
 
 #ifdef RTP_SUPPORT_THREAD
@@ -40,7 +39,7 @@ class RTCPAPPPacket;
  *  \note The RTPSession class is not meant to be thread safe. The user should use some kind of locking 
  *        mechanism to prevent different threads from using the same RTPSession instance.
  */
-class RTPSession : public RTPMemoryObject
+class RTPSession
 {
 	MEDIA_RTP_NO_COPY(RTPSession)
 public:
@@ -53,7 +52,7 @@ public:
 	 *  instance will be used instead. By specifying a random number generator yourself, it is
 	 *  possible to use the same generator in several RTPSession instances.
 	 */
-	RTPSession(RTPRandom *rnd = 0, RTPMemoryManager *mgr = 0);
+	RTPSession(RTPRandom *rnd = 0);
 	virtual ~RTPSession();
 	
 	/** Creates an RTP session.

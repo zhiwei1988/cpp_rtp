@@ -1,5 +1,4 @@
 #include "rtpipv6address.h"
-#include "rtpmemorymanager.h"
 
 #ifdef RTP_SUPPORT_IPV6
 
@@ -7,10 +6,9 @@
 
 
 
-RTPAddress *RTPIPv6Address::CreateCopy(RTPMemoryManager *mgr) const
+RTPAddress *RTPIPv6Address::CreateCopy() const
 {
-	MEDIA_RTP_UNUSED(mgr); // 可能未使用
-	RTPIPv6Address *newaddr = RTPNew(mgr,RTPMEM_TYPE_CLASS_RTPADDRESS) RTPIPv6Address(ip,port);
+	RTPIPv6Address *newaddr = new RTPIPv6Address(ip,port);
 	return newaddr;
 }
 

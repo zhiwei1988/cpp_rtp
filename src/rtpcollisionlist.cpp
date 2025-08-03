@@ -1,11 +1,10 @@
 #include "rtpcollisionlist.h"
 #include "rtperrors.h"
-#include "rtpmemorymanager.h"
 
 
 
 
-RTPCollisionList::RTPCollisionList(RTPMemoryManager *mgr) : RTPMemoryObject(mgr)
+RTPCollisionList::RTPCollisionList()
 {
 	timeinit.Dummy();
 }
@@ -15,7 +14,7 @@ void RTPCollisionList::Clear()
 	std::list<AddressAndTime>::iterator it;
 	
 	for (it = addresslist.begin() ; it != addresslist.end() ; it++)
-		RTPDelete((*it).addr,GetMemoryManager());
+		delete (*it).addr;
 	addresslist.clear();
 }
 
@@ -36,7 +35,7 @@ int RTPCollisionList::UpdateAddress(const RTPAddress *addr,const RTPTime &receiv
 		}
 	}
 
-	RTPAddress *newaddr = addr->CreateCopy(GetMemoryManager());
+	RTPAddress *newaddr = addr->CreateCopy();
 	if (newaddr == 0)
 		return ERR_RTP_OUTOFMEM;
 	
@@ -69,7 +68,7 @@ void RTPCollisionList::Timeout(const RTPTime &currenttime,const RTPTime &timeout
 	{
 		if ((*it).recvtime < checktime) // 超时
 		{
-			RTPDelete((*it).addr,GetMemoryManager());
+			delete (*it).addr;
 			it = addresslist.erase(it);	
 		}
 		else

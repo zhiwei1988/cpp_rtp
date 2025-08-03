@@ -1,5 +1,4 @@
 #include "rtpbyteaddress.h"
-#include "rtpmemorymanager.h"
 
 
 bool RTPByteAddress::IsSameAddress(const RTPAddress *addr) const
@@ -37,10 +36,9 @@ bool RTPByteAddress::IsFromSameHost(const RTPAddress *addr) const
 	return false;
 }
 
-RTPAddress *RTPByteAddress::CreateCopy(RTPMemoryManager *mgr) const
+RTPAddress *RTPByteAddress::CreateCopy() const
 {
-	MEDIA_RTP_UNUSED(mgr); // 可能未使用
-	RTPByteAddress *a = RTPNew(mgr, RTPMEM_TYPE_CLASS_RTPADDRESS) RTPByteAddress(hostaddress, addresslength, port);
+	RTPByteAddress *a = new RTPByteAddress(hostaddress, addresslength, port);
 	return a;
 }
 

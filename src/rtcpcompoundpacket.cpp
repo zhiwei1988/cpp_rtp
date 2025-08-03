@@ -15,7 +15,7 @@
 
 
 
-RTCPCompoundPacket::RTCPCompoundPacket(RTPRawPacket &rawpack, RTPMemoryManager *mgr) : RTPMemoryObject(mgr)
+RTCPCompoundPacket::RTCPCompoundPacket(RTPRawPacket &rawpack)
 {
 	compoundpacket = 0;
 	compoundpacketlength = 0;
@@ -43,7 +43,7 @@ RTCPCompoundPacket::RTCPCompoundPacket(RTPRawPacket &rawpack, RTPMemoryManager *
 	rtcppackit = rtcppacklist.begin();
 }
 
-RTCPCompoundPacket::RTCPCompoundPacket(uint8_t *packet, size_t packetlen, bool deletedata, RTPMemoryManager *mgr) : RTPMemoryObject(mgr)
+RTCPCompoundPacket::RTCPCompoundPacket(uint8_t *packet, size_t packetlen, bool deletedata)
 {
 	compoundpacket = 0;
 	compoundpacketlength = 0;
@@ -59,7 +59,7 @@ RTCPCompoundPacket::RTCPCompoundPacket(uint8_t *packet, size_t packetlen, bool d
 	rtcppackit = rtcppacklist.begin();
 }
 
-RTCPCompoundPacket::RTCPCompoundPacket(RTPMemoryManager *mgr) : RTPMemoryObject(mgr)
+RTCPCompoundPacket::RTCPCompoundPacket()
 {
 	compoundpacket = 0;
 	compoundpacketlength = 0;
@@ -124,22 +124,22 @@ int RTCPCompoundPacket::ParseData(uint8_t *data, size_t datalen)
 		switch (rtcphdr->packettype)
 		{
 		case RTP_RTCPTYPE_SR:
-			p = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPSRPACKET) RTCPSRPacket(data,length);
+			p = new RTCPSRPacket(data,length);
 			break;
 		case RTP_RTCPTYPE_RR:
-			p = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPRRPACKET) RTCPRRPacket(data,length);
+			p = new RTCPRRPacket(data,length);
 			break;
 		case RTP_RTCPTYPE_SDES:
-			p = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPSDESPACKET) RTCPSDESPacket(data,length);
+			p = new RTCPSDESPacket(data,length);
 			break;
 		case RTP_RTCPTYPE_BYE:
-			p = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPBYEPACKET) RTCPBYEPacket(data,length);
+			p = new RTCPBYEPacket(data,length);
 			break;
 		case RTP_RTCPTYPE_APP:
-			p = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPAPPPACKET) RTCPAPPPacket(data,length);
+			p = new RTCPAPPPacket(data,length);
 			break;
 		default:
-			p = RTPNew(GetMemoryManager(),RTPMEM_TYPE_CLASS_RTCPUNKNOWNPACKET) RTCPUnknownPacket(data,length);
+			p = new RTCPUnknownPacket(data,length);
 		}
 
 		if (p == 0)
@@ -166,7 +166,7 @@ RTCPCompoundPacket::~RTCPCompoundPacket()
 {
 	ClearPacketList();
 	if (compoundpacket && deletepacket)
-		RTPDeleteByteArray(compoundpacket,GetMemoryManager());
+		delete [] compoundpacket;
 }
 
 void RTCPCompoundPacket::ClearPacketList()
@@ -174,7 +174,7 @@ void RTCPCompoundPacket::ClearPacketList()
 	std::list<RTCPPacket *>::const_iterator it;
 
 	for (it = rtcppacklist.begin() ; it != rtcppacklist.end() ; it++)
-		RTPDelete(*it,GetMemoryManager());
+		delete *it;
 	rtcppacklist.clear();
 	rtcppackit = rtcppacklist.begin();
 }

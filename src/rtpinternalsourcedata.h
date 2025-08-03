@@ -15,7 +15,7 @@
 class RTPInternalSourceData : public RTPSourceData
 {
 public:
-	RTPInternalSourceData(uint32_t ssrc, RTPSources::ProbationType probtype, RTPMemoryManager *mgr = 0);
+	RTPInternalSourceData(uint32_t ssrc, RTPSources::ProbationType probtype);
 	~RTPInternalSourceData();
 
 	int ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &receivetime,bool *stored, RTPSources *sources);
@@ -52,18 +52,18 @@ inline int RTPInternalSourceData::SetRTPDataAddress(const RTPAddress *a)
 	{
 		if (rtpaddr)
 		{
-			RTPDelete(rtpaddr,GetMemoryManager());
+			delete rtpaddr;
 			rtpaddr = 0;
 		}
 	}
 	else
 	{
-		RTPAddress *newaddr = a->CreateCopy(GetMemoryManager());
+		RTPAddress *newaddr = a->CreateCopy();
 		if (newaddr == 0)
 			return ERR_RTP_OUTOFMEM;
 		
 		if (rtpaddr && a != rtpaddr)
-			RTPDelete(rtpaddr,GetMemoryManager());
+			delete rtpaddr;
 		rtpaddr = newaddr;
 	}
 	isrtpaddrset = true;
@@ -76,18 +76,18 @@ inline int RTPInternalSourceData::SetRTCPDataAddress(const RTPAddress *a)
 	{
 		if (rtcpaddr)
 		{
-			RTPDelete(rtcpaddr,GetMemoryManager());
+			delete rtcpaddr;
 			rtcpaddr = 0;
 		}
 	}
 	else
 	{
-		RTPAddress *newaddr = a->CreateCopy(GetMemoryManager());
+		RTPAddress *newaddr = a->CreateCopy();
 		if (newaddr == 0)
 			return ERR_RTP_OUTOFMEM;
 		
 		if (rtcpaddr && a != rtcpaddr)
-			RTPDelete(rtcpaddr,GetMemoryManager());
+			delete rtcpaddr;
 		rtcpaddr = newaddr;
 	}
 	isrtcpaddrset = true;

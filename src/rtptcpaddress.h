@@ -33,7 +33,7 @@ public:
 	/** Returns the socket that was specified in the constructor. */
 	SocketType GetSocket() const																	{ return m_socket; }
 
-	RTPAddress *CreateCopy(RTPMemoryManager *mgr) const;
+	RTPAddress *CreateCopy() const;
 
 	// Note that these functions are only used for received packets
 	bool IsSameAddress(const RTPAddress *addr) const;

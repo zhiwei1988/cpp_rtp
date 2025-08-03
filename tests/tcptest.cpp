@@ -54,7 +54,7 @@ protected:
 class MyTCPTransmitter : public RTPTCPTransmitter
 {
 public:
-	MyTCPTransmitter(const string &name) : RTPTCPTransmitter(0), m_name(name) { }
+	MyTCPTransmitter(const string &name) : RTPTCPTransmitter(), m_name(name) { }
 
 	void OnSendError(SocketType sock)
 	{

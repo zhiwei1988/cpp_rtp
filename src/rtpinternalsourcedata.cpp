@@ -6,7 +6,7 @@
 
 #define RTPINTERNALSOURCEDATA_MAXPROBATIONPACKETS		32
 
-RTPInternalSourceData::RTPInternalSourceData(uint32_t ssrc,RTPSources::ProbationType probtype,RTPMemoryManager *mgr):RTPSourceData(ssrc,mgr)
+RTPInternalSourceData::RTPInternalSourceData(uint32_t ssrc,RTPSources::ProbationType probtype):RTPSourceData(ssrc)
 {
 	MEDIA_RTP_UNUSED(probtype); // 可能未使用
 #ifdef RTP_SUPPORT_PROBATION
@@ -102,7 +102,7 @@ int RTPInternalSourceData::ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &re
 		{
 			RTPPacket *p = *(packetlist.begin());
 			packetlist.pop_front();
-			RTPDelete(p,GetMemoryManager());
+			delete p;
 		}
 	}
 
@@ -240,13 +240,13 @@ int RTPInternalSourceData::ProcessBYEPacket(const uint8_t *reason,size_t reasonl
 {
 	if (byereason)
 	{
-		RTPDeleteByteArray(byereason,GetMemoryManager());
+		delete [] byereason;
 		byereason = 0;
 		byereasonlen = 0;
 	}
 
 	byetime = receivetime;
-	byereason = RTPNew(GetMemoryManager(),RTPMEM_TYPE_BUFFER_RTCPBYEREASON) uint8_t[reasonlen];
+	byereason = new uint8_t[reasonlen];
 	if (byereason == 0)
 		return ERR_RTP_OUTOFMEM;
 	memcpy(byereason,reason,reasonlen);

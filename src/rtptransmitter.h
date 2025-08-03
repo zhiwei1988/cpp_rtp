@@ -8,7 +8,6 @@
 
 #include "rtpconfig.h"
 #include "rtptypes.h"
-#include "rtpmemoryobject.h"
 #include "rtptimeutilities.h"
 
 class RTPRawPacket;
@@ -23,7 +22,7 @@ class RTPTransmissionInfo;
  *  actual transmission components. Currently, three implementations exist:
  *  an UDP over IPv4 transmitter, an UDP over IPv6 transmitter and a TCP transmitter.
  */
-class RTPTransmitter : public RTPMemoryObject
+class RTPTransmitter
 {
 public:
 	/** Used to identify a specific transmitter. 
@@ -47,7 +46,7 @@ public:
 	};
 protected:
 	/** Constructor in which you can specify a memory manager to use. */
-	RTPTransmitter(RTPMemoryManager *mgr) : RTPMemoryObject(mgr)									{ timeinit.Dummy(); }
+	RTPTransmitter()																				{ timeinit.Dummy(); }
 public:
 	virtual ~RTPTransmitter()													{ }
 

@@ -8,7 +8,7 @@
 
 
 
-RTPPacketBuilder::RTPPacketBuilder(RTPRandom &r,RTPMemoryManager *mgr) : RTPMemoryObject(mgr),rtprnd(r),lastwallclocktime(0,0)
+RTPPacketBuilder::RTPPacketBuilder(RTPRandom &r) : rtprnd(r),lastwallclocktime(0,0)
 {
 	init = false;
 	timeinit.Dummy();
@@ -29,7 +29,7 @@ int RTPPacketBuilder::Init(size_t max)
 		return ERR_RTP_PACKBUILD_INVALIDMAXPACKETSIZE;
 	
 	maxpacksize = max;
-	buffer = RTPNew(GetMemoryManager(),RTPMEM_TYPE_BUFFER_RTPPACKETBUILDERBUFFER) uint8_t [max];
+	buffer = new uint8_t [max];
 	if (buffer == 0)
 		return ERR_RTP_OUTOFMEM;
 	packetlength = 0;
@@ -50,7 +50,7 @@ void RTPPacketBuilder::Destroy()
 {
 	if (!init)
 		return;
-	RTPDeleteByteArray(buffer,GetMemoryManager());
+	delete [] buffer;
 	init = false;
 }
 
@@ -60,11 +60,11 @@ int RTPPacketBuilder::SetMaximumPacketSize(size_t max)
 
 	if (max <= 0)
 		return ERR_RTP_PACKBUILD_INVALIDMAXPACKETSIZE;
-	newbuf = RTPNew(GetMemoryManager(),RTPMEM_TYPE_BUFFER_RTPPACKETBUILDERBUFFER) uint8_t[max];
+	newbuf = new uint8_t[max];
 	if (newbuf == 0)
 		return ERR_RTP_OUTOFMEM;
 	
-	RTPDeleteByteArray(buffer,GetMemoryManager());
+	delete [] buffer;
 	buffer = newbuf;
 	maxpacksize = max;
 	return 0;
@@ -203,7 +203,7 @@ int RTPPacketBuilder::PrivateBuildPacket(const void *data,size_t len,
 	                  uint16_t hdrextID,const void *hdrextdata,size_t numhdrextwords)
 {
 	RTPPacket p(pt,data,len,seqnr,timestamp,ssrc,mark,numcsrcs,csrcs,gotextension,hdrextID,
-	            (uint16_t)numhdrextwords,hdrextdata,buffer,maxpacksize,GetMemoryManager());
+	            (uint16_t)numhdrextwords,hdrextdata,buffer,maxpacksize);
 	int status = p.GetCreationError();
 
 	if (status < 0)

@@ -12,21 +12,20 @@
 #include "rtprandom.h"
 #include "rtptimeutilities.h"
 #include "rtptypes.h"
-#include "rtpmemoryobject.h"
 
 class RTPSources;
 
 /** This class can be used to build RTP packets and is a bit more high-level than the RTPPacket 
  *  class: it generates an SSRC identifier, keeps track of timestamp and sequence number etc.
  */
-class RTPPacketBuilder : public RTPMemoryObject
+class RTPPacketBuilder
 {
 	MEDIA_RTP_NO_COPY(RTPPacketBuilder)
 public:
 	/** Constructs an instance which will use \c rtprand for generating random numbers
 	 *  (used to initialize the SSRC value and sequence number), optionally installing a memory manager. 
 	 **/
-	RTPPacketBuilder(RTPRandom &rtprand, RTPMemoryManager *mgr = 0);
+	RTPPacketBuilder(RTPRandom &rtprand);
 	~RTPPacketBuilder();
 
 	/** Initializes the builder to only allow packets with a size below \c maxpacksize. */

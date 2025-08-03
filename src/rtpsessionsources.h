@@ -14,7 +14,7 @@ class RTPSession;
 class RTPSessionSources : public RTPSources
 {
 public:
-	RTPSessionSources(RTPSession &sess,RTPMemoryManager *mgr) : RTPSources(RTPSources::ProbationStore,mgr),rtpsession(sess)
+	RTPSessionSources(RTPSession &sess) : RTPSources(RTPSources::ProbationStore),rtpsession(sess)
 													{ owncollision = false; }
 	~RTPSessionSources()										{ }
 	void ClearOwnCollisionFlag()									{ owncollision = false; }

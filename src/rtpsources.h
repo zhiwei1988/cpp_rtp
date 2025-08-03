@@ -10,7 +10,6 @@
 #include <unordered_map>
 #include "rtcpsdespacket.h"
 #include "rtptypes.h"
-#include "rtpmemoryobject.h"
 
 	
 class RTPNTPTime;
@@ -29,7 +28,7 @@ class RTPSourceData;
  *  is used to identify packets from our own session. The class also provides some overridable functions 
  *  which can be used to catch certain events (new SSRC, SSRC collision, ...).
  */
-class RTPSources : public RTPMemoryObject
+class RTPSources
 {
 	MEDIA_RTP_NO_COPY(RTPSources)
 public:
@@ -42,7 +41,7 @@ public:
 	};
 	
 	/** In the constructor you can select the probation type you'd like to use and also a memory manager. */
-	RTPSources(ProbationType = ProbationStore,RTPMemoryManager *mgr = 0);
+	RTPSources(ProbationType = ProbationStore);
 	virtual ~RTPSources();
 
 	/** Clears the source table. */

@@ -211,7 +211,7 @@ class RTPUDPv4Transmitter : public RTPTransmitter
 {
 	MEDIA_RTP_NO_COPY(RTPUDPv4Transmitter)
 public:
-	RTPUDPv4Transmitter(RTPMemoryManager *mgr);
+	RTPUDPv4Transmitter();
 	~RTPUDPv4Transmitter();
 
 	int Init(bool treadsafe);

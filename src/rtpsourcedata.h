@@ -12,7 +12,6 @@
 #include "rtcpsdesinfo.h"
 #include "rtptypes.h"
 #include "rtpsources.h"
-#include "rtpmemoryobject.h"
 #include <list>
 
 class RTPAddress;
@@ -128,11 +127,11 @@ inline RTPSourceStats::RTPSourceStats():prevpacktime(0,0),lastmsgtime(0,0),lastr
 }
 
 /** Describes an entry in the RTPSources source table. */
-class RTPSourceData : public RTPMemoryObject
+class RTPSourceData
 {
 	MEDIA_RTP_NO_COPY(RTPSourceData)
 protected:
-	RTPSourceData(uint32_t ssrc, RTPMemoryManager *mgr = 0);
+	RTPSourceData(uint32_t ssrc);
 	virtual ~RTPSourceData();
 public:
 	/** Extracts the first packet of this participants RTP packet queue. */
@@ -433,7 +432,7 @@ inline void RTPSourceData::FlushPackets()
 	std::list<RTPPacket *>::const_iterator it;
 
 	for (it = packetlist.begin() ; it != packetlist.end() ; ++it)
-		RTPDelete(*it,GetMemoryManager());
+		delete *it;
 	packetlist.clear();
 }
 

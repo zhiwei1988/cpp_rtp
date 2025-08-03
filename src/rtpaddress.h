@@ -33,7 +33,7 @@ public:
 	 *  corresponding memory manager will be used to allocate the memory for the address 
 	 *  copy. 
 	 */
-	virtual RTPAddress *CreateCopy(RTPMemoryManager *mgr) const = 0;
+	virtual RTPAddress *CreateCopy() const = 0;
 
 	/** Checks if the address \c addr is the same address as the one this instance represents. 
 	 *  Checks if the address \c addr is the same address as the one this instance represents.

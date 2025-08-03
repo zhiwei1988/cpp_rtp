@@ -1,7 +1,6 @@
 #include "rtpsourcedata.h"
 #include "rtpdefines.h"
 #include "rtpaddress.h"
-#include "rtpmemorymanager.h"
 #ifdef RTP_SUPPORT_NETINET_IN
 	#include <netinet/in.h>
 #endif // RTP_SUPPORT_NETINET_IN
@@ -222,7 +221,7 @@ jitter = (uint32_t)djitter;
 	}
 }
 
-RTPSourceData::RTPSourceData(uint32_t s, RTPMemoryManager *mgr) : RTPMemoryObject(mgr),SDESinf(mgr),byetime(0,0)
+RTPSourceData::RTPSourceData(uint32_t s) : SDESinf(),byetime(0,0)
 {
 	ssrc = s;
 	issender = false;
@@ -244,11 +243,11 @@ RTPSourceData::~RTPSourceData()
 {
 	FlushPackets();
 	if (byereason)
-		RTPDeleteByteArray(byereason,GetMemoryManager());
+		delete [] byereason;
 	if (rtpaddr)
-		RTPDelete(rtpaddr,GetMemoryManager());
+		delete rtpaddr;
 	if (rtcpaddr)
-		RTPDelete(rtcpaddr,GetMemoryManager());
+		delete rtcpaddr;
 }
 
 double RTPSourceData::INF_GetEstimatedTimestampUnit() const

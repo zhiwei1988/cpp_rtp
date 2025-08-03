@@ -11,7 +11,6 @@
 #include "rtperrors.h"
 #include "rtcpsdesinfo.h"
 #include "rtptimeutilities.h"
-#include "rtpmemoryobject.h"
 
 class RTPSources;
 class RTPPacketBuilder;
@@ -25,7 +24,7 @@ class RTCPCompoundPacketBuilder;
  *  an RTPSources instance to automatically generate the next compound packet which should be sent. It also 
  *  provides functions to determine when SDES items other than the CNAME item should be sent.
  */
-class RTCPPacketBuilder : public RTPMemoryObject
+class RTCPPacketBuilder
 {
 public:
 	/** Creates an RTCPPacketBuilder instance. 
@@ -33,7 +32,7 @@ public:
 	 *  \c rtppackbuilder to determine the information for the next RTCP compound packet. Optionally,
 	 *  the memory manager \c mgr can be installed.
 	 */
-	RTCPPacketBuilder(RTPSources &sources,RTPPacketBuilder &rtppackbuilder, RTPMemoryManager *mgr = 0);
+	RTCPPacketBuilder(RTPSources &sources,RTPPacketBuilder &rtppackbuilder);
 	~RTCPPacketBuilder();
 
 	/** Initializes the builder.
@@ -161,7 +160,7 @@ private:
 	class RTCPSDESInfoInternal : public RTCPSDESInfo
 	{
 	public:
-		RTCPSDESInfoInternal(RTPMemoryManager *mgr) : RTCPSDESInfo(mgr)	{ ClearFlags(); }
+		RTCPSDESInfoInternal() : RTCPSDESInfo()		{ ClearFlags(); }
 		void ClearFlags()			{ pname = false; pemail = false; plocation = false; pphone = false; ptool = false; pnote = false; }
 		bool ProcessedName() const 		{ return pname; }
 		bool ProcessedEMail() const		{ return pemail; }

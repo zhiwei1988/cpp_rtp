@@ -1,5 +1,4 @@
 #include "rtptcpaddress.h"
-#include "rtpmemorymanager.h"
 
 
 bool RTPTCPAddress::IsSameAddress(const RTPAddress *addr) const
@@ -23,10 +22,9 @@ bool RTPTCPAddress::IsFromSameHost(const RTPAddress *addr) const
 	return IsSameAddress(addr);
 }
 
-RTPAddress *RTPTCPAddress::CreateCopy(RTPMemoryManager *mgr) const
+RTPAddress *RTPTCPAddress::CreateCopy() const
 {
-	MEDIA_RTP_UNUSED(mgr); // 可能未使用
-	RTPTCPAddress *a = RTPNew(mgr,RTPMEM_TYPE_CLASS_RTPADDRESS) RTPTCPAddress(m_socket);
+	RTPTCPAddress *a = new RTPTCPAddress(m_socket);
 	return a;
 }
 

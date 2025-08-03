@@ -46,7 +46,6 @@ media_rtp_support_option("Support SDES PRIV items" MEDIA_RTP_SUPPORT_SDESPRIV RT
 media_rtp_support_option("Support the probation mechanism for a new source" MEDIA_RTP_SUPPORT_PROBATION RTP_SUPPORT_PROBATION ON "// Do not wait for a number of consecutive packets to validate source")
 media_rtp_support_option("Support sending RTCP APP packets" MEDIA_RTP_SUPPORT_SENDAPP RTP_SUPPORT_SENDAPP ON "// No direct support for sending RTCP APP packets")
 media_rtp_support_option("Support sending unknown RTCP packets" MEDIA_RTP_SUPPORT_RTCPUNKNOWN RTP_SUPPORT_RTCPUNKNOWN OFF "// No support for sending unknown RTCP packets")
-media_rtp_support_option("Support memory management mechanism" MEDIA_RTP_SUPPORT_MEMORYMGMT RTP_SUPPORT_MEMORYMANAGEMENT ON "// No memory management support")
 
 media_rtp_include_test(sys/filio.h RTP_HAVE_SYS_FILIO "// Don't have <sys/filio.h>")
 media_rtp_include_test(sys/sockio.h RTP_HAVE_SYS_SOCKIO "// Don't have <sys/sockio.h>")

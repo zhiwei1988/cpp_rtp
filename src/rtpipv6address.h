@@ -56,7 +56,7 @@ public:
 	/** Returns the port number contained in this instance in host byte order. */
 	uint16_t GetPort() const																				{ return port; }
 
-	RTPAddress *CreateCopy(RTPMemoryManager *mgr) const;
+	RTPAddress *CreateCopy() const;
 	bool IsSameAddress(const RTPAddress *addr) const;
 	bool IsFromSameHost(const RTPAddress *addr) const;
 

@@ -1,5 +1,4 @@
 #include "rtpipv4address.h"
-#include "rtpmemorymanager.h"
 
 
 
@@ -30,10 +29,9 @@ bool RTPIPv4Address::IsFromSameHost(const RTPAddress *addr) const
 	return false;
 }
 
-RTPAddress *RTPIPv4Address::CreateCopy(RTPMemoryManager *mgr) const
+RTPAddress *RTPIPv4Address::CreateCopy() const
 {
-	MEDIA_RTP_UNUSED(mgr); // 可能未使用
-	RTPIPv4Address *a = RTPNew(mgr,RTPMEM_TYPE_CLASS_RTPADDRESS) RTPIPv4Address(ip,port);
+	RTPIPv4Address *a = new RTPIPv4Address(ip,port);
 	return a;
 }
 
