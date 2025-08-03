@@ -14,7 +14,7 @@
 #include "rtpstructs.h"
 
 /** This class is used by the transmission component to store the incoming RTP and RTCP data in. */
-class MEDIA_RTP_IMPORTEXPORT RTPRawPacket : public RTPMemoryObject
+class RTPRawPacket : public RTPMemoryObject
 {
 	MEDIA_RTP_NO_COPY(RTPRawPacket)
 public:	

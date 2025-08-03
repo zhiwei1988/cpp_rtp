@@ -9,7 +9,7 @@
 #include "rtpconfig.h"
 #include "rtpmemorymanager.h"
 
-class MEDIA_RTP_IMPORTEXPORT RTPMemoryObject
+class RTPMemoryObject
 {
 protected:	
 #ifdef RTP_SUPPORT_MEMORYMANAGEMENT

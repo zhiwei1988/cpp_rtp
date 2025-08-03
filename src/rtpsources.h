@@ -29,7 +29,7 @@ class RTPSourceData;
  *  is used to identify packets from our own session. The class also provides some overridable functions 
  *  which can be used to catch certain events (new SSRC, SSRC collision, ...).
  */
-class MEDIA_RTP_IMPORTEXPORT RTPSources : public RTPMemoryObject
+class RTPSources : public RTPMemoryObject
 {
 	MEDIA_RTP_NO_COPY(RTPSources)
 public:

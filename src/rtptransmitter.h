@@ -23,7 +23,7 @@ class RTPTransmissionInfo;
  *  actual transmission components. Currently, three implementations exist:
  *  an UDP over IPv4 transmitter, an UDP over IPv6 transmitter and a TCP transmitter.
  */
-class MEDIA_RTP_IMPORTEXPORT RTPTransmitter : public RTPMemoryObject
+class RTPTransmitter : public RTPMemoryObject
 {
 public:
 	/** Used to identify a specific transmitter. 
@@ -186,7 +186,7 @@ public:
  *  GetTransmissionProtocol function which identifies the component type for which
  *  these parameters are valid.
  */
-class MEDIA_RTP_IMPORTEXPORT RTPTransmissionParams
+class RTPTransmissionParams
 {
 protected:
 	RTPTransmissionParams(RTPTransmitter::TransmissionProtocol p)				{ protocol = p; }
@@ -205,7 +205,7 @@ private:
  *  GetTransmissionProtocol function which identifies the component type for which
  *  these parameters are valid.
  */
-class MEDIA_RTP_IMPORTEXPORT RTPTransmissionInfo
+class RTPTransmissionInfo
 {
 protected:
 	RTPTransmissionInfo(RTPTransmitter::TransmissionProtocol p)				{ protocol = p; }

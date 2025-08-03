@@ -23,7 +23,7 @@
  *  the accept or ignore functions of the transmitter, a zero port number represents 
  *  all ports for the specified IP address.
  */
-class MEDIA_RTP_IMPORTEXPORT RTPIPv6Address : public RTPAddress
+class RTPIPv6Address : public RTPAddress
 {
 public:
 	/** Creates an instance with IP address and port number set to zero. */

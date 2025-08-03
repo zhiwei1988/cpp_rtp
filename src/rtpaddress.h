@@ -12,7 +12,7 @@
 class RTPMemoryManager;
 
 /** This class is an abstract class which is used to specify destinations, multicast groups etc. */
-class MEDIA_RTP_IMPORTEXPORT RTPAddress
+class RTPAddress
 {
 public:
 	/** Identifies the actual implementation being used. */

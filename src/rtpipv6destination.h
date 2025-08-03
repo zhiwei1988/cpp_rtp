@@ -17,7 +17,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-class MEDIA_RTP_IMPORTEXPORT RTPIPv6Destination
+class RTPIPv6Destination
 {
 public:
 	RTPIPv6Destination(in6_addr ip,uint16_t portbase)

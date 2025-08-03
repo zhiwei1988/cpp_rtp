@@ -744,7 +744,6 @@ int RTPSources::ProcessBYE(uint32_t ssrc,size_t reasonlength,const void *reasond
 int RTPSources::ObtainSourceDataInstance(uint32_t ssrc,RTPInternalSourceData **srcdat,bool *created)
 {
 	RTPInternalSourceData *srcdat2;
-	int status;
 	
 	auto it = sourcelist.find(ssrc);
 	if (it == sourcelist.end()) // 此源无条目

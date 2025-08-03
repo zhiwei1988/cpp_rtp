@@ -31,7 +31,7 @@
 #define RTPUDPV6TRANS_RTCPTRANSMITBUFFER						32768
 
 /** Parameters for the UDP over IPv6 transmitter. */
-class MEDIA_RTP_IMPORTEXPORT RTPUDPv6TransmissionParams : public RTPTransmissionParams
+class RTPUDPv6TransmissionParams : public RTPTransmissionParams
 {
 public:
 	RTPUDPv6TransmissionParams();
@@ -135,7 +135,7 @@ inline RTPUDPv6TransmissionParams::RTPUDPv6TransmissionParams()
 }
 
 /** Additional information about the UDP over IPv6 transmitter. */
-class MEDIA_RTP_IMPORTEXPORT RTPUDPv6TransmissionInfo : public RTPTransmissionInfo
+class RTPUDPv6TransmissionInfo : public RTPTransmissionInfo
 {
 public:
 	RTPUDPv6TransmissionInfo(std::list<in6_addr> iplist, SocketType rtpsock, SocketType rtcpsock,
@@ -174,7 +174,7 @@ private:
  *  argument require an argument of RTPIPv6Address. The GetTransmissionInfo member function
  *  returns an instance of type RTPUDPv6TransmissionInfo.
  */
-class MEDIA_RTP_IMPORTEXPORT RTPUDPv6Transmitter : public RTPTransmitter
+class RTPUDPv6Transmitter : public RTPTransmitter
 {
 	MEDIA_RTP_NO_COPY(RTPUDPv6Transmitter)
 public:

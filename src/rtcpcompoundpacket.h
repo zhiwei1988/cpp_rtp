@@ -15,7 +15,7 @@ class RTPRawPacket;
 class RTCPPacket;
 
 /** Represents an RTCP compound packet. */
-class MEDIA_RTP_IMPORTEXPORT RTCPCompoundPacket : public RTPMemoryObject
+class RTCPCompoundPacket : public RTPMemoryObject
 {
 	MEDIA_RTP_NO_COPY(RTCPCompoundPacket)
 public:

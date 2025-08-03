@@ -85,7 +85,7 @@ else (CMAKE_CROSSCOMPILING)
 	endif (MEDIA_RTP_BIGENDIAN)
 endif (CMAKE_CROSSCOMPILING)
 
-option(MEDIA_RTP_COMPILE_TESTS "Compile various tests in the 'tests' subdirectory" NO)
+option(MEDIA_RTP_COMPILE_TESTS "Compile various tests in the 'tests' subdirectory" YES)
 
 # Linux only - no winsock support
 set(TESTDEFS "")
@@ -130,9 +130,7 @@ endif (MEDIA_RTP_STDINT)
 set(RTP_WINSOCK_HEADERS "")
 
 
-# Linux - no import/export decoration needed
-set(MEDIA_RTP_IMPORT "")
-set(MEDIA_RTP_EXPORT "")
+# Linux - no import/export decoration needed (removed unused macros)
 
 configure_file("${PROJECT_SOURCE_DIR}/src/rtptypes.h.in" "${PROJECT_BINARY_DIR}/src/rtptypes.h")
 configure_file("${PROJECT_SOURCE_DIR}/src/rtpconfig.h.in" "${PROJECT_BINARY_DIR}/src/rtpconfig.h")

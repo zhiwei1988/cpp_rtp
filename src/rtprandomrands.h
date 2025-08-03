@@ -12,7 +12,7 @@
 /** A random number generator which tries to use the \c rand_s function on the
  *  Win32 platform. 
  */
-class MEDIA_RTP_IMPORTEXPORT RTPRandomRandS : public RTPRandom
+class RTPRandomRandS : public RTPRandom
 {
 public:
 	RTPRandomRandS();

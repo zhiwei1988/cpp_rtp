@@ -18,13 +18,11 @@ set (HEADERS
 	${PROJECT_BINARY_DIR}/src/rtpconfig.h
 	rtpdefines.h
 	rtperrors.h
-	rtphashtable.h
 	rtpinternalsourcedata.h
 	rtpipv4address.h
 	rtpipv4destination.h
 	rtpipv6address.h
 	rtpipv6destination.h
-	rtpkeyhashtable.h
 	rtpmemorymanager.h
 	rtpmemoryobject.h
 	rtppacket.h

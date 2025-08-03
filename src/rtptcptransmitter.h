@@ -19,7 +19,7 @@
 #endif // RTP_SUPPORT_THREAD
 
 /** Parameters for the TCP transmitter. */
-class MEDIA_RTP_IMPORTEXPORT RTPTCPTransmissionParams : public RTPTransmissionParams
+class RTPTCPTransmissionParams : public RTPTransmissionParams
 {
 public:
 	RTPTCPTransmissionParams();
@@ -43,7 +43,7 @@ inline RTPTCPTransmissionParams::RTPTCPTransmissionParams() : RTPTransmissionPar
 }
 
 /** Additional information about the TCP transmitter. */
-class MEDIA_RTP_IMPORTEXPORT RTPTCPTransmissionInfo : public RTPTransmissionInfo
+class RTPTCPTransmissionInfo : public RTPTransmissionInfo
 {
 public:
 	RTPTCPTransmissionInfo() : RTPTransmissionInfo(RTPTransmitter::TCPProto)	{ }
@@ -74,7 +74,7 @@ public:
  *  To get notified of an error when sending over or receiving from a socket, override the
  *  RTPTCPTransmitter::OnSendError and RTPTCPTransmitter::OnReceiveError member functions.
  */
-class MEDIA_RTP_IMPORTEXPORT RTPTCPTransmitter : public RTPTransmitter
+class RTPTCPTransmitter : public RTPTransmitter
 {
 	MEDIA_RTP_NO_COPY(RTPTCPTransmitter)
 public:

@@ -17,7 +17,7 @@
 class RTCPCompoundPacket;
 
 /** Describes an RTCP sender report packet. */
-class MEDIA_RTP_IMPORTEXPORT RTCPSRPacket : public RTCPPacket
+class RTCPSRPacket : public RTCPPacket
 {
 public:
 	/** Creates an instance based on the data in \c data with length \c datalen. 

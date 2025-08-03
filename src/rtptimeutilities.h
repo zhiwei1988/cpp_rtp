@@ -20,7 +20,7 @@
  * This is a simple wrapper for the most significant word (MSW) and least 
  * significant word (LSW) of an NTP timestamp.
  */
-class MEDIA_RTP_IMPORTEXPORT RTPNTPTime
+class RTPNTPTime
 {
 public:
 	/** This constructor creates and instance with MSW \c m and LSW \c l. */
@@ -39,7 +39,7 @@ private:
  *  This class is used to specify wallclock time, delay intervals etc. 
  *  It stores a number of seconds and a number of microseconds.
  */
-class MEDIA_RTP_IMPORTEXPORT RTPTime
+class RTPTime
 {
 public:
 	/** Returns an RTPTime instance representing the current wallclock time. 
@@ -271,7 +271,7 @@ inline bool RTPTime::operator>=(const RTPTime &t) const
 	return m_t >= t.m_t;
 }
 
-class MEDIA_RTP_IMPORTEXPORT RTPTimeInitializerObject
+class RTPTimeInitializerObject
 {
 public:
 	RTPTimeInitializerObject();

@@ -25,7 +25,7 @@ class RTCPCompoundPacketBuilder;
  *  an RTPSources instance to automatically generate the next compound packet which should be sent. It also 
  *  provides functions to determine when SDES items other than the CNAME item should be sent.
  */
-class MEDIA_RTP_IMPORTEXPORT RTCPPacketBuilder : public RTPMemoryObject
+class RTCPPacketBuilder : public RTPMemoryObject
 {
 public:
 	/** Creates an RTCPPacketBuilder instance. 

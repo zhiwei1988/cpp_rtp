@@ -19,7 +19,7 @@
 class RTPSession;
 class RTCPScheduler;
 
-class MEDIA_RTP_IMPORTEXPORT RTPPollThread : private jthread::JThread
+class RTPPollThread : private jthread::JThread
 {
 	MEDIA_RTP_NO_COPY(RTPPollThread)
 public:

@@ -11,7 +11,7 @@
 #include <stdio.h>
 
 /** A random number generator which uses bytes delivered by the /dev/urandom device. */
-class MEDIA_RTP_IMPORTEXPORT RTPRandomURandom : public RTPRandom
+class RTPRandomURandom : public RTPRandom
 {
 public:
 	RTPRandomURandom();

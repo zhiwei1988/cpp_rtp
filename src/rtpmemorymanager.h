@@ -112,7 +112,7 @@
 #define RTPMEM_TYPE_BUFFER_SRTPDATA								33
 
 /** A memory manager. */
-class MEDIA_RTP_IMPORTEXPORT RTPMemoryManager
+class RTPMemoryManager
 {
 public:	
 	RTPMemoryManager()									{ }

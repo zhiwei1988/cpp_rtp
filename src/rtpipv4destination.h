@@ -15,7 +15,7 @@
 #include <string.h>
 #include <string>
 
-class MEDIA_RTP_IMPORTEXPORT RTPIPv4Destination
+class RTPIPv4Destination
 {
 public:
 	RTPIPv4Destination()

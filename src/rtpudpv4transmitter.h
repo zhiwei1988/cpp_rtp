@@ -27,7 +27,7 @@
 #define RTPUDPV4TRANS_RTCPTRANSMITBUFFER						32768
 
 /** Parameters for the UDP over IPv4 transmitter. */
-class MEDIA_RTP_IMPORTEXPORT RTPUDPv4TransmissionParams : public RTPTransmissionParams
+class RTPUDPv4TransmissionParams : public RTPTransmissionParams
 {
 public:
 	RTPUDPv4TransmissionParams();
@@ -168,7 +168,7 @@ inline RTPUDPv4TransmissionParams::RTPUDPv4TransmissionParams() : RTPTransmissio
 }
 
 /** Additional information about the UDP over IPv4 transmitter. */
-class MEDIA_RTP_IMPORTEXPORT RTPUDPv4TransmissionInfo : public RTPTransmissionInfo
+class RTPUDPv4TransmissionInfo : public RTPTransmissionInfo
 {
 public:
 	RTPUDPv4TransmissionInfo(std::list<uint32_t> iplist,SocketType rtpsock,SocketType rtcpsock,
@@ -207,7 +207,7 @@ private:
  *  argument require an argument of RTPIPv4Address. The GetTransmissionInfo member function
  *  returns an instance of type RTPUDPv4TransmissionInfo.
  */
-class MEDIA_RTP_IMPORTEXPORT RTPUDPv4Transmitter : public RTPTransmitter
+class RTPUDPv4Transmitter : public RTPTransmitter
 {
 	MEDIA_RTP_NO_COPY(RTPUDPv4Transmitter)
 public:

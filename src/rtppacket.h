@@ -18,7 +18,7 @@ class RTPRawPacket;
  *  The class can also be used to create a new RTP packet according to the parameters specified by
  *  the user.
  */
-class MEDIA_RTP_IMPORTEXPORT RTPPacket : public RTPMemoryObject
+class RTPPacket : public RTPMemoryObject
 {
 	MEDIA_RTP_NO_COPY(RTPPacket)
 public:

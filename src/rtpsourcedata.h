@@ -17,7 +17,7 @@
 
 class RTPAddress;
 
-class MEDIA_RTP_IMPORTEXPORT RTCPSenderReportInfo
+class RTCPSenderReportInfo
 {
 public:
 	RTCPSenderReportInfo():ntptimestamp(0,0),receivetime(0,0)		{ hasinfo = false; rtptimestamp = 0; packetcount = 0; bytecount = 0; }
@@ -39,7 +39,7 @@ private:
 	RTPTime receivetime;
 };
 
-class MEDIA_RTP_IMPORTEXPORT RTCPReceiverReportInfo
+class RTCPReceiverReportInfo
 {
 public:
 	RTCPReceiverReportInfo():receivetime(0,0)				{ hasinfo = false; fractionlost = 0; packetslost = 0; exthighseqnr = 0; jitter = 0; lsr = 0; dlsr = 0; } 
@@ -65,7 +65,7 @@ private:
 	RTPTime receivetime;
 };
 
-class MEDIA_RTP_IMPORTEXPORT RTPSourceStats
+class RTPSourceStats
 {
 public:
 	RTPSourceStats();
@@ -128,7 +128,7 @@ inline RTPSourceStats::RTPSourceStats():prevpacktime(0,0),lastmsgtime(0,0),lastr
 }
 
 /** Describes an entry in the RTPSources source table. */
-class MEDIA_RTP_IMPORTEXPORT RTPSourceData : public RTPMemoryObject
+class RTPSourceData : public RTPMemoryObject
 {
 	MEDIA_RTP_NO_COPY(RTPSourceData)
 protected:

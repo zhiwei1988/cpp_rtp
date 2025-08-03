@@ -26,7 +26,7 @@
  * uses a single poll thread for several RTPSession and RTPTransmitter instances.
  * This idea is further illustrated in `example8.cpp`.
  */
-class MEDIA_RTP_IMPORTEXPORT RTPAbortDescriptors
+class RTPAbortDescriptors
 {
 	MEDIA_RTP_NO_COPY(RTPAbortDescriptors)
 public:

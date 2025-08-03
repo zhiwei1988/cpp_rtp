@@ -12,7 +12,7 @@
 class RTCPCompoundPacket;
 
 /** Base class for specific types of RTCP packets. */
-class MEDIA_RTP_IMPORTEXPORT RTCPPacket 
+class RTCPPacket 
 {
 	MEDIA_RTP_NO_COPY(RTCPPacket)
 public:

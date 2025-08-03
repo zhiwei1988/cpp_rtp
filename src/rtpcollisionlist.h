@@ -15,7 +15,7 @@
 class RTPAddress;
 
 /** This class represents a list of addresses from which SSRC collisions were detected. */
-class MEDIA_RTP_IMPORTEXPORT RTPCollisionList : public RTPMemoryObject
+class RTPCollisionList : public RTPMemoryObject
 {
 public:
 	/** Constructs an instance, optionally installing a memory manager. */

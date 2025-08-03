@@ -10,13 +10,7 @@
 #define MEDIA_RTP_UNUSED(x) (void)(x)
 #endif // MEDIA_RTP_UNUSED
 
-#define MEDIA_RTP_IMPORT ${MEDIA_RTP_IMPORT}
-#define MEDIA_RTP_EXPORT ${MEDIA_RTP_EXPORT}
-#ifdef MEDIA_RTP_COMPILING
-	#define MEDIA_RTP_IMPORTEXPORT MEDIA_RTP_EXPORT
-#else
-	#define MEDIA_RTP_IMPORTEXPORT MEDIA_RTP_IMPORT
-#endif // MEDIA_RTP_COMPILING
+// Removed unused import/export macros (Linux doesn't need DLL decoration)
 
 #define MEDIA_RTP_NO_COPY(ClassName) \
 	private: \

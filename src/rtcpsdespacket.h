@@ -17,7 +17,7 @@
 class RTCPCompoundPacket;
 
 /** Describes an RTCP source description packet. */
-class MEDIA_RTP_IMPORTEXPORT RTCPSDESPacket : public RTCPPacket
+class RTCPSDESPacket : public RTCPPacket
 {
 public:
 	/** Identifies the type of an SDES item. */

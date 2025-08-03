@@ -12,7 +12,7 @@
 #include "rtptimeutilities.h"
 #include "rtpsources.h"
 
-class MEDIA_RTP_IMPORTEXPORT RTPInternalSourceData : public RTPSourceData
+class RTPInternalSourceData : public RTPSourceData
 {
 public:
 	RTPInternalSourceData(uint32_t ssrc, RTPSources::ProbationType probtype, RTPMemoryManager *mgr = 0);

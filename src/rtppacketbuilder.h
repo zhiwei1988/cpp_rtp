@@ -19,7 +19,7 @@ class RTPSources;
 /** This class can be used to build RTP packets and is a bit more high-level than the RTPPacket 
  *  class: it generates an SSRC identifier, keeps track of timestamp and sequence number etc.
  */
-class MEDIA_RTP_IMPORTEXPORT RTPPacketBuilder : public RTPMemoryObject
+class RTPPacketBuilder : public RTPMemoryObject
 {
 	MEDIA_RTP_NO_COPY(RTPPacketBuilder)
 public:

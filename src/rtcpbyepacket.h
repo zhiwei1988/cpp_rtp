@@ -16,7 +16,7 @@
 class RTCPCompoundPacket;
 
 /** Describes an RTCP BYE packet. */
-class MEDIA_RTP_IMPORTEXPORT RTCPBYEPacket : public RTCPPacket
+class RTCPBYEPacket : public RTCPPacket
 {
 public:
 	/** Creates an instance based on the data in \c data with length \c datalen. 

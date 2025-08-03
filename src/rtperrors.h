@@ -10,7 +10,7 @@
 #include <string>
 
 /** Returns a string describing the error code \c errcode. */
-std::string MEDIA_RTP_IMPORTEXPORT RTPGetErrorString(int errcode);
+std::string RTPGetErrorString(int errcode);
 
 #define ERR_RTP_OUTOFMEM                                          -1
 #define ERR_RTP_NOTHREADSUPPORT                                   -2

@@ -14,7 +14,7 @@
 #include <stdio.h>
 
 /** A random number generator using the algorithm of the rand48 set of functions. */
-class MEDIA_RTP_IMPORTEXPORT RTPRandomRand48 : public RTPRandom
+class RTPRandomRand48 : public RTPRandom
 {
 public:
 	RTPRandomRand48();

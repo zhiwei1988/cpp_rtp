@@ -13,7 +13,7 @@
 #define RTPRANDOM_2POWMIN63										1.08420217248550443400745280086994171142578125e-19
 
 /** Interface for generating random numbers. */
-class MEDIA_RTP_IMPORTEXPORT RTPRandom
+class RTPRandom
 {
 public:
 	RTPRandom()											{ }

@@ -15,7 +15,7 @@
 #include <list>
 
 /** The class RTCPSDESInfo is a container for RTCP SDES information. */
-class MEDIA_RTP_IMPORTEXPORT RTCPSDESInfo : public RTPMemoryObject
+class RTCPSDESInfo : public RTPMemoryObject
 {
 	MEDIA_RTP_NO_COPY(RTCPSDESInfo)
 public:
