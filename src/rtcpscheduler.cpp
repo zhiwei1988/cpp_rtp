@@ -5,6 +5,7 @@
 #include "rtppacket.h"
 #include "rtcpcompoundpacket.h"
 #include "rtpsourcedata.h"
+#include "rtp_protocol_utils.h"
 
 
 
@@ -50,11 +51,9 @@ int RTCPSchedulerParams::SetMinimumTransmissionInterval(const RTPTime &t)
 	return 0;
 }
 
-RTCPScheduler::RTCPScheduler(RTPSources &s, RTPRandom &r) : sources(s),nextrtcptime(0,0),prevrtcptime(0,0),rtprand(r)
+RTCPScheduler::RTCPScheduler(RTPSources &s) : sources(s),nextrtcptime(0,0),prevrtcptime(0,0)
 {
 	Reset();
-
-	//std::cout << (void *)(&rtprand) << std::endl;
 }
 
 RTCPScheduler::~RTCPScheduler()
@@ -268,7 +267,7 @@ RTPTime RTCPScheduler::CalculateTransmissionInterval(bool sender)
 //	std::cout << "CalculateTransmissionInterval" << std::endl;
 
 	td = Td.GetDouble();
-	mul = rtprand.GetRandomDouble()+0.5; // gives random value between 0.5 and 1.5
+	mul = RTPGenerateRandomDouble()+0.5; // gives random value between 0.5 and 1.5
 	T = (td*mul)/1.21828; // see RFC 3550 p 30
 
 //	std::cout << "  Td: " << td << std::endl;
@@ -376,7 +375,7 @@ RTPTime RTCPScheduler::CalculateBYETransmissionInterval()
 	double ntimesC = n*C;
 	double Td = (tmin>ntimesC)?tmin:ntimesC;
 
-	double mul = rtprand.GetRandomDouble()+0.5; // gives random value between 0.5 and 1.5
+	double mul = RTPGenerateRandomDouble()+0.5; // gives random value between 0.5 and 1.5
 	double T = (Td*mul)/1.21828; // see RFC 3550 p 30
 	
 	return RTPTime(T);

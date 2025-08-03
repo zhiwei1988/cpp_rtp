@@ -8,7 +8,6 @@
 
 #include "rtpconfig.h"
 #include "rtptimeutilities.h"
-#include "rtprandom.h"
 
 class RTCPCompoundPacket;
 class RTPPacket;
@@ -67,13 +66,10 @@ class RTCPScheduler
 {
 public:
 	/** Creates an instance which will use the source table RTPSources to determine when RTCP compound 
-	 *  packets should be scheduled. 
-	 *  Creates an instance which will use the source table RTPSources to determine when RTCP compound 
 	 *  packets should be scheduled. Note that for correct operation the \c sources instance should have information
-	 *  about the own SSRC (added by RTPSources::CreateOwnSSRC). You must also supply a random number
-	 *  generator \c rtprand which will be used for adding randomness to the RTCP intervals.
+	 *  about the own SSRC (added by RTPSources::CreateOwnSSRC).
 	 */
-	RTCPScheduler(RTPSources &sources, RTPRandom &rtprand);
+	RTCPScheduler(RTPSources &sources);
 	~RTCPScheduler();
 
 	/** Resets the scheduler. */
@@ -145,7 +141,6 @@ private:
 	size_t avgbyepacketsize;
 	bool sendbyenow;
 
-	RTPRandom &rtprand;
 };
 
 #endif // RTCPSCHEDULER_H

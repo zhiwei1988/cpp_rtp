@@ -9,7 +9,6 @@
 #include "rtpconfig.h"
 #include "rtperrors.h"
 #include "rtpdefines.h"
-#include "rtprandom.h"
 #include "rtptimeutilities.h"
 #include "rtptypes.h"
 
@@ -22,10 +21,9 @@ class RTPPacketBuilder
 {
 	MEDIA_RTP_NO_COPY(RTPPacketBuilder)
 public:
-	/** Constructs an instance which will use \c rtprand for generating random numbers
-	 *  (used to initialize the SSRC value and sequence number), optionally installing a memory manager. 
+	/** Constructs an instance, optionally installing a memory manager. 
 	 **/
-	RTPPacketBuilder(RTPRandom &rtprand);
+	RTPPacketBuilder();
 	~RTPPacketBuilder();
 
 	/** Initializes the builder to only allow packets with a size below \c maxpacksize. */
@@ -161,7 +159,7 @@ private:
 	                  uint8_t pt,bool mark,uint32_t timestampinc,bool gotextension,
 	                  uint16_t hdrextID = 0,const void *hdrextdata = 0,size_t numhdrextwords = 0);
 
-	RTPRandom &rtprnd;	
+	
 	size_t maxpacksize;
 	uint8_t *buffer;
 	size_t packetlength;

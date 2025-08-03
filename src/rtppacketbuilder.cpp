@@ -2,18 +2,17 @@
 #include "rtperrors.h"
 #include "rtppacket.h"
 #include "rtpsources.h"
+#include "rtp_protocol_utils.h"
 #include <time.h>
 #include <stdlib.h>
 
 
 
 
-RTPPacketBuilder::RTPPacketBuilder(RTPRandom &r) : rtprnd(r),lastwallclocktime(0,0)
+RTPPacketBuilder::RTPPacketBuilder() : lastwallclocktime(0,0)
 {
 	init = false;
 	timeinit.Dummy();
-
-	//std::cout << (void *)(&rtprnd) << std::endl;
 }
 
 RTPPacketBuilder::~RTPPacketBuilder()
@@ -124,9 +123,9 @@ void RTPPacketBuilder::ClearCSRCList()
 
 uint32_t RTPPacketBuilder::CreateNewSSRC()
 {
-	ssrc = rtprnd.GetRandom32();
-	timestamp = rtprnd.GetRandom32();
-	seqnr = rtprnd.GetRandom16();
+	ssrc = RTPGenerateRandom32();
+	timestamp = RTPGenerateRandom32();
+	seqnr = RTPGenerateRandom16();
 
 	// p 38：如果发送方更改其 SSRC 标识符，则计数应重置
 	numpayloadbytes = 0;
@@ -140,12 +139,12 @@ uint32_t RTPPacketBuilder::CreateNewSSRC(RTPSources &sources)
 	
 	do
 	{
-		ssrc = rtprnd.GetRandom32();
+		ssrc = RTPGenerateRandom32();
 		found = sources.GotEntry(ssrc);
 	} while (found);
 	
-	timestamp = rtprnd.GetRandom32();
-	seqnr = rtprnd.GetRandom16();
+	timestamp = RTPGenerateRandom32();
+	seqnr = RTPGenerateRandom16();
 
 	// p 38：如果发送方更改其 SSRC 标识符，则计数应重置
 	numpayloadbytes = 0;

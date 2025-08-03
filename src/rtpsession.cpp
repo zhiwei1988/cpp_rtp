@@ -9,9 +9,6 @@
 #include "rtprawpacket.h"
 #include "rtppacket.h"
 #include "rtptimeutilities.h"
-#include "rtprandomrand48.h"
-#include "rtprandomrands.h"
-#include "rtprandomurandom.h"
 #ifdef RTP_SUPPORT_SENDAPP
 	#include "rtcpcompoundpacket.h"
 #endif // RTP_SUPPORT_SENDAPP
@@ -43,8 +40,8 @@
 	#define PACKSENT_UNLOCK
 #endif // RTP_SUPPORT_THREAD
 
-RTPSession::RTPSession(RTPRandom *r) 
-	: rtprnd(GetRandomNumberGenerator(r)),sources(*this),packetbuilder(*rtprnd),rtcpsched(sources,*rtprnd),
+RTPSession::RTPSession() 
+	: sources(*this),packetbuilder(),rtcpsched(sources),
 	  rtcpbuilder(sources,packetbuilder),collisionlist()
 {
 	// 我们不打算在 Create 中设置这些标志，以便派生类的构造函数可以更改它们
@@ -53,16 +50,12 @@ RTPSession::RTPSession(RTPRandom *r)
 
 	created = false;
 	timeinit.Dummy();
-
-	//std::cout << (void *)(rtprnd) << std::endl;
 }
 
 RTPSession::~RTPSession()
 {
 	Destroy();
 
-	if (deletertprnd)
-		delete rtprnd;
 }
 
 int RTPSession::Create(const RTPSessionParams &sessparams,const RTPTransmissionParams *transparams /* = 0 */,
@@ -1572,24 +1565,6 @@ int RTPSession::CreateCNAME(uint8_t *buffer,size_t *bufferlength,bool resolve)
 	if (*bufferlength > RTCP_SDES_MAXITEMLENGTH)
 		*bufferlength = RTCP_SDES_MAXITEMLENGTH;
 	return 0;
-}
-
-RTPRandom *RTPSession::GetRandomNumberGenerator(RTPRandom *r)
-{
-	RTPRandom *rnew = 0;
-
-	if (r == 0)
-	{
-		rnew = RTPRandom::CreateDefaultRandomNumberGenerator();
-		deletertprnd = true;
-	}
-	else
-	{
-		rnew = r;
-		deletertprnd = false;
-	}
-
-	return rnew;
 }
 
 int RTPSession::SendRTPData(const void *data, size_t len)

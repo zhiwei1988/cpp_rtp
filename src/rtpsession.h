@@ -43,16 +43,9 @@ class RTPSession
 {
 	MEDIA_RTP_NO_COPY(RTPSession)
 public:
-	/** Constructs an RTPSession instance, optionally using a specific instance of a random
-	 *  number generator, and optionally installing a memory manager. 
-	 *  Constructs an RTPSession instance, optionally using a specific instance of a random
-	 *  number generator, and optionally installing a memory manager. If no random number generator
-	 *  is specified, the RTPSession object will try to use either a RTPRandomURandom or 
-	 *  RTPRandomRandS instance. If neither is available on the current platform, a RTPRandomRand48
-	 *  instance will be used instead. By specifying a random number generator yourself, it is
-	 *  possible to use the same generator in several RTPSession instances.
+	/** Constructs an RTPSession instance, optionally installing a memory manager. 
 	 */
-	RTPSession(RTPRandom *rnd = 0);
+	RTPSession();
 	virtual ~RTPSession();
 	
 	/** Creates an RTP session.
@@ -558,12 +551,9 @@ private:
 	int CreateCNAME(uint8_t *buffer,size_t *bufferlength,bool resolve);
 	int ProcessPolledData();
 	int ProcessRTCPCompoundPacket(RTCPCompoundPacket &rtcpcomppack,RTPRawPacket *pack);
-	RTPRandom *GetRandomNumberGenerator(RTPRandom *r);
 	int SendRTPData(const void *data, size_t len);
 	int SendRTCPData(const void *data, size_t len);
 
-	RTPRandom *rtprnd;
-	bool deletertprnd;
 
 	RTPTransmitter *rtptrans;
 	bool created;

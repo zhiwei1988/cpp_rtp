@@ -26,10 +26,7 @@ set (HEADERS
 	rtppacket.h
 	rtppacketbuilder.h
 	rtppollthread.h
-	rtprandom.h
-	rtprandomrand48.h
-	rtprandomrands.h
-	rtprandomurandom.h
+	rtp_protocol_utils.h
 	rtprawpacket.h
 	rtpsession.h
 	rtpsessionparams.h
@@ -72,10 +69,7 @@ set(SOURCES
 	rtppacket.cpp
 	rtppacketbuilder.cpp
 	rtppollthread.cpp
-	rtprandom.cpp
-	rtprandomrand48.cpp
-	rtprandomrands.cpp
-	rtprandomurandom.cpp
+	rtp_protocol_utils.cpp
 	rtpsession.cpp
 	rtpsessionparams.cpp
 	rtpsessionsources.cpp
