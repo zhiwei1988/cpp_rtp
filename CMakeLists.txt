@@ -34,7 +34,6 @@ include(CheckCXXSourceCompiles)
 include(TestBigEndian)
 include(${PROJECT_SOURCE_DIR}/cmake/Macros.cmake)
 
-find_package(JThread)
 
 set(MEDIA_RTP_LINK_LIBS "")
 set(MEDIA_RTP_INTERNAL_INCLUDES "")
@@ -51,22 +50,10 @@ media_rtp_include_test(sys/filio.h RTP_HAVE_SYS_FILIO "// Don't have <sys/filio.
 media_rtp_include_test(sys/sockio.h RTP_HAVE_SYS_SOCKIO "// Don't have <sys/sockio.h>")
 media_rtp_include_test(netinet/in.h RTP_SUPPORT_NETINET_IN "// Don't have <netinet/in.h>")
 
-if (JTHREAD_FOUND)
-	set(V "ON")
-else (JTHREAD_FOUND)
-	set(V "OFF")
-endif (JTHREAD_FOUND)
-
-option(JTHREAD_ENABLED "Thread support" ${V})
-if (JTHREAD_ENABLED)
-	set (RTP_SUPPORT_THREAD "#define RTP_SUPPORT_THREAD")
-	if (JTHREAD_FOUND)
-		save_paths(MEDIA_RTP_EXTERNAL_INCLUDES "${JTHREAD_INCLUDE_DIRS}")
-		save_paths(MEDIA_RTP_LINK_LIBS "${JTHREAD_LIBRARIES}")
-	endif(JTHREAD_FOUND)
-else (JTHREAD_ENABLED)
-	set (RTP_SUPPORT_THREAD "// No support for JThread was enabled")
-endif (JTHREAD_ENABLED)
+# Always enable thread support using C++ standard library
+set (RTP_SUPPORT_THREAD "#define RTP_SUPPORT_THREAD")
+# Add pthread library for thread support
+save_paths(MEDIA_RTP_LINK_LIBS "pthread")
 
 if (CMAKE_CROSSCOMPILING)
 	option (MEDIA_RTP_USE_BIGENDIAN "Target platform is big endian" ON)

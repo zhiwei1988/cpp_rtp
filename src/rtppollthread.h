@@ -8,18 +8,16 @@
 
 #include "rtpconfig.h"
 
-#ifdef RTP_SUPPORT_THREAD
-
 #include "rtptransmitter.h"
 
-#include <jthread/jthread.h>
-#include <jthread/jmutex.h>
+#include <thread>
+#include <mutex>
 #include <list>
 
 class RTPSession;
 class RTCPScheduler;
 
-class RTPPollThread : private jthread::JThread
+class RTPPollThread
 {
 	MEDIA_RTP_NO_COPY(RTPPollThread)
 public:
@@ -28,16 +26,15 @@ public:
 	int Start(RTPTransmitter *trans);
 	void Stop();
 private:
-	void *Thread();
+	void Thread();
 	
 	bool stop;
-	jthread::JMutex stopmutex;
+	std::mutex stopmutex;
+	std::thread pollthread;
 	RTPTransmitter *transmitter;
 	
 	RTPSession &rtpsession;
 	RTCPScheduler &rtcpsched;
 };
-
-#endif // RTP_SUPPORT_THREAD
 
 #endif // RTPPOLLTHREAD_H

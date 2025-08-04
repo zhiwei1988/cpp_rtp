@@ -90,10 +90,6 @@ int main(void)
 		status = sess.SendPacket((void *)"1234567890",10,0,false,10);
 		checkerror(status);
 		
-#ifndef RTP_SUPPORT_THREAD
-		status = sess.Poll();
-		checkerror(status);
-#endif // RTP_SUPPORT_THREAD
 		
 		RTPTime::Wait(RTPTime(1,0));
 	}

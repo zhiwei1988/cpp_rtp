@@ -15,9 +15,7 @@
 #include "rtpabortdescriptors.h"
 #include <list>
 
-#ifdef RTP_SUPPORT_THREAD
-	#include <jthread/jmutex.h>
-#endif // RTP_SUPPORT_THREAD
+#include <mutex>
 
 #define RTPUDPV4TRANS_DEFAULTPORTBASE								5000
 
@@ -304,10 +302,8 @@ private:
 	RTPAbortDescriptors m_abortDesc;
 	RTPAbortDescriptors *m_pAbortDesc; // in case an external one was specified
 
-#ifdef RTP_SUPPORT_THREAD
-	jthread::JMutex mainmutex,waitmutex;
+	std::mutex mainmutex,waitmutex;
 	int threadsafe;
-#endif // RTP_SUPPORT_THREAD
 };
 
 #endif // RTPUDPV4TRANSMITTER_H

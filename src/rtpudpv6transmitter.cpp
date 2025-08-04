@@ -27,17 +27,10 @@
 										mreq.ipv6mr_interface = mcastifidx;\
 										status = setsockopt(socket,IPPROTO_IPV6,type,(const char *)&mreq,sizeof(struct ipv6_mreq));\
 									}
-#ifdef RTP_SUPPORT_THREAD
-	#define MAINMUTEX_LOCK 		{ if (threadsafe) mainmutex.Lock(); }
-	#define MAINMUTEX_UNLOCK	{ if (threadsafe) mainmutex.Unlock(); }
-	#define WAITMUTEX_LOCK		{ if (threadsafe) waitmutex.Lock(); }
-	#define WAITMUTEX_UNLOCK	{ if (threadsafe) waitmutex.Unlock(); }
-#else
-	#define MAINMUTEX_LOCK
-	#define MAINMUTEX_UNLOCK
-	#define WAITMUTEX_LOCK
-	#define WAITMUTEX_UNLOCK
-#endif // RTP_SUPPORT_THREAD
+	#define MAINMUTEX_LOCK 		{ if (threadsafe) mainmutex.lock(); }
+	#define MAINMUTEX_UNLOCK	{ if (threadsafe) mainmutex.unlock(); }
+	#define WAITMUTEX_LOCK		{ if (threadsafe) waitmutex.lock(); }
+	#define WAITMUTEX_UNLOCK	{ if (threadsafe) waitmutex.unlock(); }
 	
 
 RTPUDPv6Transmitter::RTPUDPv6Transmitter() : RTPTransmitter()
@@ -56,23 +49,7 @@ int RTPUDPv6Transmitter::Init(bool tsafe)
 	if (init)
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	
-#ifdef RTP_SUPPORT_THREAD
 	threadsafe = tsafe;
-	if (threadsafe)
-	{
-		int status;
-		
-		status = mainmutex.Init();
-		if (status < 0)
-			return MEDIA_RTP_ERR_OPERATION_FAILED;
-		status = waitmutex.Init();
-		if (status < 0)
-			return MEDIA_RTP_ERR_OPERATION_FAILED;
-	}
-#else
-	if (tsafe)
-		return MEDIA_RTP_ERR_OPERATION_FAILED;
-#endif // RTP_SUPPORT_THREAD
 
 	init = true;
 	return 0;

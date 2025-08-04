@@ -20,25 +20,14 @@
 
 
 
-#ifdef RTP_SUPPORT_THREAD
-	#define SOURCES_LOCK					{ if (needthreadsafety) sourcesmutex.Lock(); }
-	#define SOURCES_UNLOCK					{ if (needthreadsafety) sourcesmutex.Unlock(); }
-	#define BUILDER_LOCK					{ if (needthreadsafety) buildermutex.Lock(); }
-	#define BUILDER_UNLOCK					{ if (needthreadsafety) buildermutex.Unlock(); }
-	#define SCHED_LOCK						{ if (needthreadsafety) schedmutex.Lock(); }
-	#define SCHED_UNLOCK					{ if (needthreadsafety) schedmutex.Unlock(); }
-	#define PACKSENT_LOCK					{ if (needthreadsafety) packsentmutex.Lock(); }
-	#define PACKSENT_UNLOCK					{ if (needthreadsafety) packsentmutex.Unlock(); } 
-#else
-	#define SOURCES_LOCK
-	#define SOURCES_UNLOCK
-	#define BUILDER_LOCK
-	#define BUILDER_UNLOCK
-	#define SCHED_LOCK
-	#define SCHED_UNLOCK
-	#define PACKSENT_LOCK
-	#define PACKSENT_UNLOCK
-#endif // RTP_SUPPORT_THREAD
+	#define SOURCES_LOCK					{ if (needthreadsafety) sourcesmutex.lock(); }
+	#define SOURCES_UNLOCK					{ if (needthreadsafety) sourcesmutex.unlock(); }
+	#define BUILDER_LOCK					{ if (needthreadsafety) buildermutex.lock(); }
+	#define BUILDER_UNLOCK					{ if (needthreadsafety) buildermutex.unlock(); }
+	#define SCHED_LOCK						{ if (needthreadsafety) schedmutex.lock(); }
+	#define SCHED_UNLOCK					{ if (needthreadsafety) schedmutex.unlock(); }
+	#define PACKSENT_LOCK					{ if (needthreadsafety) packsentmutex.lock(); }
+	#define PACKSENT_UNLOCK					{ if (needthreadsafety) packsentmutex.unlock(); }
 
 RTPSession::RTPSession() 
 	: sources(*this),packetbuilder(),rtcpsched(sources),
@@ -276,59 +265,9 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 
 	// 如果需要，执行线程相关操作
 	
-#ifdef RTP_SUPPORT_THREAD
 	pollthread = 0;
 	if (usingpollthread)
 	{
-		if (!sourcesmutex.IsInitialized())	
-		{
-			if (sourcesmutex.Init() < 0)
-			{
-				if (deletetransmitter)
-					delete rtptrans;
-				packetbuilder.Destroy();
-				sources.Clear();
-				rtcpbuilder.Destroy();
-				return MEDIA_RTP_ERR_OPERATION_FAILED;
-			}
-		}
-		if (!buildermutex.IsInitialized())
-		{
-			if (buildermutex.Init() < 0)
-			{
-				if (deletetransmitter)
-					delete rtptrans;
-				packetbuilder.Destroy();
-				sources.Clear();
-				rtcpbuilder.Destroy();
-				return MEDIA_RTP_ERR_OPERATION_FAILED;
-			}
-		}
-		if (!schedmutex.IsInitialized())
-		{
-			if (schedmutex.Init() < 0)
-			{
-				if (deletetransmitter)
-					delete rtptrans;
-				packetbuilder.Destroy();
-				sources.Clear();
-				rtcpbuilder.Destroy();
-				return MEDIA_RTP_ERR_OPERATION_FAILED;
-			}
-		}
-		if (!packsentmutex.IsInitialized())
-		{
-			if (packsentmutex.Init() < 0)
-			{
-				if (deletetransmitter)
-					delete rtptrans;
-				packetbuilder.Destroy();
-				sources.Clear();
-				rtcpbuilder.Destroy();
-				return MEDIA_RTP_ERR_OPERATION_FAILED;
-			}
-		}
-		
 		pollthread = new RTPPollThread(*this,rtcpsched);
 		if (pollthread == 0)
 		{
@@ -350,7 +289,6 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 			return status;
 		}
 	}
-#endif // RTP_SUPPORT_THREAD	
 
 	created = true;
 	return 0;
@@ -361,10 +299,8 @@ void RTPSession::Destroy()
 	if (!created)
 		return;
 
-#ifdef RTP_SUPPORT_THREAD
 	if (pollthread)
 		delete pollthread;
-#endif // RTP_SUPPORT_THREAD
 	
 	if (deletetransmitter)
 		delete rtptrans;
@@ -390,10 +326,8 @@ void RTPSession::BYEDestroy(const RTPTime &maxwaittime,const void *reason,size_t
 
 	// 首先，停止线程，以便我们完全控制所有组件
 	
-#ifdef RTP_SUPPORT_THREAD
 	if (pollthread)
 		delete pollthread;
-#endif // RTP_SUPPORT_THREAD
 
 	RTPTime stoptime = RTPTime::CurrentTime();
 	stoptime += maxwaittime;

@@ -28,17 +28,10 @@
 										mreq.imr_interface.s_addr = htonl(mcastifaceIP);\
 										status = setsockopt(socket,IPPROTO_IP,type,(const char *)&mreq,sizeof(struct ip_mreq));\
 									}
-#ifdef RTP_SUPPORT_THREAD
-	#define MAINMUTEX_LOCK 		{ if (threadsafe) mainmutex.Lock(); }
-	#define MAINMUTEX_UNLOCK	{ if (threadsafe) mainmutex.Unlock(); }
-	#define WAITMUTEX_LOCK		{ if (threadsafe) waitmutex.Lock(); }
-	#define WAITMUTEX_UNLOCK	{ if (threadsafe) waitmutex.Unlock(); }
-#else
-	#define MAINMUTEX_LOCK
-	#define MAINMUTEX_UNLOCK
-	#define WAITMUTEX_LOCK
-	#define WAITMUTEX_UNLOCK
-#endif // RTP_SUPPORT_THREAD
+	#define MAINMUTEX_LOCK 		{ if (threadsafe) mainmutex.lock(); }
+	#define MAINMUTEX_UNLOCK	{ if (threadsafe) mainmutex.unlock(); }
+	#define WAITMUTEX_LOCK		{ if (threadsafe) waitmutex.lock(); }
+	#define WAITMUTEX_UNLOCK	{ if (threadsafe) waitmutex.unlock(); }
 
 #define CLOSESOCKETS do { \
 	if (closesocketswhendone) \
@@ -66,23 +59,7 @@ int RTPUDPv4Transmitter::Init(bool tsafe)
 	if (init)
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	
-#ifdef RTP_SUPPORT_THREAD
 	threadsafe = tsafe;
-	if (threadsafe)
-	{
-		int status;
-		
-		status = mainmutex.Init();
-		if (status < 0)
-			return MEDIA_RTP_ERR_OPERATION_FAILED;
-		status = waitmutex.Init();
-		if (status < 0)
-			return MEDIA_RTP_ERR_OPERATION_FAILED;
-	}
-#else
-	if (tsafe)
-		return MEDIA_RTP_ERR_OPERATION_FAILED;
-#endif // RTP_SUPPORT_THREAD
 
 	init = true;
 	return 0;

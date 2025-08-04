@@ -81,10 +81,7 @@ void runTest(int sock1, int sock2)
 	sessParams.SetOwnTimestampUnit(1.0/packSize);
 	sessParams.SetMaximumPacketSize(packSize + 64); // some extra room for rtp header
 
-	bool threadsafe = false;
-#ifdef RTP_SUPPORT_THREAD
-	threadsafe = true;
-#endif // RTP_SUPPORT_THREAD
+	bool threadsafe = true;
 
 	checkerror(trans1.Init(threadsafe));
 	checkerror(trans2.Init(threadsafe));
@@ -117,9 +114,6 @@ void runTest(int sock1, int sock2)
 		// cause the OnValidatedRTPPacket and OnRTCPSDESItem functions to
 		// be called, so in this loop there's not much left to do. 
 		
-#ifndef RTP_SUPPORT_THREAD
-		checkerror(sess1.Poll());
-#endif // RTP_SUPPORT_THREAD
 		
 		RTPTime::Wait(RTPTime(1,0));
 	}

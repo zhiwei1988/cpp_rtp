@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#if defined(RTP_SUPPORT_THREAD) && defined(RTP_SUPPORT_IPV6)
+#if defined(RTP_SUPPORT_IPV6)
 
 #include "rtpsession.h"
 #include "rtpudpv6transmitter.h"
@@ -19,14 +19,13 @@ using namespace std;
 #include "rtpsourcedata.h"
 #include "rtpabortdescriptors.h"
 #include "rtpselect.h"
-#include "rtprandom.h"
-#include <jthread/jthread.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
 #include <vector>
-
-using namespace jthread;
+#include <thread>
+#include <random>
+#include <atomic>
 
 inline void checkerror(int rtperr)
 {
@@ -39,7 +38,7 @@ inline void checkerror(int rtperr)
 class MyRTPSession : public RTPSession
 {
 public:
-	MyRTPSession(RTPRandom *rnd) : RTPSession(rnd) { }
+	MyRTPSession() { }
 	~MyRTPSession() { }
 protected:
 	void OnValidatedRTPPacket(RTPSourceData *srcdat, RTPPacket *rtppack, bool isonprobation, bool *ispackethandled)
@@ -62,36 +61,52 @@ protected:
 	}
 };
 
-class MyPollThread : public JThread
+class MyPollThread
 {
 public:
 	MyPollThread(const vector<SocketType> &sockets, const vector<RTPSession *> &sessions)
-		: m_sockets(sockets), m_sessions(sessions)
+		: m_sockets(sockets), m_sessions(sessions), m_stop(false), m_running(false)
 	{
-		if (m_mutex.Init() < 0)
-		{
-			cerr << "ERROR: unable to initialize mutex" << endl;
-			exit(-1);
-		}
-		m_stop = false;
+	}
+
+	~MyPollThread()
+	{
+		Stop();
+		if (m_thread.joinable())
+			m_thread.join();
+	}
+
+	void Start()
+	{
+		m_running = true;
+		m_thread = std::thread(&MyPollThread::Thread, this);
+	}
+
+	void Stop()
+	{
+		SignalStop();
+		m_running = false;
+	}
+
+	bool IsRunning() const
+	{
+		return m_running;
 	}
 
 	void SignalStop()
 	{
-		m_mutex.Lock();
+		std::lock_guard<std::mutex> lock(m_mutex);
 		m_stop = true;
-		m_mutex.Unlock();
 	}
 private:
-	void *Thread()
+	void Thread()
 	{
-		JThread::ThreadStarted();
-
 		vector<int8_t> flags(m_sockets.size());
 		bool done = false;
-		m_mutex.Lock();
-		done = m_stop;
-		m_mutex.Unlock();
+		{
+			std::lock_guard<std::mutex> lock(m_mutex);
+			done = m_stop;
+		}
 
 		while (!done)
 		{
@@ -128,16 +143,17 @@ private:
 				}
 			}
 
-			m_mutex.Lock();
-			done = m_stop;
-			m_mutex.Unlock();
+			{
+				std::lock_guard<std::mutex> lock(m_mutex);
+				done = m_stop;
+			}
 		}
-
-		return 0;
 	}
 
-	JMutex m_mutex;
-	bool m_stop;
+	std::mutex m_mutex;
+	std::thread m_thread;
+	std::atomic<bool> m_stop;
+	std::atomic<bool> m_running;
 	vector<SocketType> m_sockets;
 	vector<RTPSession *> m_sessions;
 };
@@ -163,7 +179,7 @@ int main(void)
 		transParams.SetPortbase(portbaseBase + i*2);
 		transParams.SetCreatedAbortDescriptors(&abortDesc);
 		
-		RTPUDPv6Transmitter *pTrans = new RTPUDPv6Transmitter(0);
+		RTPUDPv6Transmitter *pTrans = new RTPUDPv6Transmitter();
 		checkerror(pTrans->Init(true)); // We'll need thread safety
 		checkerror(pTrans->Create(64000, &transParams));
 
@@ -172,8 +188,6 @@ int main(void)
 
 	vector<uint16_t> portBases;
 	vector<RTPSession *> sessions;
-
-	RTPRandom *rnd = RTPRandom::CreateDefaultRandomNumberGenerator();
 
 	for (int i = 0 ; i < transmitters.size() ; i++)
 	{
@@ -186,7 +200,7 @@ int main(void)
 
 		pTrans->DeleteTransmissionInfo(pInfo);
 
-		RTPSession *pSess = new MyRTPSession(rnd); // make them all use the same random number generator
+		RTPSession *pSess = new MyRTPSession();
 		RTPSessionParams sessParams;
 
 		// We're going to use our own poll thread!
@@ -214,11 +228,7 @@ int main(void)
 	}
 
 	MyPollThread myPollThread(pollSockets, sessions);
-	if (myPollThread.Start() < 0)
-	{
-		cerr << "ERROR: couldn't start own poll thread" << endl;
-		return -1;
-	}
+	myPollThread.Start();
 
 	cout << "Own poll thread started" << endl;
 
@@ -239,7 +249,6 @@ int main(void)
 	for (int i = 0 ; i < transmitters.size() ; i++)
 		delete transmitters[i];
 
-	delete rnd;
 #ifdef RTP_SOCKETTYPE_WINSOCK
 	WSACleanup();
 #endif // RTP_SOCKETTYPE_WINSOCK
@@ -255,4 +264,4 @@ int main(void)
 	return 0;
 }
 
-#endif // RTP_SUPPORT_THREAD && RTP_SUPPORT_IPV6
+#endif // RTP_SUPPORT_IPV6

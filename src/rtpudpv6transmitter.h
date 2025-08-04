@@ -19,9 +19,7 @@
 #include <string.h>
 #include <list>
 
-#ifdef RTP_SUPPORT_THREAD
-	#include <jthread/jmutex.h>
-#endif // RTP_SUPPORT_THREAD
+#include <mutex>
 
 #define RTPUDPV6TRANS_DEFAULTPORTBASE								5000
 
@@ -270,10 +268,8 @@ private:
 	RTPAbortDescriptors m_abortDesc;
 	RTPAbortDescriptors *m_pAbortDesc;
 
-#ifdef RTP_SUPPORT_THREAD
-	jthread::JMutex mainmutex,waitmutex;
+	std::mutex mainmutex,waitmutex;
 	int threadsafe;
-#endif // RTP_SUPPORT_THREAD
 };
 
 #endif // RTP_SUPPORT_IPV6

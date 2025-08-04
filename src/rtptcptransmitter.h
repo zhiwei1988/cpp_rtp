@@ -14,9 +14,7 @@
 #include <list>
 #include <vector>
 
-#ifdef RTP_SUPPORT_THREAD
-	#include <jthread/jmutex.h>
-#endif // RTP_SUPPORT_THREAD
+#include <mutex>
 
 /** Parameters for the TCP transmitter. */
 class RTPTCPTransmissionParams : public RTPTransmissionParams
@@ -163,10 +161,8 @@ private:
 	RTPAbortDescriptors m_abortDesc;
 	RTPAbortDescriptors *m_pAbortDesc; // in case an external one was specified
 
-#ifdef RTP_SUPPORT_THREAD
-	jthread::JMutex m_mainMutex, m_waitMutex;
+	std::mutex m_mainMutex, m_waitMutex;
 	bool m_threadsafe;
-#endif // RTP_SUPPORT_THREAD
 };
 
 inline void RTPTCPTransmitter::OnSendError(SocketType) { }

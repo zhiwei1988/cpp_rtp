@@ -17,9 +17,7 @@
 #include "rtptransmitter.h"
 #include <list>
 
-#ifdef RTP_SUPPORT_THREAD
-#include <jthread/jmutex.h>
-#endif // RTP_SUPPORT_THREAD
+#include <mutex>
 
 class RTPTransmitter;
 class RTPSessionParams;
@@ -460,7 +458,6 @@ protected:
 
   /** 当刚刚发送RTCP复合数据包时调用（用于检查传出的RTCP数据）。 */
   virtual void OnSendRTCPCompoundPacket(RTCPCompoundPacket *pack);
-#ifdef RTP_SUPPORT_THREAD
   /** 当在轮询线程中检测到错误\c errcode时调用。 */
   virtual void OnPollThreadError(int errcode);
 
@@ -479,7 +476,6 @@ protected:
    *  当轮询线程即将停止时调用。这发生在终止线程之前。
    */
   virtual void OnPollThreadStop();
-#endif // RTP_SUPPORT_THREAD
 
   /** 如果设置为true，传出数据将通过RTPSession::OnChangeRTPOrRTCPData
    *  和RTPSession::OnSentRTPOrRTCPData传递，允许您修改数据（例如加密）。 */
@@ -558,12 +554,10 @@ private:
 
   std::list<RTCPCompoundPacket *> byepackets;
 
-#ifdef RTP_SUPPORT_THREAD
   RTPPollThread *pollthread;
-  jthread::JMutex sourcesmutex, buildermutex, schedmutex, packsentmutex;
+  std::mutex sourcesmutex, buildermutex, schedmutex, packsentmutex;
 
   friend class RTPPollThread;
-#endif // RTP_SUPPORT_THREAD
   friend class RTPSources;
   friend class RTCPSessionPacketBuilder;
 };
@@ -602,12 +596,10 @@ inline void RTPSession::OnRTCPSDESPrivateItem(RTPSourceData *, const void *,
 inline void RTPSession::OnBYEPacket(RTPSourceData *) {}
 inline void RTPSession::OnSendRTCPCompoundPacket(RTCPCompoundPacket *) {}
 
-#ifdef RTP_SUPPORT_THREAD
 inline void RTPSession::OnPollThreadError(int) {}
 inline void RTPSession::OnPollThreadStep() {}
 inline void RTPSession::OnPollThreadStart(bool &) {}
 inline void RTPSession::OnPollThreadStop() {}
-#endif // RTP_SUPPORT_THREAD
 
 inline int RTPSession::OnChangeRTPOrRTCPData(const void *, size_t, bool,
                                              void **, size_t *) {

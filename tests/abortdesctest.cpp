@@ -8,11 +8,8 @@
 
 using namespace std;
 
-#ifdef RTP_SUPPORT_THREAD
-
-#include <jthread/jthread.h>
-
-using namespace jthread;
+#include <thread>
+#include <atomic>
 
 void checkError(int status)
 {
@@ -22,26 +19,39 @@ void checkError(int status)
 	exit(-1);
 }
 
-class SignalThread : public JThread
+class SignalThread
 {
 public:
-	SignalThread(RTPAbortDescriptors &a, double delay, int sigCount) : m_ad(a), m_delay(delay), m_sigCount(sigCount)
+	SignalThread(RTPAbortDescriptors &a, double delay, int sigCount) : m_ad(a), m_delay(delay), m_sigCount(sigCount), m_running(false)
 	{
 	}
 
 	~SignalThread()
 	{
-		while (IsRunning())
-		{
-			cout << "Waiting for thread to finish" << endl;
-			RTPTime::Wait(RTPTime(1.0));
-		}
+		Stop();
+		if (m_thread.joinable())
+			m_thread.join();
 	}
-private:
-	void *Thread()
-	{
-		JThread::ThreadStarted();
 
+	void Start()
+	{
+		m_running = true;
+		m_thread = std::thread(&SignalThread::Thread, this);
+	}
+
+	void Stop()
+	{
+		m_running = false;
+	}
+
+	bool IsRunning() const
+	{
+		return m_running;
+	}
+
+private:
+	void Thread()
+	{
 		cout << "Thread started, waiting " << m_delay << " seconds before sending abort signal" << endl;
 		RTPTime::Wait(RTPTime(m_delay));
 		cout << "Sending " << m_sigCount << " abort signals" << endl;
@@ -49,12 +59,14 @@ private:
 			m_ad.SendAbortSignal();
 
 		cout << "Thread finished" << endl;
-		return 0;
+		m_running = false;
 	}
 
 	RTPAbortDescriptors &m_ad;
 	const double m_delay;
 	const int m_sigCount;
+	std::thread m_thread;
+	std::atomic<bool> m_running;
 };
 
 void test1()
@@ -160,13 +172,4 @@ int main(void)
 	return 0;
 }
 
-#else
-
-int main(void)
-{
-	cerr << "Thread support is needed for this example" << endl;
-	return 0;
-}
-
-#endif // RTP_SUPPORT_THREAD
 
