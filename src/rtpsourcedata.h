@@ -15,6 +15,8 @@
 #include "rtpendpoint.h"
 #include <list>
 
+class RTPSources;
+
 class RTCPSenderReportInfo
 {
 public:
@@ -89,7 +91,7 @@ public:
 private:
 	bool sentdata;
 	uint32_t packetsreceived;
-	uint32_t numcycles; // shifted left 16 bits
+	uint32_t numcycles; // 左移16位
 	uint32_t baseseqnr;
 	uint32_t exthighseqnr,prevexthighseqnr;
 	uint32_t jitter,prevtimestamp;
@@ -125,267 +127,281 @@ inline RTPSourceStats::RTPSourceStats():prevpacktime(0,0),lastmsgtime(0,0),lastr
 #endif // RTP_SUPPORT_PROBATION
 }
 
-/** Describes an entry in the RTPSources source table. */
+/** 描述RTPSources源表中的一个条目。 */
 class RTPSourceData
 {
 	MEDIA_RTP_NO_COPY(RTPSourceData)
-protected:
-	RTPSourceData(uint32_t ssrc);
-	virtual ~RTPSourceData();
 public:
-	/** Extracts the first packet of this participants RTP packet queue. */
+	RTPSourceData(uint32_t ssrc);
+	RTPSourceData(uint32_t ssrc, RTPSources::ProbationType probtype);
+	virtual ~RTPSourceData();
+	/** 提取此参与者的RTP数据包队列中的第一个数据包。 */
 	RTPPacket *GetNextPacket();
 
-	/** Clears the participant's RTP packet list. */
+	/** 清除参与者的RTP数据包列表。 */
 	void FlushPackets();
 
-	/** Returns \c true if there are RTP packets which can be extracted. */
+	/** 如果有可以提取的RTP数据包则返回 \c true。 */
 	bool HasData() const							{ if (!validated) return false; return packetlist.empty()?false:true; }
 
-	/** Returns the SSRC identifier for this member. */
+	/** 返回此成员的SSRC标识符。 */
 	uint32_t GetSSRC() const						{ return ssrc; }
 
-	/** Returns \c true if the participant was added using the RTPSources member function CreateOwnSSRC and
-	 *  returns \c false otherwise.
+	/** 如果参与者是使用RTPSources成员函数CreateOwnSSRC添加的则返回 \c true，
+	 *  否则返回 \c false。
 	 */
 	bool IsOwnSSRC() const							{ return ownssrc; }
 
-	/** Returns \c true if the source identifier is actually a CSRC from an RTP packet. */
+	/** 如果源标识符实际上是RTP数据包中的CSRC则返回 \c true。 */
 	bool IsCSRC() const							{ return iscsrc; }
 
-	/** Returns \c true if this member is marked as a sender and \c false if not. */
+	/** 如果此成员被标记为发送者则返回 \c true，否则返回 \c false。 */
 	bool IsSender() const							{ return issender; }
 
-	/** Returns \c true if the participant is validated, which is the case if a number of 
-	 *  consecutive RTP packets have been received or if a CNAME item has been received for 
-	 *  this participant.
+	/** 如果参与者已验证则返回 \c true，这种情况发生在接收到一定数量的
+	 *  连续RTP数据包或为此参与者接收到CNAME项时。
 	 */
 	bool IsValidated() const						{ return validated; }
 
-	/** Returns \c true if the source was validated and had not yet sent a BYE packet. */
+	/** 如果源已验证且尚未发送BYE数据包则返回 \c true。 */
 	bool IsActive() const							{ if (!validated) return false; if (receivedbye) return false; return true; }
 
-	/** This function is used by the RTCPPacketBuilder class to mark whether this participant's 
-	 *  information has been processed in a report block or not.
+	/** 此函数由RTCPPacketBuilder类使用，用于标记此参与者的
+	 *  信息是否已在报告块中处理。
 	 */
 	void SetProcessedInRTCP(bool v)						{ processedinrtcp = v; }
 	
-	/** This function is used by the RTCPPacketBuilder class and returns whether this participant 
-	 *  has been processed in a report block or not.
+	/** 此函数由RTCPPacketBuilder类使用，返回此参与者
+	 *  是否已在报告块中处理。
 	 */
 	bool IsProcessedInRTCP() const						{ return processedinrtcp; }
 	
-	/** Returns \c true if the address from which this participant's RTP packets originate has 
-	 *  already been set.
+	/** 如果此参与者的RTP数据包来源地址已设置则返回 \c true。
 	 */
 	bool IsRTPAddressSet() const						{ return isrtpaddrset; }
 
-	/** Returns \c true if the address from which this participant's RTCP packets originate has 
-	 * already been set. 
+	/** 如果此参与者的RTCP数据包来源地址已设置则返回 \c true。
 	 */
 	bool IsRTCPAddressSet() const						{ return isrtcpaddrset; }
 
-	/** Returns the address from which this participant's RTP packets originate. 
-	 *  Returns the address from which this participant's RTP packets originate. If the address has 
-	 *  been set and the returned value is NULL, this indicates that it originated from the local 
-	 *  participant.
+	/** 返回此参与者的RTP数据包来源地址。
+	 *  返回此参与者的RTP数据包来源地址。如果地址已设置且返回值为NULL，
+	 *  这表示它来自本地参与者。
 	 */
 	const RTPEndpoint *GetRTPDataAddress() const				{ return rtpaddr; }
 
-	/** Returns the address from which this participant's RTCP packets originate. 
-	 *  Returns the address from which this participant's RTCP packets originate. If the address has 
-	 *  been set and the returned value is NULL, this indicates that it originated from the local 
-	 *  participant.
+	/** 返回此参与者的RTCP数据包来源地址。
+	 *  返回此参与者的RTCP数据包来源地址。如果地址已设置且返回值为NULL，
+	 *  这表示它来自本地参与者。
 	 */
 	const RTPEndpoint *GetRTCPDataAddress() const				{ return rtcpaddr; }
 
-	/** Returns \c true if we received a BYE message for this participant and \c false otherwise. */
+	/** 如果我们收到此参与者的BYE消息则返回 \c true，否则返回 \c false。 */
 	bool ReceivedBYE() const						{ return receivedbye; }
 
-	/** Returns the reason for leaving contained in the BYE packet of this participant.
-	 *  Returns the reason for leaving contained in the BYE packet of this participant. The length of 
-	 *  the reason is stored in \c len.
+	/** 返回此参与者BYE数据包中包含的离开原因。
+	 *  返回此参与者BYE数据包中包含的离开原因。原因的长度存储在 \c len 中。
 	 */
 	uint8_t *GetBYEReason(size_t *len) const				{ *len = byereasonlen; return byereason; }
 
-	/** Returns the time at which the BYE packet was received. */
+	/** 返回接收到BYE数据包的时间。 */
 	RTPTime GetBYETime() const						{ return byetime; }
 		
-	/** Sets the value for the timestamp unit to be used in jitter calculations for data received from this participant. 
-	 *  Sets the value for the timestamp unit to be used in jitter calculations for data received from this participant. 
-	 *  If not set, the library uses an approximation for the timestamp unit which is calculated from two consecutive
-	 *  RTCP sender reports. The timestamp unit is defined as a time interval divided by the corresponding timestamp
-	 *  interval. For 8000 Hz audio this would be 1/8000. For video, often a timestamp unit of 1/90000 is used.
+	/** 设置用于从此参与者接收的数据的抖动计算中的时间戳单位值。
+	 *  设置用于从此参与者接收的数据的抖动计算中的时间戳单位值。
+	 *  如果未设置，库使用从两个连续RTCP发送者报告计算出的时间戳单位的近似值。
+	 *  时间戳单位定义为时间间隔除以相应的时间戳间隔。对于8000 Hz音频，这将是1/8000。
+	 *  对于视频，通常使用1/90000的时间戳单位。
 	 */
 	void SetTimestampUnit(double tsu)					{ timestampunit = tsu; }
 
-	/** Returns the timestamp unit used for this participant. */
+	/** 返回用于此参与者的时间戳单位。 */
 	double GetTimestampUnit() const						{ return timestampunit; }
 
-	/** Returns \c true if an RTCP sender report has been received from this participant. */
+	/** 如果从此参与者接收到RTCP发送者报告则返回 \c true。 */
 	bool SR_HasInfo() const								{ return SRinf.HasInfo(); }
 
-	/** Returns the NTP timestamp contained in the last sender report. */
+	/** 返回最后发送者报告中包含的NTP时间戳。 */
 	RTPNTPTime SR_GetNTPTimestamp() const				{ return SRinf.GetNTPTimestamp(); }
 
-	/** Returns the RTP timestamp contained in the last sender report. */
+	/** 返回最后发送者报告中包含的RTP时间戳。 */
 	uint32_t SR_GetRTPTimestamp() const					{ return SRinf.GetRTPTimestamp(); }
 
-	/** Returns the packet count contained in the last sender report. */
+	/** 返回最后发送者报告中包含的数据包计数。 */
 	uint32_t SR_GetPacketCount() const					{ return SRinf.GetPacketCount(); }
 
-	/** Returns the octet count contained in the last sender report. */
+	/** 返回最后发送者报告中包含的八位字节计数。 */
 	uint32_t SR_GetByteCount() const					{ return SRinf.GetByteCount(); }
 
-	/** Returns the time at which the last sender report was received. */
+	/** 返回接收到最后发送者报告的时间。 */
 	RTPTime SR_GetReceiveTime() const					{ return SRinf.GetReceiveTime(); }
 	
-	/** Returns \c true if more than one RTCP sender report has been received. */
+	/** 如果接收到多个RTCP发送者报告则返回 \c true。 */
 	bool SR_Prev_HasInfo() const						{ return SRprevinf.HasInfo(); }
 
-	/** Returns the NTP timestamp contained in the second to last sender report. */
+	/** 返回倒数第二个发送者报告中包含的NTP时间戳。 */
 	RTPNTPTime SR_Prev_GetNTPTimestamp() const				{ return SRprevinf.GetNTPTimestamp(); }
 
-	/** Returns the RTP timestamp contained in the second to last sender report. */
+	/** 返回倒数第二个发送者报告中包含的RTP时间戳。 */
 	uint32_t SR_Prev_GetRTPTimestamp() const				{ return SRprevinf.GetRTPTimestamp(); }
 
-	/** Returns the packet count contained in the second to last sender report. */
+	/** 返回倒数第二个发送者报告中包含的数据包计数。 */
 	uint32_t SR_Prev_GetPacketCount() const				{ return SRprevinf.GetPacketCount(); }
 
-	/**  Returns the octet count contained in the second to last sender report. */
+	/**  返回倒数第二个发送者报告中包含的八位字节计数。 */
 	uint32_t SR_Prev_GetByteCount() const					{ return SRprevinf.GetByteCount(); }
 
-	/** Returns the time at which the second to last sender report was received. */
+	/** 返回接收到倒数第二个发送者报告的时间。 */
 	RTPTime SR_Prev_GetReceiveTime() const					{ return SRprevinf.GetReceiveTime(); }
 
-	/** Returns \c true if this participant sent a receiver report with information about the reception of our data. */
+	/** 如果此参与者发送了包含我们数据接收信息的接收者报告则返回 \c true。 */
 	bool RR_HasInfo() const							{ return RRinf.HasInfo(); }
 
-	/** Returns the fraction lost value from the last report. */
+	/** 返回最后报告中的丢包率值。 */
 	double RR_GetFractionLost() const					{ return RRinf.GetFractionLost(); }
 
-	/** Returns the number of lost packets contained in the last report. */
+	/** 返回最后报告中包含的丢失数据包数量。 */
 	int32_t	RR_GetPacketsLost() const					{ return RRinf.GetPacketsLost(); }
 
-	/** Returns the extended highest sequence number contained in the last report. */
+	/** 返回最后报告中包含的扩展最高序列号。 */
 	uint32_t RR_GetExtendedHighestSequenceNumber() const			{ return RRinf.GetExtendedHighestSequenceNumber(); }
 
-	/** Returns the jitter value from the last report. */
+	/** 返回最后报告中的抖动值。 */
 	uint32_t RR_GetJitter() const						{ return RRinf.GetJitter(); }
 
-	/** Returns the LSR value from the last report. */
+	/** 返回最后报告中的LSR值。 */
 	uint32_t RR_GetLastSRTimestamp() const					{ return RRinf.GetLastSRTimestamp(); }
 
-	/** Returns the DLSR value from the last report. */
+	/** 返回最后报告中的DLSR值。 */
 	uint32_t RR_GetDelaySinceLastSR() const				{ return RRinf.GetDelaySinceLastSR(); }
 
-	/** Returns the time at which the last report was received. */
+	/** 返回接收到最后报告的时间。 */
 	RTPTime RR_GetReceiveTime() const					{ return RRinf.GetReceiveTime(); }
 	
-	/** Returns \c true if this participant sent more than one receiver report with information 
-	 *  about the reception of our data.
+	/** 如果此参与者发送了多个包含我们数据接收信息的接收者报告则返回 \c true。
 	 */
 	bool RR_Prev_HasInfo() const						{ return RRprevinf.HasInfo(); }
 
-	/** Returns the fraction lost value from the second to last report. */
+	/** 返回倒数第二个报告中的丢包率值。 */
 	double RR_Prev_GetFractionLost() const					{ return RRprevinf.GetFractionLost(); }
 
-	/** Returns the number of lost packets contained in the second to last report. */
+	/** 返回倒数第二个报告中包含的丢失数据包数量。 */
 	int32_t	RR_Prev_GetPacketsLost() const					{ return RRprevinf.GetPacketsLost(); }
 
-	/** Returns the extended highest sequence number contained in the second to last report. */
+	/** 返回倒数第二个报告中包含的扩展最高序列号。 */
 	uint32_t RR_Prev_GetExtendedHighestSequenceNumber() const		{ return RRprevinf.GetExtendedHighestSequenceNumber(); }
 
-	/** Returns the jitter value from the second to last report. */
+	/** 返回倒数第二个报告中的抖动值。 */
 	uint32_t RR_Prev_GetJitter() const					{ return RRprevinf.GetJitter(); }
 	
-	/** Returns the LSR value from the second to last report. */
+	/** 返回倒数第二个报告中的LSR值。 */
 	uint32_t RR_Prev_GetLastSRTimestamp() const				{ return RRprevinf.GetLastSRTimestamp(); }
 
-	/** Returns the DLSR value from the second to last report. */
+	/** 返回倒数第二个报告中的DLSR值。 */
 	uint32_t RR_Prev_GetDelaySinceLastSR() const				{ return RRprevinf.GetDelaySinceLastSR(); }
 
-	/** Returns the time at which the second to last report was received. */
+	/** 返回接收到倒数第二个报告的时间。 */
 	RTPTime RR_Prev_GetReceiveTime() const					{ return RRprevinf.GetReceiveTime(); }
 
-	/** Returns \c true if validated RTP packets have been received from this participant. */
+	/** 如果从此参与者接收到已验证的RTP数据包则返回 \c true。 */
 	bool INF_HasSentData() const						{ return stats.HasSentData(); }
 
-	/** Returns the total number of received packets from this participant. */
+	/** 返回从此参与者接收的数据包总数。 */
 	int32_t INF_GetNumPacketsReceived() const				{ return stats.GetNumPacketsReceived(); }
 
-	/** Returns the base sequence number of this participant. */
+	/** 返回此参与者的基础序列号。 */
 	uint32_t INF_GetBaseSequenceNumber() const				{ return stats.GetBaseSequenceNumber(); }
 
-	/** Returns the extended highest sequence number received from this participant. */
+	/** 返回从此参与者接收的扩展最高序列号。 */
 	uint32_t INF_GetExtendedHighestSequenceNumber() const			{ return stats.GetExtendedHighestSequenceNumber(); }
 
-	/** Returns the current jitter value for this participant. */
+	/** 返回此参与者的当前抖动值。 */
 	uint32_t INF_GetJitter() const						{ return stats.GetJitter(); }
 
-	/** Returns the time at which something was last heard from this member. */
+	/** 返回最后一次从此成员听到消息的时间。 */
 	RTPTime INF_GetLastMessageTime() const					{ return stats.GetLastMessageTime(); }
 
-	/** Returns the time at which the last RTP packet was received. */
+	/** 返回接收到最后一个RTP数据包的时间。 */
 	RTPTime INF_GetLastRTPPacketTime() const				{ return stats.GetLastRTPPacketTime(); }
 
-	/** Returns the estimated timestamp unit, calculated from two consecutive sender reports. */
+	/** 返回从两个连续发送者报告计算的估计时间戳单位。 */
 	double INF_GetEstimatedTimestampUnit() const;
 
-	/** Returns the number of packets received since a new interval was started with INF_StartNewInterval. */
+	/** 返回自使用INF_StartNewInterval启动新间隔以来接收的数据包数量。 */
 	uint32_t INF_GetNumPacketsReceivedInInterval() const			{ return stats.GetNumPacketsReceivedInInterval(); }
 
-	/** Returns the extended sequence number which was stored by the INF_StartNewInterval call. */
+	/** 返回由INF_StartNewInterval调用存储的扩展序列号。 */
 	uint32_t INF_GetSavedExtendedSequenceNumber() const			{ return stats.GetSavedExtendedSequenceNumber(); }
 
-	/** Starts a new interval to count received packets in; this also stores the current extended highest sequence 
-	 *  number to be able to calculate the packet loss during the interval.
+	/** 启动一个新间隔来计数接收的数据包；这也会存储当前的扩展最高序列
+	 *  号，以便能够计算间隔期间的数据包丢失。
 	 */
 	void INF_StartNewInterval()						{ stats.StartNewInterval(); }
 
-	/** Estimates the round trip time by using the LSR and DLSR info from the last receiver report. */
+	/** 通过使用最后接收者报告中的LSR和DLSR信息估算往返时间。 */
 	RTPTime INF_GetRoundtripTime() const;
 
-	/** Returns the time at which the last SDES NOTE item was received. */
+	/** 返回接收到最后一个SDES NOTE项的时间。 */
 	RTPTime INF_GetLastSDESNoteTime() const					{ return stats.GetLastNoteTime(); }
+
+	// 内部处理方法（从RTPInternalSourceData合并）
+	int ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &receivetime,bool *stored, RTPSources *sources);
+	void ProcessSenderInfo(const RTPNTPTime &ntptime,uint32_t rtptime,uint32_t packetcount,
+	                       uint32_t octetcount,const RTPTime &receivetime)				{ SRprevinf = SRinf; SRinf.Set(ntptime,rtptime,packetcount,octetcount,receivetime); stats.SetLastMessageTime(receivetime); }
+	void ProcessReportBlock(uint8_t fractionlost,int32_t lostpackets,uint32_t exthighseqnr,
+	                        uint32_t jitter,uint32_t lsr,uint32_t dlsr,
+				const RTPTime &receivetime)						{ RRprevinf = RRinf; RRinf.Set(fractionlost,lostpackets,exthighseqnr,jitter,lsr,dlsr,receivetime); stats.SetLastMessageTime(receivetime); }
+	void UpdateMessageTime(const RTPTime &receivetime)						{ stats.SetLastMessageTime(receivetime); }
+	int ProcessSDESItem(uint8_t sdesid,const uint8_t *data,size_t itemlen,const RTPTime &receivetime,bool *cnamecollis);
+#ifdef RTP_SUPPORT_SDESPRIV
+	int ProcessPrivateSDESItem(const uint8_t *prefix,size_t prefixlen,const uint8_t *value,size_t valuelen,const RTPTime &receivetime);
+#endif // RTP_SUPPORT_SDESPRIV
+	int ProcessBYEPacket(const uint8_t *reason,size_t reasonlen,const RTPTime &receivetime);
+		
+	int SetRTPDataAddress(const RTPEndpoint *a);
+	int SetRTCPDataAddress(const RTPEndpoint *a);
+
+	void ClearSenderFlag()											{ issender = false; }
+	void SentRTPPacket()											{ if (!ownssrc) return; RTPTime t = RTPTime::CurrentTime(); issender = true; stats.SetLastRTPPacketTime(t); stats.SetLastMessageTime(t); }
+	void SetOwnSSRC()											{ ownssrc = true; validated = true; }
+	void SetCSRC()												{ validated = true; iscsrc = true; }
+	void ClearNote()											{ SDESinf.SetNote(0,0); }
 	
-	/** Returns a pointer to the SDES CNAME item of this participant and stores its length in \c len. */
+	/** 返回此参与者的SDES CNAME项的指针，并将其长度存储在 \c len 中。 */
 	uint8_t *SDES_GetCNAME(size_t *len) const				{ return SDESinf.GetCNAME(len); }
 
-	/** Returns a pointer to the SDES name item of this participant and stores its length in \c len. */
+	/** 返回此参与者的SDES name项的指针，并将其长度存储在 \c len 中。 */
 	uint8_t *SDES_GetName(size_t *len) const				{ return SDESinf.GetName(len); }
 
-	/** Returns a pointer to the SDES e-mail item of this participant and stores its length in \c len. */
+	/** 返回此参与者的SDES e-mail项的指针，并将其长度存储在 \c len 中。 */
 	uint8_t *SDES_GetEMail(size_t *len) const				{ return SDESinf.GetEMail(len); }
 
-	/** Returns a pointer to the SDES phone item of this participant and stores its length in \c len. */
+	/** 返回此参与者的SDES phone项的指针，并将其长度存储在 \c len 中。 */
 	uint8_t *SDES_GetPhone(size_t *len) const				{ return SDESinf.GetPhone(len); }
 
-	/** Returns a pointer to the SDES location item of this participant and stores its length in \c len. */
+	/** 返回此参与者的SDES location项的指针，并将其长度存储在 \c len 中。 */
 	uint8_t *SDES_GetLocation(size_t *len) const			{ return SDESinf.GetLocation(len); }
 
-	/** Returns a pointer to the SDES tool item of this participant and stores its length in \c len. */
+	/** 返回此参与者的SDES tool项的指针，并将其长度存储在 \c len 中。 */
 	uint8_t *SDES_GetTool(size_t *len) const				{ return SDESinf.GetTool(len); }
 
-	/** Returns a pointer to the SDES note item of this participant and stores its length in \c len. */                         
+	/** 返回此参与者的SDES note项的指针，并将其长度存储在 \c len 中。 */                         
 	uint8_t *SDES_GetNote(size_t *len) const				{ return SDESinf.GetNote(len); }
 	
 #ifdef RTP_SUPPORT_SDESPRIV
-	/** Starts the iteration over the stored SDES private item prefixes and their associated values. */
+	/** 开始遍历存储的SDES私有项前缀及其关联值。 */
 	void SDES_GotoFirstPrivateValue()										{ SDESinf.GotoFirstPrivateValue(); }
 	
-	/** If available, returns \c true and stores the next SDES private item prefix in \c prefix and its length in
-	 *  \c prefixlen; the associated value and its length are then stored in \c value and \c valuelen. 
+	/** 如果可用，返回 \c true 并将下一个SDES私有项前缀存储在 \c prefix 中，其长度存储在
+	 *  \c prefixlen 中；然后关联值及其长度存储在 \c value 和 \c valuelen 中。
 	 */
 	bool SDES_GetNextPrivateValue(uint8_t **prefix,size_t *prefixlen,uint8_t **value,size_t *valuelen) 		{ return SDESinf.GetNextPrivateValue(prefix,prefixlen,value,valuelen); }
 
-	/**	Looks for the entry which corresponds to the SDES private item prefix \c prefix with length 
-	 *  \c prefixlen; if found, the function returns \c true and stores the associated value and 
-	 *  its length in \c value and \c valuelen respectively.
+	/**	查找与SDES私有项前缀 \c prefix（长度为 \c prefixlen）对应的条目；
+	 *  如果找到，函数返回 \c true 并将关联值及其长度分别存储在 \c value 和 \c valuelen 中。
 	 */
 	bool SDES_GetPrivateValue(uint8_t *prefix,size_t prefixlen,uint8_t **value,size_t *valuelen) const 		{ return SDESinf.GetPrivateValue(prefix,prefixlen,value,valuelen); }
 #endif // RTP_SUPPORT_SDESPRIV
-
 
 protected:
 	std::list<RTPPacket *> packetlist;
@@ -410,6 +426,10 @@ protected:
 	RTPTime byetime;
 	uint8_t *byereason;
 	size_t byereasonlen;
+
+#ifdef RTP_SUPPORT_PROBATION
+	RTPSources::ProbationType probationtype;
+#endif // RTP_SUPPORT_PROBATION
 };
 
 inline RTPPacket *RTPSourceData::GetNextPacket()
@@ -433,6 +453,54 @@ inline void RTPSourceData::FlushPackets()
 	for (it = packetlist.begin() ; it != packetlist.end() ; ++it)
 		delete *it;
 	packetlist.clear();
+}
+
+inline int RTPSourceData::SetRTPDataAddress(const RTPEndpoint *a)
+{
+	if (a == 0)
+	{
+		if (rtpaddr)
+		{
+			delete rtpaddr;
+			rtpaddr = 0;
+		}
+	}
+	else
+	{
+		RTPEndpoint *newaddr = new RTPEndpoint(*a);
+		if (newaddr == 0)
+			return MEDIA_RTP_ERR_RESOURCE_ERROR;
+		
+		if (rtpaddr && a != rtpaddr)
+			delete rtpaddr;
+		rtpaddr = newaddr;
+	}
+	isrtpaddrset = true;
+	return 0;
+}
+
+inline int RTPSourceData::SetRTCPDataAddress(const RTPEndpoint *a)
+{
+	if (a == 0)
+	{
+		if (rtcpaddr)
+		{
+			delete rtcpaddr;
+			rtcpaddr = 0;
+		}
+	}
+	else
+	{
+		RTPEndpoint *newaddr = new RTPEndpoint(*a);
+		if (newaddr == 0)
+			return MEDIA_RTP_ERR_RESOURCE_ERROR;
+		
+		if (rtcpaddr && a != rtcpaddr)
+			delete rtcpaddr;
+		rtcpaddr = newaddr;
+	}
+	isrtcpaddrset = true;
+	return 0;
 }
 
 #endif // RTPSOURCEDATA_H

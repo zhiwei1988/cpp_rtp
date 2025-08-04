@@ -17,7 +17,6 @@ set (HEADERS
 	${PROJECT_BINARY_DIR}/src/rtpconfig.h
 	rtpdefines.h
 	rtperrors.h
-	rtpinternalsourcedata.h
 	rtppacket.h
 	rtppacketbuilder.h
 	rtppollthread.h
@@ -25,7 +24,6 @@ set (HEADERS
 	rtprawpacket.h
 	rtpsession.h
 	rtpsessionparams.h
-	rtpsessionsources.h
 	rtpsourcedata.h
 	rtpsources.h
 	rtpstructs.h
@@ -53,14 +51,12 @@ set(SOURCES
 	rtcpsdespacket.cpp
 	rtcpsrpacket.cpp
 	rtpcollisionlist.cpp
-	rtpinternalsourcedata.cpp
 	rtppacket.cpp
 	rtppacketbuilder.cpp
 	rtppollthread.cpp
 	rtp_protocol_utils.cpp
 	rtpsession.cpp
 	rtpsessionparams.cpp
-	rtpsessionsources.cpp
 	rtpsourcedata.cpp
 	rtpsources.cpp
 	rtptimeutilities.cpp

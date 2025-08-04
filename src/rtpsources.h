@@ -16,314 +16,294 @@
 class RTPNTPTime;
 class RTPTransmitter;
 class RTCPAPPPacket;
-class RTPInternalSourceData;
 class RTPRawPacket;
 class RTPPacket;
 class RTPTime;
 class RTPEndpoint;
 class RTPSourceData;
+class RTPSession;
+class RTCPScheduler;
 
-/** Represents a table in which information about the participating sources is kept.
- *  Represents a table in which information about the participating sources is kept. The class has member
- *  functions to process RTP and RTCP data and to iterate over the participants. Note that a NULL address 
- *  is used to identify packets from our own session. The class also provides some overridable functions 
- *  which can be used to catch certain events (new SSRC, SSRC collision, ...).
+/** 表示一个保存参与源信息的表格。
+ *  表示一个保存参与源信息的表格。该类具有处理RTP和RTCP数据以及遍历参与者的成员函数。
+ *  注意，NULL地址用于标识来自我们自己会话的数据包。该类还提供了一些可重写的函数，
+ *  可用于捕获某些事件（新的SSRC、SSRC冲突等）。
  */
 class RTPSources
 {
 	MEDIA_RTP_NO_COPY(RTPSources)
 public:
-	/** Type of probation to use for new sources. */
+	/** 用于新源的试用期类型。 */
 	enum ProbationType 
 	{ 
-			NoProbation, 		/**< Don't use the probation algorithm; accept RTP packets immediately. */
-			ProbationDiscard, 	/**< Discard incoming RTP packets originating from a source that's on probation. */
-			ProbationStore 		/**< Store incoming RTP packet from a source that's on probation for later retrieval. */
+			NoProbation, 		/**< 不使用试用期算法；立即接受RTP数据包。 */
+			ProbationDiscard, 	/**< 丢弃来自试用期源的数据包。 */
+			ProbationStore 		/**< 存储来自试用期源的数据包以供稍后检索。 */
 	};
 	
-	/** In the constructor you can select the probation type you'd like to use and also a memory manager. */
+	/** 在构造函数中，您可以选择要使用的试用期类型以及内存管理器。 */
 	RTPSources(ProbationType = ProbationStore);
+	/** 带有RTPSession引用的基于会话的源的构造函数。 */
+	RTPSources(RTPSession &sess, ProbationType = ProbationStore);
 	virtual ~RTPSources();
 
-	/** Clears the source table. */
+	/** 清除源表格。 */
 	void Clear();
+	
+	/** 清除自己的冲突标志（会话特定）。 */
+	void ClearOwnCollisionFlag()							{ owncollision = false; }
+	/** 返回是否检测到自己的冲突（会话特定）。 */
+	bool DetectedOwnCollision() const							{ return owncollision; }
 #ifdef RTP_SUPPORT_PROBATION
-	/** Changes the current probation type. */
+	/** 更改当前的试用期类型。 */
 	void SetProbationType(ProbationType probtype)							{ probationtype = probtype; }
 #endif // RTP_SUPPORT_PROBATION
 
-	/** Creates an entry for our own SSRC identifier. */
+	/** 为我们自己的SSRC标识符创建一个条目。 */
 	int CreateOwnSSRC(uint32_t ssrc);
 
-	/** Deletes the entry for our own SSRC identifier. */
+	/** 删除我们自己的SSRC标识符的条目。 */
 	int DeleteOwnSSRC();
 
-	/** This function should be called if our own session has sent an RTP packet. 
-	 *  This function should be called if our own session has sent an RTP packet.
-	 *  For our own SSRC entry, the sender flag is updated based upon outgoing packets instead of incoming packets.
+	/** 如果我们自己的会话发送了RTP数据包，应该调用此函数。 
+	 *  如果我们自己的会话发送了RTP数据包，应该调用此函数。
+	 *  对于我们自己的SSRC条目，发送者标志基于传出数据包而不是传入数据包进行更新。
 	 */
 	void SentRTPPacket();
 
-	/** Processes a raw packet \c rawpack.
-	 *  Processes a raw packet \c rawpack. The instance \c trans will be used to check if this
-	 *  packet is one of our own packets. The flag \c acceptownpackets indicates whether own packets should be 
-	 *  accepted or ignored.
+	/** 处理原始数据包 \c rawpack。
+	 *  处理原始数据包 \c rawpack。实例 \c trans 将用于检查此数据包是否是我们自己的数据包之一。
+	 *  标志 \c acceptownpackets 指示是否应该接受或忽略自己的数据包。
 	 */
 	int ProcessRawPacket(RTPRawPacket *rawpack,RTPTransmitter *trans,bool acceptownpackets);
 
-	/** Processes a raw packet \c rawpack.
-	 *  Processes a raw packet \c rawpack. Every transmitter in the array \c trans of length \c numtrans
-	 *  is used to check if the packet is from our own session. The flag \c acceptownpackets indicates
-	 *  whether own packets should be accepted or ignored.
+	/** 处理原始数据包 \c rawpack。
+	 *  处理原始数据包 \c rawpack。长度为 \c numtrans 的数组 \c trans 中的每个发射器都用于检查
+	 *  数据包是否来自我们自己的会话。标志 \c acceptownpackets 指示是否应该接受或忽略自己的数据包。
 	 */
 	int ProcessRawPacket(RTPRawPacket *rawpack,RTPTransmitter *trans[],int numtrans,bool acceptownpackets);
 
-	/** Processes an RTPPacket instance \c rtppack which was received at time \c receivetime and 
-	 *  which originated from \c senderaddres.
-	 *  Processes an RTPPacket instance \c rtppack which was received at time \c receivetime and 
-	 *  which originated from \c senderaddres. The \c senderaddress parameter must be NULL if
-	 *  the packet was sent by the local participant. The flag \c stored indicates whether the packet 
-	 *  was stored in the table or not.  If so, the \c rtppack instance may not be deleted.
+	/** 处理在时间 \c receivetime 接收到的RTPPacket实例 \c rtppack，该实例源自 \c senderaddres。
+	 *  处理在时间 \c receivetime 接收到的RTPPacket实例 \c rtppack，该实例源自 \c senderaddres。
+	 *  如果数据包是由本地参与者发送的，则 \c senderaddress 参数必须为NULL。
+	 *  标志 \c stored 指示数据包是否存储在表格中。如果是，则不能删除 \c rtppack 实例。
 	 */
 	int ProcessRTPPacket(RTPPacket *rtppack,const RTPTime &receivetime,const RTPEndpoint *senderaddress,bool *stored);
 
-	/** Processes the RTCP compound packet \c rtcpcomppack which was received at time \c receivetime from \c senderaddress.
-	 *  Processes the RTCP compound packet \c rtcpcomppack which was received at time \c receivetime from \c senderaddress.
-	 *  The \c senderaddress parameter must be NULL if the packet was sent by the local participant.
+	/** 处理在时间 \c receivetime 从 \c senderaddress 接收到的RTCP复合数据包 \c rtcpcomppack。
+	 *  处理在时间 \c receivetime 从 \c senderaddress 接收到的RTCP复合数据包 \c rtcpcomppack。
+	 *  如果数据包是由本地参与者发送的，则 \c senderaddress 参数必须为NULL。
 	 */
 	int ProcessRTCPCompoundPacket(RTCPCompoundPacket *rtcpcomppack,const RTPTime &receivetime,
 	                              const RTPEndpoint *senderaddress);
 	
-	/** Process the sender information of SSRC \c ssrc into the source table. 
-	 *  Process the sender information of SSRC \c ssrc into the source table. The information was received
-	 *  at time \c receivetime from address \c senderaddress. The \c senderaddress} parameter must be NULL 
-	 *  if the packet was sent by the local participant.
+	/** 将SSRC \c ssrc 的发送者信息处理到源表格中。 
+	 *  将SSRC \c ssrc 的发送者信息处理到源表格中。该信息在时间 \c receivetime 从地址 \c senderaddress 接收。
+	 *  如果数据包是由本地参与者发送的，则 \c senderaddress 参数必须为NULL。
 	 */
 	int ProcessRTCPSenderInfo(uint32_t ssrc,const RTPNTPTime &ntptime,uint32_t rtptime,
 	                          uint32_t packetcount,uint32_t octetcount,const RTPTime &receivetime,
 				  const RTPEndpoint *senderaddress);
 
-    /** Processes the report block information which was sent by participant \c ssrc into the source table.
-	 *  Processes the report block information which was sent by participant \c ssrc into the source table.
-	 *  The information was received at time \c receivetime from address \c senderaddress The \c senderaddress
-	 *  parameter must be NULL if the packet was sent by the local participant.
+    /** 将参与者 \c ssrc 发送的报告块信息处理到源表格中。
+	 *  将参与者 \c ssrc 发送的报告块信息处理到源表格中。
+	 *  该信息在时间 \c receivetime 从地址 \c senderaddress 接收。如果数据包是由本地参与者发送的，
+	 *  则 \c senderaddress 参数必须为NULL。
 	 */
 	int ProcessRTCPReportBlock(uint32_t ssrc,uint8_t fractionlost,int32_t lostpackets,
 	                           uint32_t exthighseqnr,uint32_t jitter,uint32_t lsr,
 	                           uint32_t dlsr,const RTPTime &receivetime,const RTPEndpoint *senderaddress);
 
-	/** Processes the non-private SDES item from source \c ssrc into the source table. 
-	 *  Processes the non-private SDES item from source \c ssrc into the source table. The information was
-	 *  received at time \c receivetime from address \c senderaddress. The \c senderaddress parameter must
-	 *  be NULL if the packet was sent by the local participant.
+	/** 将源 \c ssrc 的非私有SDES项处理到源表格中。 
+	 *  将源 \c ssrc 的非私有SDES项处理到源表格中。该信息在时间 \c receivetime 从地址 \c senderaddress 接收。
+	 *  如果数据包是由本地参与者发送的，则 \c senderaddress 参数必须为NULL。
 	 */
 	int ProcessSDESNormalItem(uint32_t ssrc,RTCPSDESPacket::ItemType t,size_t itemlength,
 	                          const void *itemdata,const RTPTime &receivetime,const RTPEndpoint *senderaddress);
 #ifdef RTP_SUPPORT_SDESPRIV
-	/** Processes the SDES private item from source \c ssrc into the source table. 
-	 *  Processes the SDES private item from source \c ssrc into the source table. The information was 
-	 *  received at time \c receivetime from address \c senderaddress. The \c senderaddress 
-	 *  parameter must be NULL if the packet was sent by the local participant.
+	/** 将源 \c ssrc 的SDES私有项处理到源表格中。 
+	 *  将源 \c ssrc 的SDES私有项处理到源表格中。该信息在时间 \c receivetime 从地址 \c senderaddress 接收。
+	 *  如果数据包是由本地参与者发送的，则 \c senderaddress 参数必须为NULL。
 	 */
 	int ProcessSDESPrivateItem(uint32_t ssrc,size_t prefixlen,const void *prefixdata,
 	                           size_t valuelen,const void *valuedata,const RTPTime &receivetime,
 	                           const RTPEndpoint *senderaddress);
 #endif //RTP_SUPPORT_SDESPRIV
-	/** Processes the BYE message for SSRC \c ssrc. 
-	 *  Processes the BYE message for SSRC \c ssrc. The information was received at time \c receivetime from
-	 *  address \c senderaddress. The \c senderaddress parameter must be NULL if the packet was sent by the
-	 *  local participant.
+	/** 处理SSRC \c ssrc 的BYE消息。 
+	 *  处理SSRC \c ssrc 的BYE消息。该信息在时间 \c receivetime 从地址 \c senderaddress 接收。
+	 *  如果数据包是由本地参与者发送的，则 \c senderaddress 参数必须为NULL。
 	 */
 	int ProcessBYE(uint32_t ssrc,size_t reasonlength,const void *reasondata,const RTPTime &receivetime,
 	               const RTPEndpoint *senderaddress);
 
-	/** If we heard from source \c ssrc, but no actual data was added to the source table (for example, if
-	 *  no report block was meant for us), this function can e used to indicate that something was received from
-	 *  this source. 
-	 *  If we heard from source \c ssrc, but no actual data was added to the source table (for example, if
-	 *  no report block was meant for us), this function can e used to indicate that something was received from
-	 *  this source. This will prevent a premature timeout for this participant. The message was received at time 
-	 *  \c receivetime from address \c senderaddress. The \c senderaddress parameter must be NULL if the 
-	 *  packet was sent by the local participant.
+	/** 如果我们从源 \c ssrc 听到了消息，但没有实际数据添加到源表格中（例如，如果没有报告块是针对我们的），
+	 *  此函数可用于指示从该源接收到了某些内容。 
+	 *  如果我们从源 \c ssrc 听到了消息，但没有实际数据添加到源表格中（例如，如果没有报告块是针对我们的），
+	 *  此函数可用于指示从该源接收到了某些内容。这将防止该参与者的过早超时。消息在时间 \c receivetime 
+	 *  从地址 \c senderaddress 接收。如果数据包是由本地参与者发送的，则 \c senderaddress 参数必须为NULL。
 	 */
 	int UpdateReceiveTime(uint32_t ssrc,const RTPTime &receivetime,const RTPEndpoint *senderaddress);
 	
-	/** Starts the iteration over the participants by going to the first member in the table.
-	 *  Starts the iteration over the participants by going to the first member in the table.
-	 *  If a member was found, the function returns \c true, otherwise it returns \c false.
+	/** 通过转到表格中的第一个成员来开始对参与者的迭代。
+	 *  通过转到表格中的第一个成员来开始对参与者的迭代。
+	 *  如果找到成员，函数返回 \c true，否则返回 \c false。
 	 */
 	bool GotoFirstSource();
 
-	/** Sets the current source to be the next source in the table.
-	 *  Sets the current source to be the next source in the table. If we're already at the last source, 
-	 *  the function returns \c false, otherwise it returns \c true.
+	/** 将当前源设置为表格中的下一个源。
+	 *  将当前源设置为表格中的下一个源。如果我们已经到达最后一个源，函数返回 \c false，否则返回 \c true。
 	 */
 	bool GotoNextSource();
 
-	/** Sets the current source to be the previous source in the table.
-	 *  Sets the current source to be the previous source in the table. If we're at the first source, 
-	 *  the function returns \c false, otherwise it returns \c true.
+	/** 将当前源设置为表格中的前一个源。
+	 *  将当前源设置为表格中的前一个源。如果我们在第一个源，函数返回 \c false，否则返回 \c true。
 	 */
 	bool GotoPreviousSource();
 
-	/** Sets the current source to be the first source in the table which has RTPPacket instances 
-	 *  that we haven't extracted yet.
-	 *  Sets the current source to be the first source in the table which has RTPPacket instances 
-	 *  that we haven't extracted yet. If no such member was found, the function returns \c false,
-	 *  otherwise it returns \c true.
+	/** 将当前源设置为表格中具有我们尚未提取的RTPPacket实例的第一个源。
+	 *  将当前源设置为表格中具有我们尚未提取的RTPPacket实例的第一个源。如果没有找到这样的成员，
+	 *  函数返回 \c false，否则返回 \c true。
 	 */
 	bool GotoFirstSourceWithData();
 
-	/** Sets the current source to be the next source in the table which has RTPPacket instances that
-	 *  we haven't extracted yet.
-	 *  Sets the current source to be the next source in the table which has RTPPacket instances that
-	 *  we haven't extracted yet. If no such member was found, the function returns \c false,
-	 *  otherwise it returns \c true.
+	/** 将当前源设置为表格中具有我们尚未提取的RTPPacket实例的下一个源。
+	 *  将当前源设置为表格中具有我们尚未提取的RTPPacket实例的下一个源。如果没有找到这样的成员，
+	 *  函数返回 \c false，否则返回 \c true。
 	 */
 	bool GotoNextSourceWithData();
 
-	/** Sets the current source to be the previous source in the table which has RTPPacket instances 
-	 *  that we haven't extracted yet.
-	 *  Sets the current source to be the previous source in the table which has RTPPacket instances 
-	 *  that we haven't extracted yet. If no such member was found, the function returns \c false,
-	 *  otherwise it returns \c true.
+	/** 将当前源设置为表格中具有我们尚未提取的RTPPacket实例的前一个源。
+	 *  将当前源设置为表格中具有我们尚未提取的RTPPacket实例的前一个源。如果没有找到这样的成员，
+	 *  函数返回 \c false，否则返回 \c true。
 	 */
 	bool GotoPreviousSourceWithData();
 
-	/** Returns the RTPSourceData instance for the currently selected participant. */
+	/** 返回当前选定参与者的RTPSourceData实例。 */
 	RTPSourceData *GetCurrentSourceInfo();
 
-	/** Returns the RTPSourceData instance for the participant identified by \c ssrc, or 
-	 *  NULL if no such entry exists.  
+	/** 返回由 \c ssrc 标识的参与者的RTPSourceData实例，如果不存在这样的条目则返回NULL。  
 	 */                         
 	RTPSourceData *GetSourceInfo(uint32_t ssrc);
 
-	/** Extracts the next packet from the received packets queue of the current participant. */
+	/** 从当前参与者的接收数据包队列中提取下一个数据包。 */
 	RTPPacket *GetNextPacket();
 
-	/** Returns \c true if an entry for participant \c ssrc exists and \c false otherwise. */
+	/** 如果参与者 \c ssrc 的条目存在则返回 \c true，否则返回 \c false。 */
 	bool GotEntry(uint32_t ssrc);
 
-	/** If present, it returns the RTPSourceData instance of the entry which was created by CreateOwnSSRC. */
-	RTPSourceData *GetOwnSourceInfo()								{ return (RTPSourceData *)owndata; }
+	/** 如果存在，返回由CreateOwnSSRC创建的条目的RTPSourceData实例。 */
+	RTPSourceData *GetOwnSourceInfo()								{ return owndata; }
 
-	/** Assuming that the current time is \c curtime, time out the members from whom we haven't heard 
-	 *  during the previous time  interval \c timeoutdelay.
+	/** 假设当前时间是 \c curtime，对在前一个时间间隔 \c timeoutdelay 期间我们没有听到消息的成员进行超时处理。
 	 */
 	void Timeout(const RTPTime &curtime,const RTPTime &timeoutdelay);
 
-	/** Assuming that the current time is \c curtime, remove the sender flag for senders from whom we haven't
-	 *  received any RTP packets during the previous time interval \c timeoutdelay.
+	/** 假设当前时间是 \c curtime，移除在前一个时间间隔 \c timeoutdelay 期间我们没有收到任何RTP数据包的发送者的发送者标志。
 	 */
 	void SenderTimeout(const RTPTime &curtime,const RTPTime &timeoutdelay);
 
-	/** Assuming that the current time is \c curtime, remove the members who sent a BYE packet more than 
-	 *  the time interval \c timeoutdelay ago.
+	/** 假设当前时间是 \c curtime，移除在超过时间间隔 \c timeoutdelay 之前发送BYE数据包的成员。
 	 */
 	void BYETimeout(const RTPTime &curtime,const RTPTime &timeoutdelay);
 
-	/** Assuming that the current time is \c curtime, clear the SDES NOTE items which haven't been updated 
-	 *  during the previous time interval \c timeoutdelay.
+	/** 假设当前时间是 \c curtime，清除在前一个时间间隔 \c timeoutdelay 期间未更新的SDES NOTE项。
 	 */
 	void NoteTimeout(const RTPTime &curtime,const RTPTime &timeoutdelay);
 
-	/** Combines the functions SenderTimeout, BYETimeout, Timeout and NoteTimeout.
-	 *  Combines the functions SenderTimeout, BYETimeout, Timeout and NoteTimeout. This is more efficient
-	 *  than calling all four functions since only one iteration is needed in this function.
+	/** 组合函数SenderTimeout、BYETimeout、Timeout和NoteTimeout。
+	 *  组合函数SenderTimeout、BYETimeout、Timeout和NoteTimeout。这比调用所有四个函数更高效，
+	 *  因为在此函数中只需要一次迭代。
 	 */
 	void MultipleTimeouts(const RTPTime &curtime,const RTPTime &sendertimeout,
 			      const RTPTime &byetimeout,const RTPTime &generaltimeout,
 			      const RTPTime &notetimeout);
 
-	/** Returns the number of participants which are marked as a sender. */
+	/** 返回标记为发送者的参与者数量。 */
 	int GetSenderCount() const										{ return sendercount; }
 
-	/** Returns the total number of entries in the source table. */
+	/** 返回源表格中的条目总数。 */
 	int GetTotalCount() const										{ return totalcount; }
 
-	/** Returns the number of members which have been validated and which haven't sent a BYE packet yet. */
+	/** 返回已验证且尚未发送BYE数据包的成员数量。 */
 	int GetActiveMemberCount() const								{ return activecount; } 
 
 protected:
-	/** Is called when an RTP packet is about to be processed. */
+	/** 当RTP数据包即将被处理时调用。 */
 	virtual void OnRTPPacket(RTPPacket *pack,const RTPTime &receivetime, const RTPEndpoint *senderaddress);
 
-	/** Is called when an RTCP compound packet is about to be processed. */
+	/** 当RTCP复合数据包即将被处理时调用。 */
 	virtual void OnRTCPCompoundPacket(RTCPCompoundPacket *pack,const RTPTime &receivetime,
 	                                  const RTPEndpoint *senderaddress);
 
-	/** Is called when an SSRC collision was detected.
-	 *  Is called when an SSRC collision was detected. The instance \c srcdat is the one present in 
-	 *  the table, the address \c senderaddress is the one that collided with one of the addresses 
-	 *  and \c isrtp indicates against which address of \c srcdat the check failed.
+	/** 当检测到SSRC冲突时调用。
+	 *  当检测到SSRC冲突时调用。实例 \c srcdat 是表格中存在的实例，地址 \c senderaddress 是与其中一个地址冲突的地址，
+	 *  \c isrtp 指示对 \c srcdat 的哪个地址的检查失败。
 	 */
 	virtual void OnSSRCCollision(RTPSourceData *srcdat,const RTPEndpoint *senderaddress,bool isrtp);
 
-	/** Is called when another CNAME was received than the one already present for source \c srcdat. */
+	/** 当接收到与源 \c srcdat 已存在的CNAME不同的CNAME时调用。 */
 	virtual void OnCNAMECollision(RTPSourceData *srcdat,const RTPEndpoint *senderaddress,
 	                              const uint8_t *cname,size_t cnamelength);
 
-	/** Is called when a new entry \c srcdat is added to the source table. */
+	/** 当新条目 \c srcdat 添加到源表格时调用。 */
 	virtual void OnNewSource(RTPSourceData *srcdat);
 
-	/** Is called when the entry \c srcdat is about to be deleted from the source table. */
+	/** 当条目 \c srcdat 即将从源表格中删除时调用。 */
 	virtual void OnRemoveSource(RTPSourceData *srcdat);
 
-	/** Is called when participant \c srcdat is timed out. */
+	/** 当参与者 \c srcdat 超时时调用。 */
 	virtual void OnTimeout(RTPSourceData *srcdat);
 
-	/** Is called when participant \c srcdat is timed after having sent a BYE packet. */
+	/** 当参与者 \c srcdat 在发送BYE数据包后超时时调用。 */
 	virtual void OnBYETimeout(RTPSourceData *srcdat);
 
-	/** Is called when a BYE packet has been processed for source \c srcdat. */
+	/** 当为源 \c srcdat 处理BYE数据包时调用。 */
 	virtual void OnBYEPacket(RTPSourceData *srcdat);
 
-	/** Is called when an RTCP sender report has been processed for this source. */
+	/** 当为此源处理RTCP发送者报告时调用。 */
 	virtual void OnRTCPSenderReport(RTPSourceData *srcdat);
 	
-	/** Is called when an RTCP receiver report has been processed for this source. */
+	/** 当为此源处理RTCP接收者报告时调用。 */
 	virtual void OnRTCPReceiverReport(RTPSourceData *srcdat);
 
-	/** Is called when a specific SDES item was received for this source. */
+	/** 当为此源接收到特定SDES项时调用。 */
 	virtual void OnRTCPSDESItem(RTPSourceData *srcdat, RTCPSDESPacket::ItemType t,
 	                            const void *itemdata, size_t itemlength);
 #ifdef RTP_SUPPORT_SDESPRIV
-	/** Is called when a specific SDES item of 'private' type was received for this source. */
+	/** 当为此源接收到'private'类型的特定SDES项时调用。 */
 	virtual void OnRTCPSDESPrivateItem(RTPSourceData *srcdat, const void *prefixdata, size_t prefixlen,
 	                                   const void *valuedata, size_t valuelen);
 #endif // RTP_SUPPORT_SDESPRIV
 	
 
-	/** Is called when an RTCP APP packet \c apppacket has been received at time \c receivetime 
-	 *  from address \c senderaddress.
+	/** 当在时间 \c receivetime 从地址 \c senderaddress 接收到RTCP APP数据包 \c apppacket 时调用。
 	 */
 	virtual void OnAPPPacket(RTCPAPPPacket *apppacket,const RTPTime &receivetime,
 	                         const RTPEndpoint *senderaddress);
 
-	/** Is called when an unknown RTCP packet type was detected. */
+	/** 当检测到未知的RTCP数据包类型时调用。 */
 	virtual void OnUnknownPacketType(RTCPPacket *rtcppack,const RTPTime &receivetime,
 	                                 const RTPEndpoint *senderaddress);
 
-	/** Is called when an unknown packet format for a known packet type was detected. */
+	/** 当检测到已知数据包类型的未知数据包格式时调用。 */
 	virtual void OnUnknownPacketFormat(RTCPPacket *rtcppack,const RTPTime &receivetime,
 	                                   const RTPEndpoint *senderaddress);
 
-	/** Is called when the SDES NOTE item for source \c srcdat has been timed out. */
+	/** 当源 \c srcdat 的SDES NOTE项超时时调用。 */
 	virtual void OnNoteTimeout(RTPSourceData *srcdat);
 
-	/** Allows you to use an RTP packet from the specified source directly.
-	 *  Allows you to use an RTP packet from the specified source directly. If 
-	 *  `ispackethandled` is set to `true`, the packet will no longer be stored in this
-	 *  source's packet list. */
+	/** 允许您直接使用指定源的RTP数据包。
+	 *  允许您直接使用指定源的RTP数据包。如果 `ispackethandled` 设置为 `true`，
+	 *  数据包将不再存储在此源的数据包列表中。 */
 	virtual void OnValidatedRTPPacket(RTPSourceData *srcdat, RTPPacket *rtppack, bool isonprobation, bool *ispackethandled);
 private:
 	void ClearSourceList();
-	int ObtainSourceDataInstance(uint32_t ssrc,RTPInternalSourceData **srcdat,bool *created);
-	int GetRTCPSourceData(uint32_t ssrc,const RTPEndpoint *senderaddress,RTPInternalSourceData **srcdat,bool *newsource);
-	bool CheckCollision(RTPInternalSourceData *srcdat,const RTPEndpoint *senderaddress,bool isrtp);
+	int ObtainSourceDataInstance(uint32_t ssrc,RTPSourceData **srcdat,bool *created);
+	int GetRTCPSourceData(uint32_t ssrc,const RTPEndpoint *senderaddress,RTPSourceData **srcdat,bool *newsource);
+	bool CheckCollision(RTPSourceData *srcdat,const RTPEndpoint *senderaddress,bool isrtp);
 	
-	std::unordered_map<uint32_t,RTPInternalSourceData*> sourcelist;
-	std::unordered_map<uint32_t,RTPInternalSourceData*>::iterator current_it;
+	std::unordered_map<uint32_t,RTPSourceData*> sourcelist;
+	std::unordered_map<uint32_t,RTPSourceData*>::iterator current_it;
 	
 	int sendercount;
 	int totalcount;
@@ -333,32 +313,15 @@ private:
 	ProbationType probationtype;
 #endif // RTP_SUPPORT_PROBATION
 
-	RTPInternalSourceData *owndata;
-
-	friend class RTPInternalSourceData;
+	RTPSourceData *owndata;
+	
+	// 会话特定成员
+	RTPSession *rtpsession;
+	bool owncollision;
+	
+	friend class RTPSourceData;
 };
 
-// Inlining the default implementations to avoid unused-parameter errors.
-inline void RTPSources::OnRTPPacket(RTPPacket *, const RTPTime &, const RTPEndpoint *)                               { }
-inline void RTPSources::OnRTCPCompoundPacket(RTCPCompoundPacket *, const RTPTime &, const RTPEndpoint *)             { }
-inline void RTPSources::OnSSRCCollision(RTPSourceData *, const RTPEndpoint *, bool)                                  { }
-inline void RTPSources::OnCNAMECollision(RTPSourceData *, const RTPEndpoint *, const uint8_t *, size_t)              { }
-inline void RTPSources::OnNewSource(RTPSourceData *)                                                                { }
-inline void RTPSources::OnRemoveSource(RTPSourceData *)                                                             { }
-inline void RTPSources::OnTimeout(RTPSourceData *)                                                                  { }
-inline void RTPSources::OnBYETimeout(RTPSourceData *)                                                               { }
-inline void RTPSources::OnBYEPacket(RTPSourceData *)                                                                { }
-inline void RTPSources::OnRTCPSenderReport(RTPSourceData *)                                                         { }
-inline void RTPSources::OnRTCPReceiverReport(RTPSourceData *)                                                       { }
-inline void RTPSources::OnRTCPSDESItem(RTPSourceData *, RTCPSDESPacket::ItemType, const void *, size_t)             { }
-#ifdef RTP_SUPPORT_SDESPRIV
-inline void RTPSources::OnRTCPSDESPrivateItem(RTPSourceData *, const void *, size_t, const void *, size_t)          { }
-#endif // RTP_SUPPORT_SDESPRIV
-inline void RTPSources::OnAPPPacket(RTCPAPPPacket *, const RTPTime &, const RTPEndpoint *)                           { }
-inline void RTPSources::OnUnknownPacketType(RTCPPacket *, const RTPTime &, const RTPEndpoint *)                      { }
-inline void RTPSources::OnUnknownPacketFormat(RTCPPacket *, const RTPTime &, const RTPEndpoint *)                    { }
-inline void RTPSources::OnNoteTimeout(RTPSourceData *)                                                              { }
-inline void RTPSources::OnValidatedRTPPacket(RTPSourceData *, RTPPacket *, bool, bool *)                            { }
 
 #endif // RTPSOURCES_H
 
