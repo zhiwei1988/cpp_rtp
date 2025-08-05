@@ -8,7 +8,7 @@
 
 #include "rtpconfig.h"
 #include "rtpendpoint.h"
-#include "rtptimeutilities.h"
+#include "rtp_protocol_utils.h"
 #include <list>
 
 class RTPEndpoint;

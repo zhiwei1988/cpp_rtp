@@ -6,7 +6,6 @@
 
 RTPCollisionList::RTPCollisionList()
 {
-	timeinit.Dummy();
 }
 
 void RTPCollisionList::Clear()

@@ -27,14 +27,12 @@ set (HEADERS
 	rtpsourcedata.h
 	rtpsources.h
 	rtpstructs.h
-	rtptimeutilities.h
+	rtp_protocol_utils.h
 	rtptransmitter.h
 	rtpudpv4transmitter.h
 	rtpudpv6transmitter.h  
 	rtpendpoint.h
-	rtpsocketutil.h
 	rtpabortdescriptors.h
-	rtpselect.h
 	rtptcptransmitter.h
 	)
 
@@ -59,7 +57,6 @@ set(SOURCES
 	rtpsessionparams.cpp
 	rtpsourcedata.cpp
 	rtpsources.cpp
-	rtptimeutilities.cpp
 	rtpudpv4transmitter.cpp
 	rtpudpv6transmitter.cpp 
 	rtpendpoint.cpp

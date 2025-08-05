@@ -1,57 +1,51 @@
-/**
- * \file rtcppacket.h
- */
-
-#ifndef RTCPPACKET_H
-
-#define RTCPPACKET_H
+#pragma once
 
 #include "rtpconfig.h"
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 
 class RTCPCompoundPacket;
 
-/** Base class for specific types of RTCP packets. */
-class RTCPPacket 
-{
-	MEDIA_RTP_NO_COPY(RTCPPacket)
+/** RTCP数据包特定类型的基类。 */
+class RTCPPacket {
+  MEDIA_RTP_NO_COPY(RTCPPacket)
 public:
-	/** Identifies the specific kind of RTCP packet. */
-	enum PacketType 
-	{ 
-			SR,		/**< An RTCP sender report. */
-			RR,		/**< An RTCP receiver report. */
-			SDES,	/**< An RTCP source description packet. */
-			BYE,	/**< An RTCP bye packet. */
-			APP,	/**< An RTCP packet containing application specific data. */
-			Unknown	/**< The type of RTCP packet was not recognized. */
-	};
-protected:
-	RTCPPacket(PacketType t,uint8_t *d,size_t dlen) : data(d),datalen(dlen),packettype(t) { knownformat = false; }
-public:
-	virtual ~RTCPPacket()								{ }	
-
-	/** Returns \c true if the subclass was able to interpret the data and \c false otherwise. */
-	bool IsKnownFormat() const							{ return knownformat; }
-	
-	/** Returns the actual packet type which the subclass implements. */
-	PacketType GetPacketType() const					{ return packettype; }
-
-	/** Returns a pointer to the data of this RTCP packet. */
-	uint8_t *GetPacketData()							{ return data; }
-
-	/** Returns the length of this RTCP packet. */
-	size_t GetPacketLength() const						{ return datalen; }
-
+  /** 标识RTCP数据包的具体类型。 */
+  enum PacketType {
+    SR,     /**< RTCP发送者报告。 */
+    RR,     /**< RTCP接收者报告。 */
+    SDES,   /**< RTCP源描述数据包。 */
+    BYE,    /**< RTCP再见数据包。 */
+    APP,    /**< 包含应用程序特定数据的RTCP数据包。 */
+    Unknown /**< RTCP数据包类型未被识别。 */
+  };
 
 protected:
-	uint8_t *data;
-	size_t datalen;
-	bool knownformat;
+  RTCPPacket(PacketType t, uint8_t *d, size_t dlen)
+      : data(d), datalen(dlen), packettype(t) {
+    knownformat = false;
+  }
+
+public:
+  virtual ~RTCPPacket() {}
+
+  /** 如果子类能够解释数据则返回\c true，否则返回\c false。 */
+  bool IsKnownFormat() const { return knownformat; }
+
+  /** 返回子类实现的实际数据包类型。 */
+  PacketType GetPacketType() const { return packettype; }
+
+  /** 返回指向此RTCP数据包数据的指针。 */
+  uint8_t *GetPacketData() { return data; }
+
+  /** 返回此RTCP数据包的长度。 */
+  size_t GetPacketLength() const { return datalen; }
+
+protected:
+  uint8_t *data;
+  size_t datalen;
+  bool knownformat;
+
 private:
-	const PacketType packettype;
+  const PacketType packettype;
 };
-
-#endif // RTCPPACKET_H
-

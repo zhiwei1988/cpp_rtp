@@ -1,21 +1,15 @@
 #include "rtptcptransmitter.h"
 #include "rtprawpacket.h"
 #include "rtpendpoint.h"
-#include "rtptimeutilities.h"
+#include "rtp_protocol_utils.h"
 #include "rtpdefines.h"
 #include "rtpstructs.h"
-#include "rtpsocketutilinternal.h"
-
-#include "rtpinternalutils.h"
-#include "rtpselect.h"
+#include "rtperrors.h"
 #include <stdio.h>
 #include <assert.h>
 #include <vector>
 
-
 #include <iostream>
-
-
 
 using namespace std;
 
@@ -209,7 +203,7 @@ bool RTPTCPTransmitter::ComesFromThisTransmitter(const RTPEndpoint *addr)
 	}
 
 	bool v = false;
-	SocketType socket = addr->GetSocket();
+	int socket = addr->GetSocket();
 
 	MEDIA_RTP_UNUSED(socket);
 	// TODO: 目前，我们假设我们不能只发送到同一个发送器
@@ -230,15 +224,15 @@ int RTPTCPTransmitter::Poll()
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 
-	std::map<SocketType, SocketData>::iterator it = m_destSockets.begin();
-	std::map<SocketType, SocketData>::iterator end = m_destSockets.end();
+	std::map<int, SocketData>::iterator it = m_destSockets.begin();
+	std::map<int, SocketData>::iterator end = m_destSockets.end();
 	int status = 0;
 
-	vector<SocketType> errSockets;
+	vector<int> errSockets;
 
 	while (it != end)
 	{
-		SocketType sock = it->first;
+		int sock = it->first;
 		status = PollSocket(sock, it->second);
 		if (status < 0)
 		{
@@ -284,10 +278,10 @@ int RTPTCPTransmitter::WaitForIncomingData(const RTPTime &delay,bool *dataavaila
 	
 	m_tmpSocks.resize(m_destSockets.size()+1);
 	m_tmpFlags.resize(m_tmpSocks.size());
-	SocketType abortSocket = m_pAbortDesc->GetAbortSocket();
+	int abortSocket = m_pAbortDesc->GetAbortSocket();
 
-	std::map<SocketType, SocketData>::iterator it = m_destSockets.begin();
-	std::map<SocketType, SocketData>::iterator end = m_destSockets.end();
+	std::map<int, SocketData>::iterator it = m_destSockets.begin();
+	std::map<int, SocketData>::iterator end = m_destSockets.end();
 	int idx = 0;
 
 	while (it != end)
@@ -413,7 +407,7 @@ int RTPTCPTransmitter::AddDestination(const RTPEndpoint &addr)
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	
-	SocketType s = addr.GetSocket();
+	int s = addr.GetSocket();
 	if (s == 0)
 	{
 		MAINMUTEX_UNLOCK
@@ -427,7 +421,7 @@ int RTPTCPTransmitter::AddDestination(const RTPEndpoint &addr)
 		return status;
 	}
 	
-	std::map<SocketType, SocketData>::iterator it = m_destSockets.find(s);
+	std::map<int, SocketData>::iterator it = m_destSockets.find(s);
 	if (it != m_destSockets.end())
 	{
 		MAINMUTEX_UNLOCK
@@ -468,14 +462,14 @@ int RTPTCPTransmitter::DeleteDestination(const RTPEndpoint &addr)
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 	
-	SocketType s = addr.GetSocket();
+	int s = addr.GetSocket();
 	if (s == 0)
 	{
 		MAINMUTEX_UNLOCK
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
 
-	std::map<SocketType, SocketData>::iterator it = m_destSockets.find(s);
+	std::map<int, SocketData>::iterator it = m_destSockets.find(s);
 	if (it == m_destSockets.end())
 	{
 		MAINMUTEX_UNLOCK
@@ -640,7 +634,7 @@ void RTPTCPTransmitter::FlushPackets()
 	m_rawpacketlist.clear();
 }
 
-int RTPTCPTransmitter::PollSocket(SocketType sock, SocketData &sdata)
+int RTPTCPTransmitter::PollSocket(int sock, SocketData &sdata)
 {
 	size_t len;
 	bool dataavailable;
@@ -706,8 +700,6 @@ int RTPTCPTransmitter::PollSocket(SocketType sock, SocketData &sdata)
 	return 0;
 }
 
-
-
 int RTPTCPTransmitter::SendRTPRTCPData(const void *data, size_t len)
 {
 	if (!m_init)
@@ -726,10 +718,10 @@ int RTPTCPTransmitter::SendRTPRTCPData(const void *data, size_t len)
 		return MEDIA_RTP_ERR_RESOURCE_ERROR;
 	}
 	
-	std::map<SocketType, SocketData>::iterator it = m_destSockets.begin();
-	std::map<SocketType, SocketData>::iterator end = m_destSockets.end();
+	std::map<int, SocketData>::iterator it = m_destSockets.begin();
+	std::map<int, SocketData>::iterator end = m_destSockets.end();
 
-	vector<SocketType> errSockets;
+	vector<int> errSockets;
 	int flags = 0;
 #ifdef RTP_HAVE_MSG_NOSIGNAL
 	flags = MSG_NOSIGNAL;
@@ -738,7 +730,7 @@ int RTPTCPTransmitter::SendRTPRTCPData(const void *data, size_t len)
 	while (it != end)
 	{
 		uint8_t lengthBytes[2] = { (uint8_t)((len >> 8)&0xff), (uint8_t)(len&0xff) };
-		SocketType sock = it->first;
+		int sock = it->first;
 
 		if (send(sock,(const char *)lengthBytes,2,flags) < 0 ||
 			send(sock,(const char *)data,len,flags) < 0)
@@ -759,7 +751,7 @@ int RTPTCPTransmitter::SendRTPRTCPData(const void *data, size_t len)
 	return 0;
 }
 
-int RTPTCPTransmitter::ValidateSocket(SocketType)
+int RTPTCPTransmitter::ValidateSocket(int)
 {
 	// TODO: 我们是否应该检查（对于 TCP 套接字）？ 
 	return 0;
@@ -767,8 +759,8 @@ int RTPTCPTransmitter::ValidateSocket(SocketType)
 
 void RTPTCPTransmitter::ClearDestSockets()
 {
-	std::map<SocketType, SocketData>::iterator it = m_destSockets.begin();
-	std::map<SocketType, SocketData>::iterator end = m_destSockets.end();
+	std::map<int, SocketData>::iterator it = m_destSockets.begin();
+	std::map<int, SocketData>::iterator end = m_destSockets.end();
 
 	while (it != end)
 	{
@@ -799,7 +791,7 @@ RTPTCPTransmitter::SocketData::~SocketData()
 	assert(m_pDataBuffer == 0); // 应在外部删除，以避免在类中存储内存管理器
 }
 
-int RTPTCPTransmitter::SocketData::ProcessAvailableBytes(SocketType sock, int availLen, bool &complete)
+int RTPTCPTransmitter::SocketData::ProcessAvailableBytes(int sock, int availLen, bool &complete)
 {
 
 	const int numLengthBuffer = 2;

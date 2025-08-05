@@ -9,7 +9,7 @@
 #include "rtpconfig.h"
 #include <cstdint>
 #include "rtptransmitter.h"
-#include "rtptimeutilities.h"
+#include "rtp_protocol_utils.h"
 #include "rtpsources.h"
 #include <string>
 

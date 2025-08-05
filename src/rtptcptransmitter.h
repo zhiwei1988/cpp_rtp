@@ -8,7 +8,6 @@
 
 #include "rtpconfig.h"
 #include "rtptransmitter.h"
-#include "rtpsocketutil.h"
 #include "rtpabortdescriptors.h"
 #include <map>
 #include <list>
@@ -119,9 +118,9 @@ public:
 
 protected:
 	/** By overriding this function you can be notified of an error when sending over a socket. */
-	virtual void OnSendError(SocketType sock);
+	virtual void OnSendError(int sock);
 	/** By overriding this function you can be notified of an error when receiving from a socket. */
-	virtual void OnReceiveError(SocketType sock);
+	virtual void OnReceiveError(int sock);
 private:
 	class SocketData
 	{
@@ -137,21 +136,21 @@ private:
 		uint8_t *m_pDataBuffer;
 
 		uint8_t *ExtractDataBuffer() { uint8_t *pTmp = m_pDataBuffer; m_pDataBuffer = 0; return pTmp; }
-		int ProcessAvailableBytes(SocketType sock, int availLen, bool &complete);
+		int ProcessAvailableBytes(int sock, int availLen, bool &complete);
 	};
 
 	int SendRTPRTCPData(const void *data,size_t len);	
 	void FlushPackets();
-	int PollSocket(SocketType sock, SocketData &sdata);
+	int PollSocket(int sock, SocketData &sdata);
 	void ClearDestSockets();
-	int ValidateSocket(SocketType s);
+	int ValidateSocket(int s);
 
 	bool m_init;
 	bool m_created;
 	bool m_waitingForData;
 
-	std::map<SocketType, SocketData> m_destSockets;
-	std::vector<SocketType> m_tmpSocks;
+	std::map<int, SocketData> m_destSockets;
+	std::vector<int> m_tmpSocks;
 	std::vector<int8_t> m_tmpFlags;
 	std::vector<uint8_t> m_localHostname;
 	size_t m_maxPackSize;
@@ -165,8 +164,8 @@ private:
 	bool m_threadsafe;
 };
 
-inline void RTPTCPTransmitter::OnSendError(SocketType) { }
-inline void RTPTCPTransmitter::OnReceiveError(SocketType) { }
+inline void RTPTCPTransmitter::OnSendError(int) { }
+inline void RTPTCPTransmitter::OnReceiveError(int) { }
 
 #endif // RTPTCPTRANSMITTER_H
 

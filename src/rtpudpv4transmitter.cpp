@@ -1,25 +1,19 @@
 #include "rtpudpv4transmitter.h"
 #include "rtprawpacket.h"
-#include "rtptimeutilities.h"
+#include "rtp_protocol_utils.h"
 #include "rtpdefines.h"
 #include "rtpstructs.h"
-#include "rtpsocketutilinternal.h"
-#include "rtpinternalutils.h"
-#include "rtpselect.h"
+#include "rtperrors.h"
 #include <stdio.h>
 #include <assert.h>
 #include <vector>
 
-
 #include <iostream>
-
-
 
 #define RTPUDPV4TRANS_MAXPACKSIZE							65535
 #define RTPUDPV4TRANS_IFREQBUFSIZE							8192
 
 #define RTPUDPV4TRANS_IS_MCASTADDR(x)							(((x)&0xF0000000) == 0xE0000000)
-
 
 #define RTPUDPV4TRANS_MCASTMEMBERSHIP(socket,type,mcastip,status)	{\
 										struct ip_mreq mreq;\
@@ -65,7 +59,7 @@ int RTPUDPv4Transmitter::Init(bool tsafe)
 	return 0;
 }
 
-static int GetIPv4SocketPort(SocketType s, uint16_t *pPort)
+static int GetIPv4SocketPort(int s, uint16_t *pPort)
 {
 	assert(pPort != 0);
 
@@ -97,16 +91,16 @@ static int GetIPv4SocketPort(SocketType s, uint16_t *pPort)
 }
 
 int GetAutoSockets(uint32_t bindIP, bool allowOdd, bool rtcpMux,
-                   SocketType *pRtpSock, SocketType *pRtcpSock, 
+                   int *pRtpSock, int *pRtcpSock, 
                    uint16_t *pRtpPort, uint16_t *pRtcpPort)
 {
 	const int maxAttempts = 1024;
 	int attempts = 0;
-	std::vector<SocketType> toClose;
+	std::vector<int> toClose;
 
 	while (attempts++ < maxAttempts)
 	{
-		SocketType sock = socket(PF_INET, SOCK_DGRAM, 0);
+		int sock = socket(PF_INET, SOCK_DGRAM, 0);
 		if (sock == RTPSOCKERR)
 		{
 			for (size_t i = 0 ; i < toClose.size() ; i++)
@@ -158,7 +152,7 @@ int GetAutoSockets(uint32_t bindIP, bool allowOdd, bool rtcpMux,
 		}
 		else
 		{
-			SocketType sock2 = socket(PF_INET, SOCK_DGRAM, 0);
+			int sock2 = socket(PF_INET, SOCK_DGRAM, 0);
 			if (sock2 == RTPSOCKERR)
 			{
 				RTPCLOSE(sock);
@@ -639,7 +633,7 @@ int RTPUDPv4Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 			it = localIPs.begin();
 			ip = (*it);
 			
-			RTP_SNPRINTF(str,16,"%d.%d.%d.%d",(int)((ip>>24)&0xFF),(int)((ip>>16)&0xFF),(int)((ip>>8)&0xFF),(int)(ip&0xFF));
+			snprintf(str,16,"%d.%d.%d.%d",(int)((ip>>24)&0xFF),(int)((ip>>16)&0xFF),(int)((ip>>8)&0xFF),(int)(ip&0xFF));
 			len = strlen(str);
 	
 			localhostnamelength = len;
@@ -752,9 +746,9 @@ int RTPUDPv4Transmitter::WaitForIncomingData(const RTPTime &delay,bool *dataavai
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	
-	SocketType abortSocket = m_pAbortDesc->GetAbortSocket();
+	int abortSocket = m_pAbortDesc->GetAbortSocket();
 
-	SocketType socks[3] = { rtpsock, rtcpsock, abortSocket };
+	int socks[3] = { rtpsock, rtcpsock, abortSocket };
 	int8_t readflags[3] = { 0, 0, 0 };
 	const int idxRTP = 0;
 	const int idxRTCP = 1;
@@ -1736,6 +1730,4 @@ void RTPUDPv4Transmitter::AddLoopbackAddress()
 	if (!found)
 		localIPs.push_back(loopbackaddr);
 }
-
-
 

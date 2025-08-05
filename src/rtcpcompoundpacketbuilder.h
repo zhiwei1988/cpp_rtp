@@ -8,7 +8,7 @@
 
 #include "rtpconfig.h"
 #include "rtcpcompoundpacket.h"
-#include "rtptimeutilities.h"
+#include "rtp_protocol_utils.h"
 #include "rtcpsdespacket.h"
 #include "rtperrors.h"
 #include <list>

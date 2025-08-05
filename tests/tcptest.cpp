@@ -1,6 +1,5 @@
 #include "rtpconfig.h"
-#include "rtpsocketutil.h"
-#include "rtpsocketutilinternal.h"
+#include "rtp_protocol_utils.h"
 #include "rtpsession.h"
 #include "rtpsessionparams.h"
 #include "rtperrors.h"
@@ -55,13 +54,13 @@ class MyTCPTransmitter : public RTPTCPTransmitter
 public:
 	MyTCPTransmitter(const string &name) : RTPTCPTransmitter(), m_name(name) { }
 
-	void OnSendError(SocketType sock)
+	void OnSendError(int sock)
 	{
 		cout << m_name << ": Error sending over socket " << sock << ", removing destination" << endl;
 		DeleteDestination(RTPEndpoint(sock));
 	}
 	
-	void OnReceiveError(SocketType sock)
+	void OnReceiveError(int sock)
 	{
 		cout << m_name << ": Error receiving from socket " << sock << ", removing destination" << endl;
 		DeleteDestination(RTPEndpoint(sock));
@@ -133,7 +132,7 @@ int main(int argc, char *argv[])
 	}
 
 	// Create a listener socket and listen on it
-	SocketType listener = socket(AF_INET, SOCK_STREAM, 0);
+	int listener = socket(AF_INET, SOCK_STREAM, 0);
 	if (listener == RTPSOCKERR)
 	{
 		cerr << "Can't create listener socket" << endl;
@@ -155,7 +154,7 @@ int main(int argc, char *argv[])
 	listen(listener, 1);
 
 	// Create a client socket and connect to the listener
-	SocketType client = socket(AF_INET, SOCK_STREAM, 0);
+	int client = socket(AF_INET, SOCK_STREAM, 0);
 	if (client == RTPSOCKERR)
 	{
 		cerr << "Can't create client socket" << endl;
@@ -169,7 +168,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	SocketType server = accept(listener, 0, 0);
+	int server = accept(listener, 0, 0);
 	if (server == RTPSOCKERR)
 	{
 		cerr << "Can't accept incoming connection" << endl;

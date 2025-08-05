@@ -8,7 +8,7 @@
 
 #include "rtpconfig.h"
 #include "rtcppacket.h"
-#include "rtptimeutilities.h"
+#include "rtp_protocol_utils.h"
 #include "rtpstructs.h"
 #ifdef RTP_SUPPORT_NETINET_IN
 	#include <netinet/in.h>

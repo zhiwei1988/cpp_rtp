@@ -7,7 +7,7 @@
 #define RTCPSCHEDULER_H
 
 #include "rtpconfig.h"
-#include "rtptimeutilities.h"
+#include "rtp_protocol_utils.h"
 
 class RTCPCompoundPacket;
 class RTPPacket;

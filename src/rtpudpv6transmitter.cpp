@@ -5,20 +5,15 @@
 #ifdef RTP_SUPPORT_IPV6
 
 #include "rtprawpacket.h"
-#include "rtptimeutilities.h"
+#include "rtp_protocol_utils.h"
 #include "rtpdefines.h"
-#include "rtpsocketutilinternal.h"
-#include "rtpinternalutils.h"
-#include "rtpselect.h"
+#include "rtperrors.h"
 #include <stdio.h>
-
-
 
 #define RTPUDPV6TRANS_MAXPACKSIZE							65535
 #define RTPUDPV6TRANS_IFREQBUFSIZE							8192
 
 #define RTPUDPV6TRANS_IS_MCASTADDR(x)							(x.s6_addr[0] == 0xFF)
-
 
 #define RTPUDPV6TRANS_MCASTMEMBERSHIP(socket,type,mcastip,status)	{\
 										struct ipv6_mreq mreq;\
@@ -416,7 +411,7 @@ int RTPUDPv6Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 				ip16[j] |= ((uint16_t)ip.s6_addr[i+1]);
 			}			
 			
-			RTP_SNPRINTF(str,48,"%04X:%04X:%04X:%04X:%04X:%04X:%04X:%04X",(int)ip16[0],(int)ip16[1],(int)ip16[2],(int)ip16[3],(int)ip16[4],(int)ip16[5],(int)ip16[6],(int)ip16[7]);
+			snprintf(str,48,"%04X:%04X:%04X:%04X:%04X:%04X:%04X:%04X",(int)ip16[0],(int)ip16[1],(int)ip16[2],(int)ip16[3],(int)ip16[4],(int)ip16[5],(int)ip16[6],(int)ip16[7]);
 			len = strlen(str);
 	
 			localhostnamelength = len;
@@ -530,8 +525,8 @@ int RTPUDPv6Transmitter::WaitForIncomingData(const RTPTime &delay,bool *dataavai
 		return MEDIA_RTP_ERR_INVALID_STATE;
 	}
 	
-	SocketType abortSocket = m_pAbortDesc->GetAbortSocket();
-	SocketType socks[3] = { rtpsock, rtcpsock, abortSocket };
+	int abortSocket = m_pAbortDesc->GetAbortSocket();
+	int socks[3] = { rtpsock, rtcpsock, abortSocket };
 	int8_t readflags[3] = { 0, 0, 0 };
 	const int idxRTP = 0;
 	const int idxRTCP = 1;
@@ -1430,7 +1425,6 @@ int RTPUDPv6Transmitter::CreateLocalIPList()
 	return 0;
 }
 
-
 #ifdef RTP_SUPPORT_IFADDRS
 
 bool RTPUDPv6Transmitter::GetLocalIPList_Interfaces()
@@ -1513,7 +1507,6 @@ void RTPUDPv6Transmitter::AddLoopbackAddress()
 	if (!found)
 		localIPs.push_back(in6addr_loopback);
 }
-
 
 #endif // RTP_SUPPORT_IPV6
 

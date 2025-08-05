@@ -8,7 +8,7 @@
 
 #include "rtpconfig.h"
 #include <cstdint>
-#include "rtptimeutilities.h"
+#include "rtp_protocol_utils.h"
 
 class RTPRawPacket;
 class RTPEndpoint;
@@ -46,7 +46,7 @@ public:
 	};
 protected:
 	/** Constructor in which you can specify a memory manager to use. */
-	RTPTransmitter()																				{ timeinit.Dummy(); }
+	RTPTransmitter()																				{ }
 public:
 	virtual ~RTPTransmitter()													{ }
 

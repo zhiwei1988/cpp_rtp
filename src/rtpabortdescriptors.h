@@ -7,7 +7,6 @@
 #define RTPABORTDESCRIPTORS_H
 
 #include "rtpconfig.h"
-#include "rtpsocketutil.h"
 
 /**
  * Helper class for several RTPTransmitter instances, to be able to cancel a
@@ -38,7 +37,7 @@ public:
 
 	/** Returns the socket descriptor that can be included in a call to
 	 *  'select' (for example).*/
-	SocketType GetAbortSocket() const													{ return m_descriptors[0]; }
+	int GetAbortSocket() const													{ return m_descriptors[0]; }
 
 	/** Returns a flag indicating if this instance was initialized. */
 	bool IsInitialized() const															{ return m_init; }
@@ -60,7 +59,7 @@ public:
 	 *  RTPAbortDescriptors::SendAbortSignal was called. */
 	int ClearAbortSignal();
 private:
-	SocketType m_descriptors[2];
+	int m_descriptors[2];
 	bool m_init;
 };
  

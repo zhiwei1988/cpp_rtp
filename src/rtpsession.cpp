@@ -8,17 +8,13 @@
 #include "rtpdefines.h"
 #include "rtprawpacket.h"
 #include "rtppacket.h"
-#include "rtptimeutilities.h"
+#include "rtp_protocol_utils.h"
 #ifdef RTP_SUPPORT_SENDAPP
 	#include "rtcpcompoundpacket.h"
 #endif // RTP_SUPPORT_SENDAPP
-#include "rtpinternalutils.h"
+#include <cstring>
 #include <unistd.h>
 #include <stdlib.h>
-
-
-
-
 
 	#define SOURCES_LOCK					{ if (needthreadsafety) sourcesmutex.lock(); }
 	#define SOURCES_UNLOCK					{ if (needthreadsafety) sourcesmutex.unlock(); }
@@ -38,7 +34,6 @@ RTPSession::RTPSession()
 	m_changeOutgoingData = false;
 
 	created = false;
-	timeinit.Dummy();
 }
 
 RTPSession::~RTPSession()
@@ -198,7 +193,7 @@ int RTPSession::InternalCreate(const RTPSessionParams &sessparams)
 	}
 	else
 	{
-		RTP_STRNCPY((char *)buf, forcedcname.c_str(), buflen);
+		strncpy((char *)buf, forcedcname.c_str(), buflen);
 		buf[buflen-1] = 0;
 		buflen = strlen((char *)buf);
 	}
@@ -1489,10 +1484,10 @@ int RTPSession::CreateCNAME(uint8_t *buffer,size_t *bufferlength,bool resolve)
 	{
 		char hostname[1024];
 		
-		RTP_STRNCPY(hostname,"localhost",1024); // 以防gethostname失败
+		strncpy(hostname,"localhost",1024); // 以防gethostname失败
 
 		gethostname(hostname,1024);
-		RTP_STRNCPY((char *)(buffer+offset),hostname,buflen2);
+		strncpy((char *)(buffer+offset),hostname,buflen2);
 
 		*bufferlength = offset+strlen(hostname);
 	}
@@ -1544,6 +1539,4 @@ int RTPSession::SendRTCPData(const void *data, size_t len)
 
 	return status;
 }
-
-
 

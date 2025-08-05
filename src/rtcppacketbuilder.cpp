@@ -11,7 +11,6 @@ RTCPPacketBuilder::RTCPPacketBuilder(RTPSources &s,RTPPacketBuilder &pb)
 	: sources(s),rtppacketbuilder(pb),prevbuildtime(0,0),transmissiondelay(0,0),ownsdesinfo()
 {
 	init = false;
-	timeinit.Dummy();
 }
 
 RTCPPacketBuilder::~RTCPPacketBuilder()

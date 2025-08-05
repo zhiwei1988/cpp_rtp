@@ -1,8 +1,7 @@
 #include "rtpconfig.h"
 #include "rtpabortdescriptors.h"
 #include "rtperrors.h"
-#include "rtpsocketutilinternal.h"
-#include "rtptimeutilities.h"
+#include "rtp_protocol_utils.h"
 #include <stdlib.h>
 #include <iostream>
 

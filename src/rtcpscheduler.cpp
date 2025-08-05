@@ -7,8 +7,6 @@
 #include "rtpsourcedata.h"
 #include "rtp_protocol_utils.h"
 
-
-
 #define RTCPSCHED_MININTERVAL						1.0
 
 RTCPSchedulerParams::RTCPSchedulerParams() : mininterval(RTCP_DEFAULTMININTERVAL)
@@ -17,7 +15,6 @@ RTCPSchedulerParams::RTCPSchedulerParams() : mininterval(RTCP_DEFAULTMININTERVAL
 	senderfraction = RTCP_DEFAULTSENDERFRACTION;
 	usehalfatstartup = RTCP_DEFAULTHALFATSTARTUP;
 	immediatebye = RTCP_DEFAULTIMMEDIATEBYE;
-	timeinit.Dummy();
 }
 
 RTCPSchedulerParams::~RTCPSchedulerParams()

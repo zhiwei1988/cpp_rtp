@@ -58,7 +58,7 @@ RTPEndpoint RTPEndpoint::CreateIPv6FromBytes(const uint8_t ip[16], uint16_t rtpP
 #endif
 
 // TCP constructor
-RTPEndpoint::RTPEndpoint(SocketType socket)
+RTPEndpoint::RTPEndpoint(int socket)
     : type(TCP), sockAddrValid(false)
 {
     tcpData.socket = socket;
@@ -293,7 +293,7 @@ void RTPEndpoint::SetRtcpPort(uint16_t port)
 }
 
 // TCP-specific methods
-SocketType RTPEndpoint::GetSocket() const
+int RTPEndpoint::GetSocket() const
 {
     if (type != TCP)
         throw std::runtime_error("GetSocket() called on non-TCP endpoint");
@@ -490,7 +490,7 @@ namespace std {
             }
 #endif
             case RTPEndpoint::TCP:
-                return std::hash<SocketType>{}(endpoint.GetSocket());
+                return std::hash<int>{}(endpoint.GetSocket());
         }
         return 0;
     }

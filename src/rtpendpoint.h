@@ -7,7 +7,6 @@
 
 #include "rtpconfig.h"
 #include <cstdint>
-#include "rtpsocketutil.h"
 #include <string>
 #include <memory>
 
@@ -56,7 +55,7 @@ public:
 
     // TCP constructor
     /** Creates a TCP endpoint from an existing socket. */
-    explicit RTPEndpoint(SocketType socket);
+    explicit RTPEndpoint(int socket);
 
     ~RTPEndpoint() = default;
 
@@ -109,7 +108,7 @@ public:
 
     // TCP-specific methods
     /** Returns socket descriptor (TCP endpoints only). */
-    SocketType GetSocket() const;
+    int GetSocket() const;
 
     // Socket address access
     /** Returns RTP socket address structure. */
@@ -162,7 +161,7 @@ private:
 #endif
         
         struct {
-            SocketType socket;
+            int socket;
         } tcpData;
     };
     

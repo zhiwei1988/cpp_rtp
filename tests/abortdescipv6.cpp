@@ -18,7 +18,7 @@ using namespace std;
 #include "rtperrors.h"
 #include "rtpsourcedata.h"
 #include "rtpabortdescriptors.h"
-#include "rtpselect.h"
+#include "rtp_protocol_utils.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
@@ -64,7 +64,7 @@ protected:
 class MyPollThread
 {
 public:
-	MyPollThread(const vector<SocketType> &sockets, const vector<RTPSession *> &sessions)
+	MyPollThread(const vector<int> &sockets, const vector<RTPSession *> &sessions)
 		: m_sockets(sockets), m_sessions(sessions), m_stop(false), m_running(false)
 	{
 	}
@@ -154,7 +154,7 @@ private:
 	std::thread m_thread;
 	std::atomic<bool> m_stop;
 	std::atomic<bool> m_running;
-	vector<SocketType> m_sockets;
+	vector<int> m_sockets;
 	vector<RTPSession *> m_sessions;
 };
 
@@ -166,7 +166,7 @@ int main(void)
 #endif // RTP_SOCKETTYPE_WINSOCK
 
 	RTPAbortDescriptors abortDesc;
-	vector<SocketType> pollSockets;
+	vector<int> pollSockets;
 
 	checkerror(abortDesc.Init());
 

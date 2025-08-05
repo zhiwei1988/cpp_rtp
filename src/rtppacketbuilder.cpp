@@ -6,13 +6,9 @@
 #include <time.h>
 #include <stdlib.h>
 
-
-
-
 RTPPacketBuilder::RTPPacketBuilder() : lastwallclocktime(0,0)
 {
 	init = false;
-	timeinit.Dummy();
 }
 
 RTPPacketBuilder::~RTPPacketBuilder()

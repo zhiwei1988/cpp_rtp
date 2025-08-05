@@ -10,7 +10,7 @@
 #include <cstdint>
 #include "rtperrors.h"
 #include "rtcpsdesinfo.h"
-#include "rtptimeutilities.h"
+#include "rtp_protocol_utils.h"
 
 class RTPSources;
 class RTPPacketBuilder;
