@@ -257,24 +257,6 @@ int RTCPCompoundPacketBuilder::AddSDESNormalItem(RTCPSDESPacket::ItemType t,cons
 	case RTCPSDESPacket::CNAME:
 		itemid = RTCP_SDES_ID_CNAME;
 		break;
-	case RTCPSDESPacket::NAME:
-		itemid = RTCP_SDES_ID_NAME;
-		break;
-	case RTCPSDESPacket::EMAIL:
-		itemid = RTCP_SDES_ID_EMAIL;
-		break;
-	case RTCPSDESPacket::PHONE:
-		itemid = RTCP_SDES_ID_PHONE;
-		break;
-	case RTCPSDESPacket::LOC:
-		itemid = RTCP_SDES_ID_LOCATION;
-		break;
-	case RTCPSDESPacket::TOOL:
-		itemid = RTCP_SDES_ID_TOOL;
-		break;
-	case RTCPSDESPacket::NOTE:
-		itemid = RTCP_SDES_ID_NOTE;
-		break;
 	default:
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}
@@ -308,52 +290,6 @@ int RTCPCompoundPacketBuilder::AddSDESNormalItem(RTCPSDESPacket::ItemType t,cons
 	return 0;
 }
 
-#ifdef RTP_SUPPORT_SDESPRIV
-int RTCPCompoundPacketBuilder::AddSDESPrivateItem(const void *prefixdata,uint8_t prefixlength,const void *valuedata,
-                                                  uint8_t valuelength)
-{
-	if (!arebuilding)
-		return MEDIA_RTP_ERR_INVALID_STATE;
-	if (sdes.sdessources.empty())
-		return MEDIA_RTP_ERR_INVALID_STATE;
-
-	size_t itemlength = ((size_t)prefixlength)+1+((size_t)valuelength);
-	if (itemlength > 255)
-		return MEDIA_RTP_ERR_RESOURCE_ERROR;
-	
-#ifndef RTP_SUPPORT_RTCPUNKNOWN
-	size_t totalotherbytes = byesize+appsize+report.NeededBytes();
-#else
-	size_t totalotherbytes = byesize+appsize+unknownsize+report.NeededBytes();
-#endif // RTP_SUPPORT_RTCPUNKNOWN 
-	size_t sdessizewithextraitem = sdes.NeededBytesWithExtraItem(itemlength);
-
-	if ((sdessizewithextraitem+totalotherbytes) > maximumpacketsize)
-		return MEDIA_RTP_ERR_RESOURCE_ERROR;
-
-	uint8_t *buf;
-	size_t len;
-
-	buf = new uint8_t[sizeof(RTCPSDESHeader)+itemlength];
-	if (buf == 0)
-		return MEDIA_RTP_ERR_RESOURCE_ERROR;
-	len = sizeof(RTCPSDESHeader)+(size_t)itemlength;
-
-	RTCPSDESHeader *sdeshdr = (RTCPSDESHeader *)(buf);
-
-	sdeshdr->sdesid = RTCP_SDES_ID_PRIVATE;
-	sdeshdr->length = itemlength;
-	
-	buf[sizeof(RTCPSDESHeader)] = prefixlength;
-	if (prefixlength != 0)
-		memcpy((buf+sizeof(RTCPSDESHeader)+1),prefixdata,(size_t)prefixlength);
-	if (valuelength != 0)
-		memcpy((buf+sizeof(RTCPSDESHeader)+1+(size_t)prefixlength),valuedata,(size_t)valuelength);
-
-	sdes.AddItem(buf,len);
-	return 0;
-}
-#endif // RTP_SUPPORT_SDESPRIV
 
 int RTCPCompoundPacketBuilder::AddBYEPacket(uint32_t *ssrcs,uint8_t numssrcs,const void *reasondata,uint8_t reasonlength)
 {

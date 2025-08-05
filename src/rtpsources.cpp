@@ -446,23 +446,13 @@ int RTPSources::ProcessRTCPCompoundPacket(RTCPCompoundPacket *rtcpcomppack,const
 								{
 									RTCPSDESPacket::ItemType t;
 				
-									if ((t = p->GetItemType()) != RTCPSDESPacket::PRIV)
+									if ((t = p->GetItemType()) != RTCPSDESPacket::Unknown)
 									{
 										updated = true;
 										status = ProcessSDESNormalItem(sdesssrc,t,p->GetItemLength(),p->GetItemData(),receivetime,senderaddress);
 										if (status < 0)
 											return status;
 									}
-#ifdef RTP_SUPPORT_SDESPRIV
-									else
-									{
-										updated = true;
-										status = ProcessSDESPrivateItem(sdesssrc,p->GetPRIVPrefixLength(),p->GetPRIVPrefixData(),p->GetPRIVValueLength(),
-												                        p->GetPRIVValueData(),receivetime,senderaddress);
-										if (status < 0)
-											return status;
-									}
-#endif // RTP_SUPPORT_SDESPRIV
 								} while (p->GotoNextItem());
 							}
 							if (!updated)
@@ -657,24 +647,6 @@ int RTPSources::ProcessSDESNormalItem(uint32_t ssrc,RTCPSDESPacket::ItemType t,s
 	case RTCPSDESPacket::CNAME:
 		sdesid = RTCP_SDES_ID_CNAME;
 		break;
-	case RTCPSDESPacket::NAME:
-		sdesid = RTCP_SDES_ID_NAME;
-		break;
-	case RTCPSDESPacket::EMAIL:
-		sdesid = RTCP_SDES_ID_EMAIL;
-		break;
-	case RTCPSDESPacket::PHONE:
-		sdesid = RTCP_SDES_ID_PHONE;
-		break;
-	case RTCPSDESPacket::LOC:
-		sdesid = RTCP_SDES_ID_LOCATION;
-		break;
-	case RTCPSDESPacket::TOOL:
-		sdesid = RTCP_SDES_ID_TOOL;
-		break;
-	case RTCPSDESPacket::NOTE:
-		sdesid = RTCP_SDES_ID_NOTE;
-		break;
 	default:
 		return MEDIA_RTP_ERR_INVALID_PARAMETER;
 	}	
@@ -702,32 +674,6 @@ int RTPSources::ProcessSDESNormalItem(uint32_t ssrc,RTCPSDESPacket::ItemType t,s
 	return status;
 }
 
-#ifdef RTP_SUPPORT_SDESPRIV
-int RTPSources::ProcessSDESPrivateItem(uint32_t ssrc,size_t prefixlen,const void *prefixdata,
-                           size_t valuelen,const void *valuedata,const RTPTime &receivetime,
-			   const RTPEndpoint *senderaddress)
-{
-	RTPSourceData *srcdat;
-	bool created;
-	int status;
-	
-	status = GetRTCPSourceData(ssrc,senderaddress,&srcdat,&created);
-	if (status < 0)
-		return status;
-	if (srcdat == 0)
-		return 0;
-
-	status = srcdat->ProcessPrivateSDESItem((const uint8_t *)prefixdata,prefixlen,(const uint8_t *)valuedata,valuelen,receivetime);
-	// 调用回调
-	if (created)
-		OnNewSource(srcdat);
-
-	if (status >= 0)
-		OnRTCPSDESPrivateItem(srcdat, prefixdata, prefixlen, valuedata, valuelen);
-
-	return status;
-}
-#endif //RTP_SUPPORT_SDESPRIV
 
 int RTPSources::ProcessBYE(uint32_t ssrc,size_t reasonlength,const void *reasondata,
 		           const RTPTime &receivetime,const RTPEndpoint *senderaddress)
@@ -992,17 +938,7 @@ void RTPSources::NoteTimeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 		RTPSourceData *srcdat = pair.second;
 		size_t notelen;
 
-        	srcdat->SDES_GetNote(&notelen);
-		if (notelen != 0) // Note has been set
-		{
-			RTPTime notetime = srcdat->INF_GetLastSDESNoteTime();
-			
-			if (checktime > notetime)
-			{
-				srcdat->ClearNote();
-				OnNoteTimeout(srcdat);
-			}
-		}
+        	// Note 项已删除，跳过此检查
 		
 		newtotalcount++;
 		if (srcdat->IsSender())
@@ -1049,17 +985,7 @@ void RTPSources::MultipleTimeouts(const RTPTime &curtime,const RTPTime &senderti
 		normaltimeout = false;
 		notetimeout = false;
 
-        	srcdat->SDES_GetNote(&notelen);
-		if (notelen != 0) // Note has been set
-		{
-			RTPTime notetime = srcdat->INF_GetLastSDESNoteTime();
-			
-			if (notechecktime > notetime)
-			{
-				notetimeout = true;
-				srcdat->ClearNote();
-			}
-		}
+        	// Note 项已删除，跳过此检查
 
 		if (srcdat->ReceivedBYE())
 		{
@@ -1307,13 +1233,6 @@ void RTPSources::OnRTCPSDESItem(RTPSourceData *srcdat, RTCPSDESPacket::ItemType 
 		rtpsession->OnRTCPSDESItem(srcdat, t, itemdata, itemlength);
 }
 
-#ifdef RTP_SUPPORT_SDESPRIV
-void RTPSources::OnRTCPSDESPrivateItem(RTPSourceData *srcdat, const void *prefixdata, size_t prefixlen, const void *valuedata, size_t valuelen)          
-{ 
-	if (rtpsession)
-		rtpsession->OnRTCPSDESPrivateItem(srcdat, prefixdata, prefixlen, valuedata, valuelen);
-}
-#endif // RTP_SUPPORT_SDESPRIV
 
 void RTPSources::OnAPPPacket(RTCPAPPPacket *apppacket, const RTPTime &receivetime, const RTPEndpoint *senderaddress)                           
 { 

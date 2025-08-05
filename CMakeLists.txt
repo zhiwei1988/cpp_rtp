@@ -41,7 +41,6 @@ set(MEDIA_RTP_EXTERNAL_INCLUDES "")
 
 add_additional_stuff(MEDIA_RTP_EXTERNAL_INCLUDES MEDIA_RTP_LINK_LIBS)
 
-media_rtp_support_option("Support SDES PRIV items" MEDIA_RTP_SUPPORT_SDESPRIV RTP_SUPPORT_SDESPRIV ON "// No support for SDES PRIV items")
 media_rtp_support_option("Support the probation mechanism for a new source" MEDIA_RTP_SUPPORT_PROBATION RTP_SUPPORT_PROBATION ON "// Do not wait for a number of consecutive packets to validate source")
 media_rtp_support_option("Support sending RTCP APP packets" MEDIA_RTP_SUPPORT_SENDAPP RTP_SUPPORT_SENDAPP ON "// No direct support for sending RTCP APP packets")
 media_rtp_support_option("Support sending unknown RTCP packets" MEDIA_RTP_SUPPORT_RTCPUNKNOWN RTP_SUPPORT_RTCPUNKNOWN OFF "// No support for sending unknown RTCP packets")

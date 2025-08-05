@@ -138,34 +138,13 @@ protected:
 							case RTCPSDESPacket::CNAME:
 								strcpy(str,"CNAME:  ");
 								break;
-							case RTCPSDESPacket::NAME:
-								strcpy(str,"NAME:   ");
-								break;
-							case RTCPSDESPacket::EMAIL:
-								strcpy(str,"EMAIL:  ");
-								break;
-							case RTCPSDESPacket::PHONE:
-								strcpy(str,"PHONE:  ");
-								break;
-							case RTCPSDESPacket::LOC:
-								strcpy(str,"LOC:    ");
-								break;
-							case RTCPSDESPacket::TOOL:
-								strcpy(str,"TOOL:   ");
-								break;
-							case RTCPSDESPacket::NOTE:
-								strcpy(str,"NOTE:   ");
-								break;
-							case RTCPSDESPacket::PRIV:
-								strcpy(str,"PRIV:   ");
-								break;
 							case RTCPSDESPacket::Unknown:
 							default:
 								strcpy(str,"Unknown ");
 							}
 							fprintf(f,"    %s",str);
 							
-							if (p->GetItemType() != RTCPSDESPacket::PRIV)
+							if (p->GetItemType() != RTCPSDESPacket::Unknown)
 							{
 								char str[1024];
 								memcpy(str,p->GetItemData(),p->GetItemLength());

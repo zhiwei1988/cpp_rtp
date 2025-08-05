@@ -70,11 +70,6 @@ public:
 	 *  will have length \c itemlength and will contain the data \c itemdata.
 	 */
 	int AddSDESNormalItem(RTCPSDESPacket::ItemType t,const void *itemdata,uint8_t itemlength);
-#ifdef RTP_SUPPORT_SDESPRIV
-	/** Adds an SDES PRIV item described by the function's arguments to the current SDES chunk. */
-	int AddSDESPrivateItem(const void *prefixdata,uint8_t prefixlength,const void *valuedata,
-	                       uint8_t valuelength);
-#endif // RTP_SUPPORT_SDESPRIV
 
 	/** Adds a BYE packet to the compound packet.
 	 *  Adds a BYE packet to the compound packet. It will contain \c numssrcs source identifiers specified in

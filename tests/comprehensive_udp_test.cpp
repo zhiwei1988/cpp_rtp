@@ -47,10 +47,27 @@ struct TestStats {
     }
 };
 
+// 获取详细错误信息的函数
+string getErrorDescription(int errorCode) {
+    switch (errorCode) {
+        case -1: return "无效参数 (MEDIA_RTP_ERR_INVALID_PARAMETER)";
+        case -2: return "操作失败 (MEDIA_RTP_ERR_OPERATION_FAILED)";
+        case -3: return "无效状态 (MEDIA_RTP_ERR_INVALID_STATE)";
+        case -4: return "资源错误 (MEDIA_RTP_ERR_RESOURCE_ERROR)";
+        case -5: return "协议错误 (MEDIA_RTP_ERR_PROTOCOL_ERROR)";
+        default:
+            if (errorCode < 0) {
+                return "未知RTP错误 (错误码: " + std::to_string(errorCode) + ")";
+            }
+            return "成功";
+    }
+}
+
 // 统一的错误检查函数
 void checkError(int rtperr, const string& testName) {
     if (rtperr < 0) {
-        throw std::runtime_error("RTP错误");
+        string errorMsg = "RTP错误 - " + testName + ": " + getErrorDescription(rtperr);
+        throw std::runtime_error(errorMsg);
     }
 }
 
@@ -129,6 +146,7 @@ public:
             // 配置会话参数
             sessParams.SetOwnTimestampUnit(1.0/8000.0);
             sessParams.SetAcceptOwnPackets(true);
+            sessParams.SetUsePollThread(false); // 禁用轮询线程，使用手动轮询
             transParams.SetPortbase(5000);
             
             // 创建会话
@@ -170,6 +188,7 @@ public:
             RTPUDPv4TransmissionParams senderParams, receiverParams;
             
             sessParams.SetOwnTimestampUnit(1.0/8000.0);
+            sessParams.SetUsePollThread(false); // 禁用轮询线程，使用手动轮询
             senderParams.SetPortbase(5010);
             receiverParams.SetPortbase(5020);
             
@@ -223,6 +242,7 @@ public:
             RTPUDPv4TransmissionParams transParams;
             
             sessParams.SetOwnTimestampUnit(1.0/8000.0);
+            sessParams.SetUsePollThread(false); // 禁用轮询线程，使用手动轮询
             sessParams.SetAcceptOwnPackets(true);
             transParams.SetPortbase(5030);
             transParams.SetRTCPMultiplexing(true); // 启用RTCP复用
@@ -286,6 +306,7 @@ public:
             RTPUDPv4TransmissionParams transParams;
             
             sessParams.SetOwnTimestampUnit(1.0/8000.0);
+            sessParams.SetUsePollThread(false); // 禁用轮询线程，使用手动轮询
             sessParams.SetAcceptOwnPackets(true);
             transParams.SetUseExistingSockets(rtpSock, rtcpSock);
             
@@ -335,6 +356,7 @@ public:
             RTPUDPv6TransmissionParams transParams;
             
             sessParams.SetOwnTimestampUnit(1.0/8000.0);
+            sessParams.SetUsePollThread(false); // 禁用轮询线程，使用手动轮询
             sessParams.SetAcceptOwnPackets(true);
             transParams.SetPortbase(5040);
             
@@ -409,6 +431,7 @@ public:
             RTPUDPv4TransmissionParams transParams;
             
             sessParams.SetOwnTimestampUnit(1.0/8000.0);
+            sessParams.SetUsePollThread(false); // 禁用轮询线程，使用手动轮询
             sessParams.SetAcceptOwnPackets(true);
             transParams.SetPortbase(5050);
             

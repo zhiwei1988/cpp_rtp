@@ -4,11 +4,12 @@
 #include "rtcpscheduler.h"
 #include "rtpsourcedata.h"
 #include "rtcpcompoundpacketbuilder.h"
+#include <cstring>
 
 
 
 RTCPPacketBuilder::RTCPPacketBuilder(RTPSources &s,RTPPacketBuilder &pb)
-	: sources(s),rtppacketbuilder(pb),prevbuildtime(0,0),transmissiondelay(0,0),ownsdesinfo()
+	: sources(s),rtppacketbuilder(pb),prevbuildtime(0,0),transmissiondelay(0,0)
 {
 	init = false;
 }
@@ -35,17 +36,11 @@ int RTCPPacketBuilder::Init(size_t maxpacksize,double tsunit,const void *cname,s
 	
 	int status;
 	
-	if ((status = ownsdesinfo.SetCNAME((const uint8_t *)cname,cnamelen)) < 0)
-		return status;
+	// 设置 CNAME
+	own_cname.assign((const char*)cname, cnamelen);
 	
 	ClearAllSourceFlags();
 	
-	interval_name = -1;
-	interval_email = -1;
-	interval_location = -1;
-	interval_phone = -1;
-	interval_tool = -1;
-	interval_note = -1;
 
 	sdesbuildcount = 0;
 	transmissiondelay = RTPTime(0,0);
@@ -60,7 +55,7 @@ void RTCPPacketBuilder::Destroy()
 {
 	if (!init)
 		return;
-	ownsdesinfo.Clear();
+	own_cname.clear();
 	init = false;
 }
 
@@ -131,7 +126,8 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 	uint8_t *owncname;
 	size_t owncnamelen;
 
-	owncname = ownsdesinfo.GetCNAME(&owncnamelen);
+	owncname = (uint8_t*)own_cname.c_str();
+	owncnamelen = own_cname.length();
 
 	if ((status = rtcpcomppack->AddSDESSource(ssrc)) < 0)
 	{
@@ -172,18 +168,6 @@ int RTCPPacketBuilder::BuildNextPacket(RTCPCompoundPacket **pack)
 			
 			ClearAllSourceFlags();
 	
-			doname = false;
-			doemail = false;
-			doloc = false;
-			dophone = false;
-			dotool = false;
-			donote = false;
-			if (interval_name > 0 && ((sdesbuildcount%interval_name) == 0)) doname = true;
-			if (interval_email > 0 && ((sdesbuildcount%interval_email) == 0)) doemail = true;
-			if (interval_location > 0 && ((sdesbuildcount%interval_location) == 0)) doloc = true;
-			if (interval_phone > 0 && ((sdesbuildcount%interval_phone) == 0)) dophone = true;
-			if (interval_tool > 0 && ((sdesbuildcount%interval_tool) == 0)) dotool = true;
-			if (interval_note > 0 && ((sdesbuildcount%interval_note) == 0)) donote = true;
 			
 			bool processedall;
 			int itemcount;
@@ -472,109 +456,7 @@ int RTCPPacketBuilder::FillInSDES(RTCPCompoundPacketBuilder *rtcpcomppack,bool *
 	*processedall = false;
 	*added = 0;
 
-			// 我们不需要为自己的数据添加 SSRC，这仍然是从添加 CNAME 时设置的
-	if (doname)
-	{
-		if (!ownsdesinfo.ProcessedName())
-		{
-			data = ownsdesinfo.GetName(&datalen);
-			if ((status = rtcpcomppack->AddSDESNormalItem(RTCPSDESPacket::NAME,data,datalen)) < 0)
-			{
-				if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
-				{
-					*full = true;
-					return 0;
-				}
-			}
-			(*added)++;
-			ownsdesinfo.SetProcessedName(true);
-		}
-	}
-	if (doemail)
-	{
-		if (!ownsdesinfo.ProcessedEMail())
-		{
-			data = ownsdesinfo.GetEMail(&datalen);
-			if ((status = rtcpcomppack->AddSDESNormalItem(RTCPSDESPacket::EMAIL,data,datalen)) < 0)
-			{
-				if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
-				{
-					*full = true;
-					return 0;
-				}
-			}
-			(*added)++;
-			ownsdesinfo.SetProcessedEMail(true);
-		}
-	}
-	if (doloc)
-	{
-		if (!ownsdesinfo.ProcessedLocation())
-		{
-			data = ownsdesinfo.GetLocation(&datalen);
-			if ((status = rtcpcomppack->AddSDESNormalItem(RTCPSDESPacket::LOC,data,datalen)) < 0)
-			{
-				if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
-				{
-					*full = true;
-					return 0;
-				}
-			}
-			(*added)++;
-			ownsdesinfo.SetProcessedLocation(true);
-		}
-	}
-	if (dophone)
-	{
-		if (!ownsdesinfo.ProcessedPhone())
-		{
-			data = ownsdesinfo.GetPhone(&datalen);
-			if ((status = rtcpcomppack->AddSDESNormalItem(RTCPSDESPacket::PHONE,data,datalen)) < 0)
-			{
-				if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
-				{
-					*full = true;
-					return 0;
-				}
-			}
-			(*added)++;
-			ownsdesinfo.SetProcessedPhone(true);
-		}
-	}
-	if (dotool)
-	{
-		if (!ownsdesinfo.ProcessedTool())
-		{
-			data = ownsdesinfo.GetTool(&datalen);
-			if ((status = rtcpcomppack->AddSDESNormalItem(RTCPSDESPacket::TOOL,data,datalen)) < 0)
-			{
-				if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
-				{
-					*full = true;
-					return 0;
-				}
-			}
-			(*added)++;
-			ownsdesinfo.SetProcessedTool(true);
-		}
-	}
-	if (donote)
-	{
-		if (!ownsdesinfo.ProcessedNote())
-		{
-			data = ownsdesinfo.GetNote(&datalen);
-			if ((status = rtcpcomppack->AddSDESNormalItem(RTCPSDESPacket::NOTE,data,datalen)) < 0)
-			{
-				if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
-				{
-					*full = true;
-					return 0;
-				}
-			}
-			(*added)++;
-			ownsdesinfo.SetProcessedNote(true);
-		}
-	}
+			// 只处理 CNAME 项，不需要其他 SDES 项了
 
 	*processedall = true;
 	return 0;
@@ -582,7 +464,7 @@ int RTCPPacketBuilder::FillInSDES(RTCPCompoundPacketBuilder *rtcpcomppack,bool *
 
 void RTCPPacketBuilder::ClearAllSDESFlags()
 {
-	ownsdesinfo.ClearFlags();
+	// SDES flags 不再需要，因为只有 CNAME
 }
 	
 int RTCPPacketBuilder::BuildBYEPacket(RTCPCompoundPacket **pack,const void *reason,size_t reasonlength,bool useSRifpossible)
@@ -658,7 +540,8 @@ int RTCPPacketBuilder::BuildBYEPacket(RTCPCompoundPacket **pack,const void *reas
 	uint8_t *owncname;
 	size_t owncnamelen;
 
-	owncname = ownsdesinfo.GetCNAME(&owncnamelen);
+	owncname = (uint8_t*)own_cname.c_str();
+	owncnamelen = own_cname.length();
 
 	if ((status = rtcpcomppack->AddSDESSource(ssrc)) < 0)
 	{

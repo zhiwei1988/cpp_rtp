@@ -120,15 +120,6 @@ public:
 	 */
 	int ProcessSDESNormalItem(uint32_t ssrc,RTCPSDESPacket::ItemType t,size_t itemlength,
 	                          const void *itemdata,const RTPTime &receivetime,const RTPEndpoint *senderaddress);
-#ifdef RTP_SUPPORT_SDESPRIV
-	/** 将源 \c ssrc 的SDES私有项处理到源表格中。 
-	 *  将源 \c ssrc 的SDES私有项处理到源表格中。该信息在时间 \c receivetime 从地址 \c senderaddress 接收。
-	 *  如果数据包是由本地参与者发送的，则 \c senderaddress 参数必须为NULL。
-	 */
-	int ProcessSDESPrivateItem(uint32_t ssrc,size_t prefixlen,const void *prefixdata,
-	                           size_t valuelen,const void *valuedata,const RTPTime &receivetime,
-	                           const RTPEndpoint *senderaddress);
-#endif //RTP_SUPPORT_SDESPRIV
 	/** 处理SSRC \c ssrc 的BYE消息。 
 	 *  处理SSRC \c ssrc 的BYE消息。该信息在时间 \c receivetime 从地址 \c senderaddress 接收。
 	 *  如果数据包是由本地参与者发送的，则 \c senderaddress 参数必须为NULL。
@@ -269,11 +260,6 @@ protected:
 	/** 当为此源接收到特定SDES项时调用。 */
 	virtual void OnRTCPSDESItem(RTPSourceData *srcdat, RTCPSDESPacket::ItemType t,
 	                            const void *itemdata, size_t itemlength);
-#ifdef RTP_SUPPORT_SDESPRIV
-	/** 当为此源接收到'private'类型的特定SDES项时调用。 */
-	virtual void OnRTCPSDESPrivateItem(RTPSourceData *srcdat, const void *prefixdata, size_t prefixlen,
-	                                   const void *valuedata, size_t valuelen);
-#endif // RTP_SUPPORT_SDESPRIV
 	
 
 	/** 当在时间 \c receivetime 从地址 \c senderaddress 接收到RTCP APP数据包 \c apppacket 时调用。

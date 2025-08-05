@@ -13,6 +13,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 7. 所有变更完成后验证构建和测试是否通过
 8. 使用中文回复
 
+## 编程规范
+
+1. 变量名用小驼峰
+2. 函数名用大驼峰
+3. class 的成员变量加 m_ 前缀
+4. 全局变量加 g_ 前缀
+5. 注释用中文
+6. 整形用 uint8_t 这里明确长度的类型
+
 ## Project Overview
 
 This is a modified version of JRTPLIB - a C++ object-oriented library implementing the Real-time Transport Protocol (RTP) as described in RFC 3550. The original library has been transformed into a custom implementation with copyright notices removed. The library provides high-level RTP session management, RTCP handling, and multiple transmission protocols including UDP IPv4/IPv6 and TCP.
@@ -24,8 +33,7 @@ This is a modified version of JRTPLIB - a C++ object-oriented library implementi
 The project uses CMake as its build system. Basic build commands:
 
 ```bash
-# Create build directory
-mkdir build && cd build
+cd build
 
 # Configure project (Linux only - no Windows/winsock support)
 cmake ..

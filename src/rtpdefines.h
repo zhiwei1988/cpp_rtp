@@ -20,14 +20,7 @@
 #define RTP_RTCPTYPE_APP						204
 
 #define RTCP_SDES_ID_CNAME						1
-#define RTCP_SDES_ID_NAME						2
-#define RTCP_SDES_ID_EMAIL						3
-#define RTCP_SDES_ID_PHONE						4
-#define RTCP_SDES_ID_LOCATION						5
-#define RTCP_SDES_ID_TOOL						6
-#define RTCP_SDES_ID_NOTE						7
-#define RTCP_SDES_ID_PRIVATE						8
-#define RTCP_SDES_NUMITEMS_NONPRIVATE					7
+#define RTCP_SDES_NUMITEMS_NONPRIVATE					1
 #define RTCP_SDES_MAXITEMLENGTH						255
 
 #define RTCP_BYE_MAXREASONLENGTH					255

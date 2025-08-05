@@ -319,65 +319,6 @@ public:
    */
   int SetTimestampUnit(double u);
 
-  /** 设置SDES名称项的RTCP间隔。
-   *  在处理完源表中所有可能的源后，类将检查是否需要发送其他SDES项。
-   *  如果\c count为零或负数，则不会发生任何情况。如果\c count为正数，
-   *  在处理源表中的源\c count次后，将添加SDES名称项。
-   */
-  void SetNameInterval(int count);
-
-  /** 设置SDES电子邮件项的RTCP间隔。
-   *  在处理完源表中所有可能的源后，类将检查是否需要发送其他SDES项。
-   *  如果\c count为零或负数，则不会发生任何情况。如果\c count为正数，
-   *  在处理源表中的源\c count次后，将添加SDES电子邮件项。
-   */
-  void SetEMailInterval(int count);
-
-  /** 设置SDES位置项的RTCP间隔。
-   *  在处理完源表中所有可能的源后，类将检查是否需要发送其他SDES项。
-   *  如果\c count为零或负数，则不会发生任何情况。如果\c count为正数，
-   *  在处理源表中的源\c count次后，将添加SDES位置项。
-   */
-  void SetLocationInterval(int count);
-
-  /** 设置SDES电话项的RTCP间隔。
-   *  在处理完源表中所有可能的源后，类将检查是否需要发送其他SDES项。
-   *  如果\c count为零或负数，则不会发生任何情况。如果\c count为正数，
-   *  在处理源表中的源\c count次后，将添加SDES电话项。
-   */
-  void SetPhoneInterval(int count);
-
-  /** 设置SDES工具项的RTCP间隔。
-   *  在处理完源表中所有可能的源后，类将检查是否需要发送其他SDES项。
-   *  如果\c count为零或负数，则不会发生任何情况。如果\c count为正数，
-   *  在处理源表中的源\c count次后，将添加SDES工具项。
-   */
-  void SetToolInterval(int count);
-
-  /** 设置SDES注释项的RTCP间隔。
-   *  在处理完源表中所有可能的源后，类将检查是否需要发送其他SDES项。
-   *  如果\c count为零或负数，则不会发生任何情况。如果\c count为正数，
-   *  在处理源表中的源\c count次后，将添加SDES注释项。
-   */
-  void SetNoteInterval(int count);
-
-  /** 将本地参与者的SDES名称项设置为值\c s，长度为\c len。 */
-  int SetLocalName(const void *s, size_t len);
-
-  /** 将本地参与者的SDES电子邮件项设置为值\c s，长度为\c len。 */
-  int SetLocalEMail(const void *s, size_t len);
-
-  /** 将本地参与者的SDES位置项设置为值\c s，长度为\c len。 */
-  int SetLocalLocation(const void *s, size_t len);
-
-  /** 将本地参与者的SDES电话项设置为值\c s，长度为\c len。 */
-  int SetLocalPhone(const void *s, size_t len);
-
-  /** 将本地参与者的SDES工具项设置为值\c s，长度为\c len。 */
-  int SetLocalTool(const void *s, size_t len);
-
-  /** 将本地参与者的SDES注释项设置为值\c s，长度为\c len。 */
-  int SetLocalNote(const void *s, size_t len);
 
 protected:
   /** 当传入的RTP数据包即将被处理时调用。
@@ -446,12 +387,6 @@ protected:
   /** 当为此源接收到特定SDES项时调用。 */
   virtual void OnRTCPSDESItem(RTPSourceData *srcdat, RTCPSDESPacket::ItemType t,
                               const void *itemdata, size_t itemlength);
-#ifdef RTP_SUPPORT_SDESPRIV
-  /** 当为此源接收到"私有"类型的特定SDES项时调用。 */
-  virtual void OnRTCPSDESPrivateItem(RTPSourceData *srcdat,
-                                     const void *prefixdata, size_t prefixlen,
-                                     const void *valuedata, size_t valuelen);
-#endif // RTP_SUPPORT_SDESPRIV
 
   /** 当为源\c srcdat处理BYE数据包时调用。 */
   virtual void OnBYEPacket(RTPSourceData *srcdat);
@@ -588,10 +523,6 @@ inline void RTPSession::OnRTCPSDESItem(RTPSourceData *,
                                        RTCPSDESPacket::ItemType, const void *,
                                        size_t) {}
 
-#ifdef RTP_SUPPORT_SDESPRIV
-inline void RTPSession::OnRTCPSDESPrivateItem(RTPSourceData *, const void *,
-                                              size_t, const void *, size_t) {}
-#endif // RTP_SUPPORT_SDESPRIV
 
 inline void RTPSession::OnBYEPacket(RTPSourceData *) {}
 inline void RTPSession::OnSendRTCPCompoundPacket(RTCPCompoundPacket *) {}

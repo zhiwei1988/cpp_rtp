@@ -9,7 +9,6 @@ set (HEADERS
 	rtcppacketbuilder.h
 	rtcprrpacket.h
 	rtcpscheduler.h
-	rtcpsdesinfo.h
 	rtcpsdespacket.h
 	rtcpsrpacket.h
 	rtcpunknownpacket.h
@@ -45,7 +44,6 @@ set(SOURCES
 	rtcppacketbuilder.cpp
 	rtcprrpacket.cpp
 	rtcpscheduler.cpp
-	rtcpsdesinfo.cpp
 	rtcpsdespacket.cpp
 	rtcpsrpacket.cpp
 	rtpcollisionlist.cpp

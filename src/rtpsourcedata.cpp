@@ -222,7 +222,7 @@ jitter = (uint32_t)djitter;
 	}
 }
 
-RTPSourceData::RTPSourceData(uint32_t s) : SDESinf(),byetime(0,0)
+RTPSourceData::RTPSourceData(uint32_t s) : byetime(0,0)
 {
 	ssrc = s;
 	issender = false;
@@ -243,7 +243,7 @@ RTPSourceData::RTPSourceData(uint32_t s) : SDESinf(),byetime(0,0)
 #endif // RTP_SUPPORT_PROBATION
 }
 
-RTPSourceData::RTPSourceData(uint32_t s, RTPSources::ProbationType probtype) : SDESinf(),byetime(0,0)
+RTPSourceData::RTPSourceData(uint32_t s, RTPSources::ProbationType probtype) : byetime(0,0)
 {
 	ssrc = s;
 	issender = false;
@@ -274,6 +274,7 @@ RTPSourceData::~RTPSourceData()
 		delete rtpaddr;
 	if (rtcpaddr)
 		delete rtcpaddr;
+	// sdes_cname 会自动清理
 }
 
 double RTPSourceData::INF_GetEstimatedTimestampUnit() const
@@ -456,81 +457,31 @@ int RTPSourceData::ProcessSDESItem(uint8_t sdesid,const uint8_t *data,size_t ite
 	{
 	case RTCP_SDES_ID_CNAME:
 		{
-			size_t curlen;
-			uint8_t *oldcname;
-			
 			// 注意：我们将确保 CNAME 只设置一次。
-			oldcname = SDESinf.GetCNAME(&curlen);
-			if (curlen == 0)
+			if (sdes_cname.empty())
 			{
 				// 如果设置了 CNAME，则源已验证
-				SDESinf.SetCNAME(data,itemlen);
-				validated = true;
+				if (itemlen > 0) {
+					sdes_cname.assign((const char*)data, itemlen);
+					validated = true;
+				}
 			}
 			else // 检查此 CNAME 是否等于已存在的 CNAME
 			{
-				if (curlen != itemlen)
+				if (sdes_cname.length() != itemlen)
 					*cnamecollis = true;
 				else
 				{
-					if (memcmp(data,oldcname,itemlen) != 0)
+					if (memcmp(data, sdes_cname.c_str(), itemlen) != 0)
 						*cnamecollis = true;
 				}
 			}
 		}
 		break;
-	case RTCP_SDES_ID_NAME:
-		{
-			size_t oldlen;
-
-            		SDESinf.GetName(&oldlen);
-			if (oldlen == 0) // 名称未设置
-				return SDESinf.SetName(data,itemlen);
-		}
-		break;
-	case RTCP_SDES_ID_EMAIL:
-		{
-			size_t oldlen;
-
-			SDESinf.GetEMail(&oldlen);
-			if (oldlen == 0)
-				return SDESinf.SetEMail(data,itemlen);
-		}
-		break;
-	case RTCP_SDES_ID_PHONE:
-		return SDESinf.SetPhone(data,itemlen);
-	case RTCP_SDES_ID_LOCATION:
-		return SDESinf.SetLocation(data,itemlen);
-	case RTCP_SDES_ID_TOOL:
-		{
-			size_t oldlen;
-
-			SDESinf.GetTool(&oldlen);
-			if (oldlen == 0)
-				return SDESinf.SetTool(data,itemlen);
-		}
-		break;
-	case RTCP_SDES_ID_NOTE:
-		stats.SetLastNoteTime(receivetime);
-		return SDESinf.SetNote(data,itemlen);
 	}
 	return 0;
 }
 
-#ifdef RTP_SUPPORT_SDESPRIV
-
-int RTPSourceData::ProcessPrivateSDESItem(const uint8_t *prefix,size_t prefixlen,const uint8_t *value,size_t valuelen,const RTPTime &receivetime)
-{
-	int status;
-	
-	stats.SetLastMessageTime(receivetime);
-	status = SDESinf.SetPrivateValue(prefix,prefixlen,value,valuelen);
-	if (status == MEDIA_RTP_ERR_RESOURCE_ERROR)
-		return 0; // 不要仅仅因为项目数量已满就停止处理
-	return status;
-}
-
-#endif // RTP_SUPPORT_SDESPRIV
 
 int RTPSourceData::ProcessBYEPacket(const uint8_t *reason,size_t reasonlen,const RTPTime &receivetime)
 {

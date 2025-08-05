@@ -83,7 +83,6 @@ Installation notes
 
     - `RTP_SUPPORT_THREAD`: Enables support for JThread.
 
-    - `RTP_SUPPORT_SDESPRIV`: Enables support for RTCP SDES private items.
 
     - `RTP_SUPPORT_PROBATION`: If set, a few consecutive RTP packets are 
       needed to validate a member.

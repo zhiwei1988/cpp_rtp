@@ -25,13 +25,6 @@ public:
 	{ 
 		None,	/**< Used when the iteration over the items has finished. */
 		CNAME,	/**< Used for a CNAME (canonical name) item. */
-		NAME,	/**< Used for a NAME item. */
-		EMAIL,	/**< Used for an EMAIL item. */
-		PHONE,	/**< Used for a PHONE item. */
-		LOC,	/**< Used for a LOC (location) item. */
-		TOOL,	/**< Used for a TOOL item. */
-		NOTE,	/**< Used for a NOTE item. */
-		PRIV,	/**< Used for a PRIV item. */
 		Unknown /**< Used when there is an item present, but the type is not recognized. */
 	};
 	
@@ -85,27 +78,6 @@ public:
 	/** Returns the item data of the current item in the current chunk. */
 	uint8_t *GetItemData();
 
-#ifdef RTP_SUPPORT_SDESPRIV
-	/** If the current item is an SDES PRIV item, this function returns the length of the 
-	 *  prefix string of the private item. 
-	 */
-	size_t GetPRIVPrefixLength() const;
-
-	/** If the current item is an SDES PRIV item, this function returns actual data of the
-	 *  prefix string.
-	 */
-	uint8_t *GetPRIVPrefixData();
-
-	/** If the current item is an SDES PRIV item, this function returns the length of the
-	 *  value string of the private item.
-	 */
-	size_t GetPRIVValueLength() const;
-
-	/** If the current item is an SDES PRIV item, this function returns actual value data of the
-	 *  private item.
-	 */
-	uint8_t *GetPRIVValueData();
-#endif // RTP_SUPPORT_SDESPRIV
 
 
 private:
@@ -219,20 +191,6 @@ inline RTCPSDESPacket::ItemType RTCPSDESPacket::GetItemType() const
 		return None;
 	case RTCP_SDES_ID_CNAME:
 		return CNAME;
-	case RTCP_SDES_ID_NAME:
-		return NAME;
-	case RTCP_SDES_ID_EMAIL:
-		return EMAIL;
-	case RTCP_SDES_ID_PHONE:
-		return PHONE;
-	case RTCP_SDES_ID_LOCATION:
-		return LOC;
-	case RTCP_SDES_ID_TOOL:
-		return TOOL;
-	case RTCP_SDES_ID_NOTE:
-		return NOTE;
-	case RTCP_SDES_ID_PRIVATE:
-		return PRIV;
 	default:
 		return Unknown;
 	}
@@ -263,85 +221,6 @@ inline uint8_t *RTCPSDESPacket::GetItemData()
 	return (currentchunk+itemoffset+sizeof(RTCPSDESHeader));
 }
 
-#ifdef RTP_SUPPORT_SDESPRIV
-inline size_t RTCPSDESPacket::GetPRIVPrefixLength() const
-{
-	if (!knownformat)
-		return 0;
-	if (currentchunk == 0)
-		return 0;
-	RTCPSDESHeader *sdeshdr = (RTCPSDESHeader *)(currentchunk+itemoffset);
-	if (sdeshdr->sdesid != RTCP_SDES_ID_PRIVATE)
-		return 0;
-	if (sdeshdr->length == 0)
-		return 0;
-	uint8_t *preflen = currentchunk+itemoffset+sizeof(RTCPSDESHeader);
-	size_t prefixlength = (size_t)(*preflen);
-	if (prefixlength > (size_t)((sdeshdr->length)-1))
-		return 0;
-	return prefixlength;
-}
-
-inline uint8_t *RTCPSDESPacket::GetPRIVPrefixData()
-{
-	if (!knownformat)
-		return 0;
-	if (currentchunk == 0)
-		return 0;
-	RTCPSDESHeader *sdeshdr = (RTCPSDESHeader *)(currentchunk+itemoffset);
-	if (sdeshdr->sdesid != RTCP_SDES_ID_PRIVATE)
-		return 0;
-	if (sdeshdr->length == 0)
-		return 0;
-	uint8_t *preflen = currentchunk+itemoffset+sizeof(RTCPSDESHeader);
-	size_t prefixlength = (size_t)(*preflen);
-	if (prefixlength > (size_t)((sdeshdr->length)-1))
-		return 0;
-	if (prefixlength == 0)
-		return 0;
-	return (currentchunk+itemoffset+sizeof(RTCPSDESHeader)+1);
-}
-
-inline size_t RTCPSDESPacket::GetPRIVValueLength() const
-{
-	if (!knownformat)
-		return 0;
-	if (currentchunk == 0)
-		return 0;
-	RTCPSDESHeader *sdeshdr = (RTCPSDESHeader *)(currentchunk+itemoffset);
-	if (sdeshdr->sdesid != RTCP_SDES_ID_PRIVATE)
-		return 0;
-	if (sdeshdr->length == 0)
-		return 0;
-	uint8_t *preflen = currentchunk+itemoffset+sizeof(RTCPSDESHeader);
-	size_t prefixlength = (size_t)(*preflen);
-	if (prefixlength > (size_t)((sdeshdr->length)-1))
-		return 0;
-	return ((size_t)(sdeshdr->length))-prefixlength-1;
-}
-
-inline uint8_t *RTCPSDESPacket::GetPRIVValueData()
-{
-	if (!knownformat)
-		return 0;
-	if (currentchunk == 0)
-		return 0;
-	RTCPSDESHeader *sdeshdr = (RTCPSDESHeader *)(currentchunk+itemoffset);
-	if (sdeshdr->sdesid != RTCP_SDES_ID_PRIVATE)
-		return 0;
-	if (sdeshdr->length == 0)
-		return 0;
-	uint8_t *preflen = currentchunk+itemoffset+sizeof(RTCPSDESHeader);
-	size_t prefixlength = (size_t)(*preflen);
-	if (prefixlength > (size_t)((sdeshdr->length)-1))
-		return 0;
-	size_t valuelen = ((size_t)(sdeshdr->length))-prefixlength-1;
-	if (valuelen == 0)
-		return 0;
-	return (currentchunk+itemoffset+sizeof(RTCPSDESHeader)+1+prefixlength);
-}
-
-#endif // RTP_SUPPORT_SDESPRIV
 
 #endif // RTCPSDESPACKET_H
 

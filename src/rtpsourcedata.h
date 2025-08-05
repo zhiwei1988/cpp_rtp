@@ -9,11 +9,12 @@
 #include "rtpconfig.h"
 #include "rtp_protocol_utils.h"
 #include "rtppacket.h"
-#include "rtcpsdesinfo.h"
+#include "rtperrors.h"
 #include <cstdint>
 #include "rtpsources.h"
 #include "rtpendpoint.h"
 #include <list>
+#include <string>
 
 class RTPSources;
 
@@ -353,9 +354,6 @@ public:
 				const RTPTime &receivetime)						{ RRprevinf = RRinf; RRinf.Set(fractionlost,lostpackets,exthighseqnr,jitter,lsr,dlsr,receivetime); stats.SetLastMessageTime(receivetime); }
 	void UpdateMessageTime(const RTPTime &receivetime)						{ stats.SetLastMessageTime(receivetime); }
 	int ProcessSDESItem(uint8_t sdesid,const uint8_t *data,size_t itemlen,const RTPTime &receivetime,bool *cnamecollis);
-#ifdef RTP_SUPPORT_SDESPRIV
-	int ProcessPrivateSDESItem(const uint8_t *prefix,size_t prefixlen,const uint8_t *value,size_t valuelen,const RTPTime &receivetime);
-#endif // RTP_SUPPORT_SDESPRIV
 	int ProcessBYEPacket(const uint8_t *reason,size_t reasonlen,const RTPTime &receivetime);
 		
 	int SetRTPDataAddress(const RTPEndpoint *a);
@@ -365,43 +363,11 @@ public:
 	void SentRTPPacket()											{ if (!ownssrc) return; RTPTime t = RTPTime::CurrentTime(); issender = true; stats.SetLastRTPPacketTime(t); stats.SetLastMessageTime(t); }
 	void SetOwnSSRC()											{ ownssrc = true; validated = true; }
 	void SetCSRC()												{ validated = true; iscsrc = true; }
-	void ClearNote()											{ SDESinf.SetNote(0,0); }
 	
 	/** 返回此参与者的SDES CNAME项的指针，并将其长度存储在 \c len 中。 */
-	uint8_t *SDES_GetCNAME(size_t *len) const				{ return SDESinf.GetCNAME(len); }
+	uint8_t *SDES_GetCNAME(size_t *len) const				{ *len = sdes_cname.length(); return (uint8_t*)sdes_cname.c_str(); }
 
-	/** 返回此参与者的SDES name项的指针，并将其长度存储在 \c len 中。 */
-	uint8_t *SDES_GetName(size_t *len) const				{ return SDESinf.GetName(len); }
-
-	/** 返回此参与者的SDES e-mail项的指针，并将其长度存储在 \c len 中。 */
-	uint8_t *SDES_GetEMail(size_t *len) const				{ return SDESinf.GetEMail(len); }
-
-	/** 返回此参与者的SDES phone项的指针，并将其长度存储在 \c len 中。 */
-	uint8_t *SDES_GetPhone(size_t *len) const				{ return SDESinf.GetPhone(len); }
-
-	/** 返回此参与者的SDES location项的指针，并将其长度存储在 \c len 中。 */
-	uint8_t *SDES_GetLocation(size_t *len) const			{ return SDESinf.GetLocation(len); }
-
-	/** 返回此参与者的SDES tool项的指针，并将其长度存储在 \c len 中。 */
-	uint8_t *SDES_GetTool(size_t *len) const				{ return SDESinf.GetTool(len); }
-
-	/** 返回此参与者的SDES note项的指针，并将其长度存储在 \c len 中。 */                         
-	uint8_t *SDES_GetNote(size_t *len) const				{ return SDESinf.GetNote(len); }
 	
-#ifdef RTP_SUPPORT_SDESPRIV
-	/** 开始遍历存储的SDES私有项前缀及其关联值。 */
-	void SDES_GotoFirstPrivateValue()										{ SDESinf.GotoFirstPrivateValue(); }
-	
-	/** 如果可用，返回 \c true 并将下一个SDES私有项前缀存储在 \c prefix 中，其长度存储在
-	 *  \c prefixlen 中；然后关联值及其长度存储在 \c value 和 \c valuelen 中。
-	 */
-	bool SDES_GetNextPrivateValue(uint8_t **prefix,size_t *prefixlen,uint8_t **value,size_t *valuelen) 		{ return SDESinf.GetNextPrivateValue(prefix,prefixlen,value,valuelen); }
-
-	/**	查找与SDES私有项前缀 \c prefix（长度为 \c prefixlen）对应的条目；
-	 *  如果找到，函数返回 \c true 并将关联值及其长度分别存储在 \c value 和 \c valuelen 中。
-	 */
-	bool SDES_GetPrivateValue(uint8_t *prefix,size_t prefixlen,uint8_t **value,size_t *valuelen) const 		{ return SDESinf.GetPrivateValue(prefix,prefixlen,value,valuelen); }
-#endif // RTP_SUPPORT_SDESPRIV
 
 protected:
 	std::list<RTPPacket *> packetlist;
@@ -418,7 +384,7 @@ protected:
 	RTCPSenderReportInfo SRinf,SRprevinf;
 	RTCPReceiverReportInfo RRinf,RRprevinf;
 	RTPSourceStats stats;
-	RTCPSDESInfo SDESinf;
+	std::string sdes_cname;
 	
 	bool isrtpaddrset,isrtcpaddrset;
 	RTPEndpoint *rtpaddr,*rtcpaddr;
