@@ -163,7 +163,7 @@ int RTPTCPTransmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 	if (m_localHostname.size() == 0)
 	{
 		//
-		// TODO: 需要实现主机名解析
+		// 主机名解析未实现，使用默认值
 		//
 		m_localHostname.resize(9);
 		memcpy(&m_localHostname[0], "localhost", m_localHostname.size());
@@ -206,7 +206,7 @@ bool RTPTCPTransmitter::ComesFromThisTransmitter(const RTPEndpoint *addr)
 	int socket = addr->GetSocket();
 
 	MEDIA_RTP_UNUSED(socket);
-	// TODO: 目前，我们假设我们不能只发送到同一个发送器
+	// 当前实现假设不支持向同一传输器发送
 
 	MAINMUTEX_UNLOCK
 	return v;
@@ -753,7 +753,7 @@ int RTPTCPTransmitter::SendRTPRTCPData(const void *data, size_t len)
 
 int RTPTCPTransmitter::ValidateSocket(int)
 {
-	// TODO: 我们是否应该检查（对于 TCP 套接字）？ 
+	// TCP套接字验证暂未实现 
 	return 0;
 }
 

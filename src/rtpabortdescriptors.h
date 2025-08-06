@@ -9,58 +9,50 @@
 #include "rtpconfig.h"
 
 /**
- * Helper class for several RTPTransmitter instances, to be able to cancel a
- * call to 'select', 'poll' or 'WSAPoll'.
+ * 用于多个RTPTransmitter实例的辅助类，能够取消对'select'、'poll'或'WSAPoll'的调用。
  *
- * This is a helper class for several RTPTransmitter instances. Typically a
- * call to 'select' (or 'poll' or 'WSAPoll', depending on the platform) is used
- * to wait for incoming data for a certain time. To be able to cancel this wait
- * from another thread, this class provides a socket descriptor that's compatible
- * with e.g. the 'select' call, and to which data can be sent using
- * RTPAbortDescriptors::SendAbortSignal. If the descriptor is included in the
- * 'select' call, the function will detect incoming data and the function stops
- * waiting for incoming data.
+ * 这是多个RTPTransmitter实例的辅助类。通常使用'select'调用（或'poll'或'WSAPoll'，
+ * 取决于平台）来等待指定时间的传入数据。为了能够从另一个线程取消此等待，
+ * 此类提供了一个与'select'调用兼容的套接字描述符，可以使用
+ * RTPAbortDescriptors::SendAbortSignal向其发送数据。如果描述符包含在'select'调用中，
+ * 函数将检测到传入数据并停止等待传入数据。
  *
- * The class can be useful in case you'd like to create an implementation which
- * uses a single poll thread for several RTPSession and RTPTransmitter instances.
- * This idea is further illustrated in `example8.cpp`.
+ * 如果您想创建一个使用单个轮询线程处理多个RTPSession和RTPTransmitter实例的实现，
+ * 此类会很有用。这个想法在`example8.cpp`中有进一步说明。
  */
-class RTPAbortDescriptors
-{
-	MEDIA_RTP_NO_COPY(RTPAbortDescriptors)
+class RTPAbortDescriptors {
+  MEDIA_RTP_NO_COPY(RTPAbortDescriptors)
 public:
-	RTPAbortDescriptors();
-	~RTPAbortDescriptors();
+  RTPAbortDescriptors();
+  ~RTPAbortDescriptors();
 
-	/** Initializes this instance. */
-	int Init();
+  /** 初始化此实例。 */
+  int Init();
 
-	/** Returns the socket descriptor that can be included in a call to
-	 *  'select' (for example).*/
-	int GetAbortSocket() const													{ return m_descriptors[0]; }
+  /** 返回可以包含在'select'调用中的套接字描述符（例如）。*/
+  int GetAbortSocket() const { return m_descriptors[0]; }
 
-	/** Returns a flag indicating if this instance was initialized. */
-	bool IsInitialized() const															{ return m_init; }
+  /** 返回指示此实例是否已初始化的标志。 */
+  bool IsInitialized() const { return m_init; }
 
-	/** De-initializes this instance. */
-	void Destroy();
+  /** 反初始化此实例。 */
+  void Destroy();
 
-	/** Send a signal to the socket that's returned by RTPAbortDescriptors::GetAbortSocket,
-	 *  causing the 'select' call to detect that data is available, making the call
-	 *  end. */
-	int SendAbortSignal();
+  /** 向RTPAbortDescriptors::GetAbortSocket返回的套接字发送信号，
+   *  使'select'调用检测到数据可用，从而结束调用。 */
+  int SendAbortSignal();
 
-	/** For each RTPAbortDescriptors::SendAbortSignal function that's called, a call
-	 *  to this function can be made to clear the state again. */
-	int ReadSignallingByte();
+  /** 对于每次调用RTPAbortDescriptors::SendAbortSignal函数，
+   *  可以调用此函数来再次清除状态。 */
+  int ReadSignallingByte();
 
-	/** Similar to ReadSignallingByte::ReadSignallingByte, this function clears the signalling
-	 *  state, but this also works independently from the amount of times that
-	 *  RTPAbortDescriptors::SendAbortSignal was called. */
-	int ClearAbortSignal();
+  /** 类似于ReadSignallingByte::ReadSignallingByte，此函数清除信令状态，
+   *  但这也独立于RTPAbortDescriptors::SendAbortSignal被调用的次数而工作。 */
+  int ClearAbortSignal();
+
 private:
-	int m_descriptors[2];
-	bool m_init;
+  int m_descriptors[2];
+  bool m_init;
 };
- 
+
 #endif // RTPABORTDESCRIPTORS_H

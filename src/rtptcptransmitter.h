@@ -47,7 +47,7 @@ public:
 	~RTPTCPTransmissionInfo()													{ }
 };
 	
-// TODO: this is for IPv4, and will only be valid if one  rtp packet is in one tcp frame
+// 注意：此实现仅适用于IPv4，假设每个TCP帧包含一个RTP包
 #define RTPTCPTRANS_HEADERSIZE						(20+20+2) // 20 IP, 20 TCP, 2 for framing (RFC 4571)
 	
 /** A TCP transmission component.

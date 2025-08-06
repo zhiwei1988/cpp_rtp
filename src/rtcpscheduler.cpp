@@ -11,7 +11,7 @@
 
 RTCPSchedulerParams::RTCPSchedulerParams() : mininterval(RTCP_DEFAULTMININTERVAL)
 {
-	bandwidth = 1000; // TODO What is a good value here? 
+	bandwidth = 1000; // 默认带宽值 
 	senderfraction = RTCP_DEFAULTSENDERFRACTION;
 	usehalfatstartup = RTCP_DEFAULTHALFATSTARTUP;
 	immediatebye = RTCP_DEFAULTIMMEDIATEBYE;
@@ -62,7 +62,7 @@ void RTCPScheduler::Reset()
 	headeroverhead = 0; // user has to set this to an appropriate value
 	hassentrtcp = false;
 	firstcall = true;
-	avgrtcppacksize = 1000; // TODO: what is a good value for this?
+	avgrtcppacksize = 1000; // 默认RTCP包大小
 	byescheduled = false;
 	sendbyenow = false;
 }
@@ -150,7 +150,6 @@ bool RTCPScheduler::IsTime()
 
 	RTPTime currenttime = RTPTime::CurrentTime();
 
-//	// TODO: for debugging
 //	double diff = nextrtcptime.GetDouble() - currenttime.GetDouble();
 //
 //	std::cout << "Delay till next RTCP interval: " << diff << std::endl;
@@ -250,7 +249,6 @@ RTPTime RTCPScheduler::CalculateDeterministicInterval(bool sender /* = false */)
 	double ntimesC = n*C;
 	double Td = (tmin>ntimesC)?tmin:ntimesC;
 
-	// TODO: for debugging
 //	std::cout << "  Td: " << Td << std::endl;
 
 	return RTPTime(Td);

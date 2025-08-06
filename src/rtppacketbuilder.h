@@ -6,230 +6,253 @@
 
 #define RTPPACKETBUILDER_H
 
-#include "rtpconfig.h"
-#include "rtperrors.h"
-#include "rtpdefines.h"
 #include "rtp_protocol_utils.h"
+#include "rtpconfig.h"
+#include "rtpdefines.h"
+#include "rtperrors.h"
 #include <cstdint>
 
 class RTPSources;
 
-/** This class can be used to build RTP packets and is a bit more high-level than the RTPPacket 
- *  class: it generates an SSRC identifier, keeps track of timestamp and sequence number etc.
+/** 此类可用于构建RTP数据包，比RTPPacket类更高级：
+ *  它生成SSRC标识符，跟踪时间戳和序列号等。
  */
-class RTPPacketBuilder
-{
-	MEDIA_RTP_NO_COPY(RTPPacketBuilder)
+class RTPPacketBuilder {
+  MEDIA_RTP_NO_COPY(RTPPacketBuilder)
 public:
-	/** Constructs an instance, optionally installing a memory manager. 
-	 **/
-	RTPPacketBuilder();
-	~RTPPacketBuilder();
+  /** 构造一个实例，可选择安装内存管理器。
+   **/
+  RTPPacketBuilder();
+  ~RTPPacketBuilder();
 
-	/** Initializes the builder to only allow packets with a size below \c maxpacksize. */
-	int Init(size_t maxpacksize);
+  /** 初始化构建器，只允许大小小于\c maxpacksize的数据包。 */
+  int Init(size_t maxpacksize);
 
-	/** Cleans up the builder. */
-	void Destroy();
+  /** 清理构建器。 */
+  void Destroy();
 
-	/** Returns the number of packets which have been created with the current SSRC identifier. */
-	uint32_t GetPacketCount()					{ if (!init) return 0; return numpackets; }
+  /** 返回使用当前SSRC标识符创建的数据包数量。 */
+  uint32_t GetPacketCount() {
+    if (!init)
+      return 0;
+    return numpackets;
+  }
 
-	/** Returns the number of payload octets which have been generated with this SSRC identifier. */
-	uint32_t GetPayloadOctetCount()				{ if (!init) return 0; return numpayloadbytes; }
+  /** 返回使用此SSRC标识符生成的负载八位字节数。 */
+  uint32_t GetPayloadOctetCount() {
+    if (!init)
+      return 0;
+    return numpayloadbytes;
+  }
 
-	/** Sets the maximum allowed packet size to \c maxpacksize. */
-	int SetMaximumPacketSize(size_t maxpacksize);
+  /** 将最大允许数据包大小设置为\c maxpacksize。 */
+  int SetMaximumPacketSize(size_t maxpacksize);
 
-	/** Adds a CSRC to the CSRC list which will be stored in the RTP packets. */
-	int AddCSRC(uint32_t csrc);
+  /** 向将存储在RTP数据包中的CSRC列表添加CSRC。 */
+  int AddCSRC(uint32_t csrc);
 
-	/** Deletes a CSRC from the list which will be stored in the RTP packets. */
-	int DeleteCSRC(uint32_t csrc);
+  /** 从将存储在RTP数据包中的列表中删除CSRC。 */
+  int DeleteCSRC(uint32_t csrc);
 
-	/** Clears the CSRC list. */
-	void ClearCSRCList();	
-	
-	/** Builds a packet with payload \c data and payload length \c len.
-	 *  Builds a packet with payload \c data and payload length \c len. The payload type, marker 
-	 *  and timestamp increment used will be those that have been set using the \c SetDefault 
-	 *  functions below.
-	 */
-	int BuildPacket(const void *data,size_t len);
+  /** 清除CSRC列表。 */
+  void ClearCSRCList();
 
-	/** Builds a packet with payload \c data and payload length \c len.
-	 *  Builds a packet with payload \c data and payload length \c len. The payload type will be 
-	 *  set to \c pt, the marker bit to \c mark and after building this packet, the timestamp will
-	 *  be incremented with \c timestamp.
-	 */
-	int BuildPacket(const void *data,size_t len,
-	                uint8_t pt,bool mark,uint32_t timestampinc);
+  /** 使用负载\c data和负载长度\c len构建数据包。
+   *  使用负载\c data和负载长度\c len构建数据包。使用的负载类型、标记
+   *  和时间戳增量将是使用下面的\c SetDefault函数设置的。
+   */
+  int BuildPacket(const void *data, size_t len);
 
-	/** Builds a packet with payload \c data and payload length \c len.
-	 *  Builds a packet with payload \c data and payload length \c len. The payload type, marker 
-	 *  and timestamp increment used will be those that have been set using the \c SetDefault 
-	 *  functions below. This packet will also contain an RTP header extension with identifier 
-	 *  \c hdrextID and data \c hdrextdata. The length of the header extension data is given by 
-	 *  \c numhdrextwords which expresses the length in a number of 32-bit words.
-	 */
-	int BuildPacketEx(const void *data,size_t len,
-	                  uint16_t hdrextID,const void *hdrextdata,size_t numhdrextwords);
+  /** 使用负载\c data和负载长度\c len构建数据包。
+   *  使用负载\c data和负载长度\c len构建数据包。负载类型将设置为\c pt，
+   *  标记位设置为\c mark，构建此数据包后，时间戳将增加\c timestamp。
+   */
+  int BuildPacket(const void *data, size_t len, uint8_t pt, bool mark,
+                  uint32_t timestampinc);
 
-	/** Builds a packet with payload \c data and payload length \c len. 
-	 *  Builds a packet with payload \c data and payload length \c len. The payload type will be set 
-	 *  to \c pt, the marker bit to \c mark and after building this packet, the timestamp will 
-	 *  be incremented with \c timestamp. This packet will also contain an RTP header extension 
-	 *  with identifier \c hdrextID and data \c hdrextdata. The length of the header extension 
-	 *  data is given by \c numhdrextwords which expresses the length in a number of 32-bit words.
-	 */
-	int BuildPacketEx(const void *data,size_t len,
-	                  uint8_t pt,bool mark,uint32_t timestampinc,
-	                  uint16_t hdrextID,const void *hdrextdata,size_t numhdrextwords);
+  /** 使用负载\c data和负载长度\c len构建数据包。
+   *  使用负载\c data和负载长度\c len构建数据包。使用的负载类型、标记
+   *  和时间戳增量将是使用下面的\c SetDefault函数设置的。此数据包还将包含
+   *  标识符为\c hdrextID和数据为\c hdrextdata的RTP头部扩展。头部扩展数据的长度
+   *  由\c numhdrextwords给出，它以32位字的数量表示长度。
+   */
+  int BuildPacketEx(const void *data, size_t len, uint16_t hdrextID,
+                    const void *hdrextdata, size_t numhdrextwords);
 
-	/** Returns a pointer to the last built RTP packet data. */
-	uint8_t *GetPacket()						{ if (!init) return 0; return buffer; }
+  /** 使用负载\c data和负载长度\c len构建数据包。
+   *  使用负载\c data和负载长度\c len构建数据包。负载类型将设置为\c pt，
+   *  标记位设置为\c mark，构建此数据包后，时间戳将增加\c timestamp。
+   *  此数据包还将包含标识符为\c hdrextID和数据为\c hdrextdata的RTP头部扩展。
+   *  头部扩展数据的长度由\c numhdrextwords给出，它以32位字的数量表示长度。
+   */
+  int BuildPacketEx(const void *data, size_t len, uint8_t pt, bool mark,
+                    uint32_t timestampinc, uint16_t hdrextID,
+                    const void *hdrextdata, size_t numhdrextwords);
 
-	/** Returns the size of the last built RTP packet. */
-	size_t GetPacketLength()					{ if (!init) return 0; return packetlength; }
-	
-	/** Sets the default payload type to \c pt. */
-	int SetDefaultPayloadType(uint8_t pt);
+  /** 返回指向最后构建的RTP数据包数据的指针。 */
+  uint8_t *GetPacket() {
+    if (!init)
+      return 0;
+    return buffer;
+  }
 
-	/** Sets the default marker bit to \c m. */
-	int SetDefaultMark(bool m);
+  /** 返回最后构建的RTP数据包的大小。 */
+  size_t GetPacketLength() {
+    if (!init)
+      return 0;
+    return packetlength;
+  }
 
-	/** Sets the default timestamp increment to \c timestampinc. */
-	int SetDefaultTimestampIncrement(uint32_t timestampinc);
+  /** 将默认负载类型设置为\c pt。 */
+  int SetDefaultPayloadType(uint8_t pt);
 
-	/** This function increments the timestamp with the amount given by \c inc.
-	 *  This function increments the timestamp with the amount given by \c inc. This can be useful 
-	 *  if, for example, a packet was not sent because it contained only silence. Then, this function 
-	 *  should be called to increment the timestamp with the appropriate amount so that the next packets 
-	 *  will still be played at the correct time at other hosts.
-	 */
-	int IncrementTimestamp(uint32_t inc);
+  /** 将默认标记位设置为\c m。 */
+  int SetDefaultMark(bool m);
 
-	/** This function increments the timestamp with the amount given set by the SetDefaultTimestampIncrement
-	 *  member function. 
-	 *  This function increments the timestamp with the amount given set by the SetDefaultTimestampIncrement
-	 *  member function. This can be useful if, for example, a packet was not sent because it contained only silence.
-	 *  Then, this function should be called to increment the timestamp with the appropriate amount so that the next
-	 *  packets will still be played at the correct time at other hosts.	
-	 */
-	int IncrementTimestampDefault();
-	
-	/** Creates a new SSRC to be used in generated packets. 
-	 *  Creates a new SSRC to be used in generated packets. This will also generate new timestamp and 
-	 *  sequence number offsets.
-	 */
-	uint32_t CreateNewSSRC();
+  /** 将默认时间戳增量设置为\c timestampinc。 */
+  int SetDefaultTimestampIncrement(uint32_t timestampinc);
 
-	/** Creates a new SSRC to be used in generated packets. 
-	 *  Creates a new SSRC to be used in generated packets. This will also generate new timestamp and 
-	 *  sequence number offsets. The source table \c sources is used to make sure that the chosen SSRC 
-	 *  isn't used by another participant yet.
-	 */
-	uint32_t CreateNewSSRC(RTPSources &sources);
+  /** 此函数将时间戳增加\c inc给定的量。
+   *  此函数将时间戳增加\c inc给定的量。这可能很有用，
+   *  例如，如果数据包因为只包含静音而没有发送。然后，应该调用此函数
+   *  以适当的量增加时间戳，以便其他主机上的下一个数据包仍然在正确的时间播放。
+   */
+  int IncrementTimestamp(uint32_t inc);
 
-	/** Returns the current SSRC identifier. */
-	uint32_t GetSSRC() const					{ if (!init) return 0; return ssrc; }
+  /** 此函数将时间戳增加由SetDefaultTimestampIncrement成员函数设置的量。
+   *  此函数将时间戳增加由SetDefaultTimestampIncrement成员函数设置的量。
+   *  这可能很有用，例如，如果数据包因为只包含静音而没有发送。
+   *  然后，应该调用此函数以适当的量增加时间戳，以便其他主机上的下一个
+   *  数据包仍然在正确的时间播放。
+   */
+  int IncrementTimestampDefault();
 
-	/** Returns the current RTP timestamp. */
-	uint32_t GetTimestamp() const					{ if (!init) return 0; return timestamp; }
+  /** 创建用于生成数据包的新SSRC。
+   *  创建用于生成数据包的新SSRC。这还将生成新的时间戳和序列号偏移量。
+   */
+  uint32_t CreateNewSSRC();
 
-	/** Returns the current sequence number. */
-	uint16_t GetSequenceNumber() const				{ if (!init) return 0; return seqnr; }
+  /** 创建用于生成数据包的新SSRC。
+   *  创建用于生成数据包的新SSRC。这还将生成新的时间戳和序列号偏移量。
+   *  使用源表\c sources确保选择的SSRC尚未被其他参与者使用。
+   */
+  uint32_t CreateNewSSRC(RTPSources &sources);
 
-	/** Returns the time at which a packet was generated.
-	 *  Returns the time at which a packet was generated. This is not necessarily the time at which 
-	 *  the last RTP packet was generated: if the timestamp increment was zero, the time is not updated.
-	 */
-	RTPTime GetPacketTime() const					{ if (!init) return RTPTime(0,0); return lastwallclocktime; }
+  /** 返回当前SSRC标识符。 */
+  uint32_t GetSSRC() const {
+    if (!init)
+      return 0;
+    return ssrc;
+  }
 
-	/** Returns the RTP timestamp which corresponds to the time returned by the previous function. */
-	uint32_t GetPacketTimestamp() const				{ if (!init) return 0; return lastrtptimestamp; }
+  /** 返回当前RTP时间戳。 */
+  uint32_t GetTimestamp() const {
+    if (!init)
+      return 0;
+    return timestamp;
+  }
 
-	/** Sets a specific SSRC to be used.
-	 *  Sets a specific SSRC to be used. Does not create a new timestamp offset or sequence number
-	 *  offset. Does not reset the packet count or byte count. Think twice before using this!
-	 */
-	void AdjustSSRC(uint32_t s)					{ ssrc = s; }
+  /** 返回当前序列号。 */
+  uint16_t GetSequenceNumber() const {
+    if (!init)
+      return 0;
+    return seqnr;
+  }
+
+  /** 返回生成数据包的时间。
+   *  返回生成数据包的时间。这不一定是生成最后一个RTP数据包的时间：
+   *  如果时间戳增量为零，时间不会更新。
+   */
+  RTPTime GetPacketTime() const {
+    if (!init)
+      return RTPTime(0, 0);
+    return lastwallclocktime;
+  }
+
+  /** 返回与上一个函数返回的时间对应的RTP时间戳。 */
+  uint32_t GetPacketTimestamp() const {
+    if (!init)
+      return 0;
+    return lastrtptimestamp;
+  }
+
+  /** 设置要使用的特定SSRC。
+   *  设置要使用的特定SSRC。不创建新的时间戳偏移量或序列号偏移量。
+   *  不重置数据包计数或字节计数。使用此函数前请三思！
+   */
+  void AdjustSSRC(uint32_t s) { ssrc = s; }
+
 private:
-	int PrivateBuildPacket(const void *data,size_t len,
-	                  uint8_t pt,bool mark,uint32_t timestampinc,bool gotextension,
-	                  uint16_t hdrextID = 0,const void *hdrextdata = 0,size_t numhdrextwords = 0);
+  int PrivateBuildPacket(const void *data, size_t len, uint8_t pt, bool mark,
+                         uint32_t timestampinc, bool gotextension,
+                         uint16_t hdrextID = 0, const void *hdrextdata = 0,
+                         size_t numhdrextwords = 0);
 
-	
-	size_t maxpacksize;
-	uint8_t *buffer;
-	size_t packetlength;
-	
-	uint32_t numpayloadbytes;
-	uint32_t numpackets;
-	bool init;
+  size_t maxpacksize;
+  uint8_t *buffer;
+  size_t packetlength;
 
-	uint32_t ssrc;
-	uint32_t timestamp;
-	uint16_t seqnr;
+  uint32_t numpayloadbytes;
+  uint32_t numpackets;
+  bool init;
 
-	uint32_t defaulttimestampinc;
-	uint8_t defaultpayloadtype;
-	bool defaultmark;
+  uint32_t ssrc;
+  uint32_t timestamp;
+  uint16_t seqnr;
 
-	bool deftsset,defptset,defmarkset;
+  uint32_t defaulttimestampinc;
+  uint8_t defaultpayloadtype;
+  bool defaultmark;
 
-	uint32_t csrcs[RTP_MAXCSRCS];
-	int numcsrcs;
+  bool deftsset, defptset, defmarkset;
 
-	RTPTime lastwallclocktime;
-	uint32_t lastrtptimestamp;
-	uint32_t prevrtptimestamp;
+  uint32_t csrcs[RTP_MAXCSRCS];
+  int numcsrcs;
+
+  RTPTime lastwallclocktime;
+  uint32_t lastrtptimestamp;
+  uint32_t prevrtptimestamp;
 };
 
-inline int RTPPacketBuilder::SetDefaultPayloadType(uint8_t pt)
-{
-	if (!init)
-		return MEDIA_RTP_ERR_INVALID_STATE;
-	defptset = true;
-	defaultpayloadtype = pt;
-	return 0;
+inline int RTPPacketBuilder::SetDefaultPayloadType(uint8_t pt) {
+  if (!init)
+    return MEDIA_RTP_ERR_INVALID_STATE;
+  defptset = true;
+  defaultpayloadtype = pt;
+  return 0;
 }
 
-inline int RTPPacketBuilder::SetDefaultMark(bool m)
-{
-	if (!init)
-		return MEDIA_RTP_ERR_INVALID_STATE;
-	defmarkset = true;
-	defaultmark = m;
-	return 0;
+inline int RTPPacketBuilder::SetDefaultMark(bool m) {
+  if (!init)
+    return MEDIA_RTP_ERR_INVALID_STATE;
+  defmarkset = true;
+  defaultmark = m;
+  return 0;
 }
 
-inline int RTPPacketBuilder::SetDefaultTimestampIncrement(uint32_t timestampinc)
-{
-	if (!init)
-		return MEDIA_RTP_ERR_INVALID_STATE;
-	deftsset = true;
-	defaulttimestampinc = timestampinc;
-	return 0;
+inline int
+RTPPacketBuilder::SetDefaultTimestampIncrement(uint32_t timestampinc) {
+  if (!init)
+    return MEDIA_RTP_ERR_INVALID_STATE;
+  deftsset = true;
+  defaulttimestampinc = timestampinc;
+  return 0;
 }
 
-inline int RTPPacketBuilder::IncrementTimestamp(uint32_t inc)
-{
-	if (!init)
-		return MEDIA_RTP_ERR_INVALID_STATE;
-	timestamp += inc;
-	return 0;
+inline int RTPPacketBuilder::IncrementTimestamp(uint32_t inc) {
+  if (!init)
+    return MEDIA_RTP_ERR_INVALID_STATE;
+  timestamp += inc;
+  return 0;
 }
 
-inline int RTPPacketBuilder::IncrementTimestampDefault()
-{
-	if (!init)
-		return MEDIA_RTP_ERR_INVALID_STATE;
-	if (!deftsset)
-		return MEDIA_RTP_ERR_PROTOCOL_ERROR;
-	timestamp += defaulttimestampinc;
-	return 0;
+inline int RTPPacketBuilder::IncrementTimestampDefault() {
+  if (!init)
+    return MEDIA_RTP_ERR_INVALID_STATE;
+  if (!deftsset)
+    return MEDIA_RTP_ERR_PROTOCOL_ERROR;
+  timestamp += defaulttimestampinc;
+  return 0;
 }
 
 #endif // RTPPACKETBUILDER_H
-

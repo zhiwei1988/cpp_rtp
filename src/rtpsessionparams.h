@@ -6,215 +6,219 @@
 
 #define RTPSESSIONPARAMS_H
 
-#include "rtpconfig.h"
-#include <cstdint>
-#include "rtptransmitter.h"
 #include "rtp_protocol_utils.h"
+#include "rtpconfig.h"
 #include "rtpsources.h"
+#include "rtptransmitter.h"
+#include <cstdint>
 #include <string>
 
-/** Describes the parameters for to be used by an RTPSession instance. 
- *  Describes the parameters for to be used by an RTPSession instance. Note that the own timestamp 
- *  unit must be set to a valid number, otherwise the session can't be created.
+/** 描述RTPSession实例要使用的参数。
+ *  描述RTPSession实例要使用的参数。注意，自己的时间戳单位必须设置为有效数字，
+ *  否则无法创建会话。
  */
-class RTPSessionParams
-{
+class RTPSessionParams {
 public:
-	RTPSessionParams();
-	
-	/** If \c usethread is \c true, the session will use a poll thread to automatically process incoming
-	 *  data and to send RTCP packets when necessary.
-	 */
-	int SetUsePollThread(bool usethread);
+  RTPSessionParams();
 
-	/** if `s` is `true`, the session will use mutexes in case multiple threads 
-	 *  are at work. */
-	int SetNeedThreadSafety(bool s);
+  /** 如果 \c usethread 为 \c true，会话将使用轮询线程来自动处理传入数据
+   *  并在必要时发送RTCP数据包。
+   */
+  int SetUsePollThread(bool usethread);
 
-	/** Returns whether the session should use a poll thread or not (default is \c true). */
-	bool IsUsingPollThread() const								{ return usepollthread; }
+  /** 如果 `s` 为 `true`，会话将在多个线程工作时使用互斥锁。 */
+  int SetNeedThreadSafety(bool s);
 
-	/** Sets the maximum allowed packet size for the session. */
-	void SetMaximumPacketSize(size_t max)						{ maxpacksize = max; }
+  /** 返回会话是否应该使用轮询线程（默认为 \c true）。 */
+  bool IsUsingPollThread() const { return usepollthread; }
 
-	/** Returns the maximum allowed packet size (default is 1400 bytes). */
-	size_t GetMaximumPacketSize() const							{ return maxpacksize; }
+  /** 设置会话的最大允许数据包大小。 */
+  void SetMaximumPacketSize(size_t max) { maxpacksize = max; }
 
-	/** If the argument is \c true, the session should accept its own packets and store 
-	 *  them accordingly in the source table.
-	 */
-	void SetAcceptOwnPackets(bool accept)						{ acceptown = accept; }
-	
-	/** Returns \c true if the session should accept its own packets (default is \c false). */
-	bool AcceptOwnPackets() const								{ return acceptown; }
+  /** 返回最大允许数据包大小（默认为1400字节）。 */
+  size_t GetMaximumPacketSize() const { return maxpacksize; }
 
-	/** Sets the receive mode to be used by the session. */
-	void SetReceiveMode(RTPTransmitter::ReceiveMode recvmode)	{ receivemode = recvmode; }
+  /** 如果参数为 \c true，会话应该接受自己的数据包并相应地
+   *  将它们存储在源表中。
+   */
+  void SetAcceptOwnPackets(bool accept) { acceptown = accept; }
 
-	/** Sets the receive mode to be used by the session (default is: accept all packets). */
-	RTPTransmitter::ReceiveMode GetReceiveMode() const			{ return receivemode; }
+  /** 如果会话应该接受自己的数据包则返回 \c true（默认为 \c false）。 */
+  bool AcceptOwnPackets() const { return acceptown; }
 
-	/** Sets the timestamp unit for our own data.
-	 *  Sets the timestamp unit for our own data. The timestamp unit is defined as a time interval in 
-	 *  seconds divided by the corresponding timestamp interval. For example, for 8000 Hz audio, the 
-	 *  timestamp unit would typically be 1/8000. Since this value is initially set to an illegal value, 
-	 *  the user must set this to an allowed value to be able to create a session.
-	 */
-	void SetOwnTimestampUnit(double tsunit)						{ owntsunit = tsunit; }
+  /** 设置会话要使用的接收模式。 */
+  void SetReceiveMode(RTPTransmitter::ReceiveMode recvmode) {
+    receivemode = recvmode;
+  }
 
-	/** Returns the currently set timestamp unit. */
-	double GetOwnTimestampUnit() const							{ return owntsunit; }
+  /** 设置会话要使用的接收模式（默认为：接受所有数据包）。 */
+  RTPTransmitter::ReceiveMode GetReceiveMode() const { return receivemode; }
 
-	/** Sets a flag indicating if a DNS lookup should be done to determine our hostname (to construct a CNAME item).
-	 *  If \c v is set to \c true, the session will ask the transmitter to find a host name based upon the IP
-	 *  addresses in its list of local IP addresses. If set to \c false, a call to \c gethostname or something
-	 *  similar will be used to find the local hostname. Note that the first method might take some time.
-	 */
-	void SetResolveLocalHostname(bool v)						{ resolvehostname = v; }
+  /** 设置我们自己数据的时间戳单位。
+   *  设置我们自己数据的时间戳单位。时间戳单位定义为以秒为单位的时间间隔
+   *  除以相应的时间戳间隔。例如，对于8000 Hz音频，时间戳单位通常为1/8000。
+   *  由于此值最初设置为非法值，用户必须将其设置为允许的值才能创建会话。
+   */
+  void SetOwnTimestampUnit(double tsunit) { owntsunit = tsunit; }
 
-	/** Returns whether the local hostname should be determined from the transmitter's list of local IP addresses 
-	 *  or not (default is \c false).
-	 */
-	bool GetResolveLocalHostname() const						{ return resolvehostname; }
+  /** 返回当前设置的时间戳单位。 */
+  double GetOwnTimestampUnit() const { return owntsunit; }
+
+  /** 设置一个标志，指示是否应该进行DNS查找以确定我们的主机名（用于构造CNAME项）。
+   *  如果 \c v 设置为 \c true，会话将要求发送器基于其本地IP地址列表中的IP地址
+   *  查找主机名。如果设置为 \c false，将使用对 \c gethostname
+   * 或类似函数的调用来 查找本地主机名。注意，第一种方法可能需要一些时间。
+   */
+  void SetResolveLocalHostname(bool v) { resolvehostname = v; }
+
+  /** 返回是否应该从发送器的本地IP地址列表确定本地主机名
+   *  （默认为 \c false）。
+   */
+  bool GetResolveLocalHostname() const { return resolvehostname; }
 #ifdef RTP_SUPPORT_PROBATION
-	/** If probation support is enabled, this function sets the probation type to be used. */
-	void SetProbationType(RTPSources::ProbationType probtype)	{ probationtype = probtype; }
+  /** 如果启用了试用支持，此函数设置要使用的试用类型。 */
+  void SetProbationType(RTPSources::ProbationType probtype) {
+    probationtype = probtype;
+  }
 
-	/** Returns the probation type which will be used (default is RTPSources::ProbationStore). */
-	RTPSources::ProbationType GetProbationType() const			{ return probationtype; }
+  /** 返回将要使用的试用类型（默认为RTPSources::ProbationStore）。 */
+  RTPSources::ProbationType GetProbationType() const { return probationtype; }
 #endif // RTP_SUPPORT_PROBATION
 
-	/** Sets the session bandwidth in bytes per second. */
-	void SetSessionBandwidth(double sessbw)						{ sessionbandwidth = sessbw; }
+  /** 设置会话带宽（以字节/秒为单位）。 */
+  void SetSessionBandwidth(double sessbw) { sessionbandwidth = sessbw; }
 
-	/** Returns the session bandwidth in bytes per second (default is 10000 bytes per second). */
-	double GetSessionBandwidth() const							{ return sessionbandwidth; }
+  /** 返回会话带宽（以字节/秒为单位）（默认为每秒10000字节）。 */
+  double GetSessionBandwidth() const { return sessionbandwidth; }
 
-	/** Sets the fraction of the session bandwidth to be used for control traffic. */
-	void SetControlTrafficFraction(double frac)					{ controlfrac = frac; }
+  /** 设置用于控制流量的会话带宽比例。 */
+  void SetControlTrafficFraction(double frac) { controlfrac = frac; }
 
-	/** Returns the fraction of the session bandwidth that will be used for control traffic (default is 5%). */
-	double GetControlTrafficFraction() const					{ return controlfrac; }
+  /** 返回将用于控制流量的会话带宽比例（默认为5%）。 */
+  double GetControlTrafficFraction() const { return controlfrac; }
 
-	/** Sets the minimum fraction of the control traffic that will be used by senders. */
-	void SetSenderControlBandwidthFraction(double frac)			{ senderfrac = frac; }
+  /** 设置发送者将使用的最小控制流量比例。 */
+  void SetSenderControlBandwidthFraction(double frac) { senderfrac = frac; }
 
-	/** Returns the minimum fraction of the control traffic that will be used by senders (default is 25%). */
-	double GetSenderControlBandwidthFraction() const			{ return senderfrac; }
+  /** 返回发送者将使用的最小控制流量比例（默认为25%）。 */
+  double GetSenderControlBandwidthFraction() const { return senderfrac; }
 
-	/** Set the minimal time interval between sending RTCP packets. */
-	void SetMinimumRTCPTransmissionInterval(const RTPTime &t)	{ mininterval = t; }
+  /** 设置发送RTCP数据包之间的最小时间间隔。 */
+  void SetMinimumRTCPTransmissionInterval(const RTPTime &t) { mininterval = t; }
 
-	/** Returns the minimal time interval between sending RTCP packets (default is 5 seconds). */
-	RTPTime GetMinimumRTCPTransmissionInterval() const			{ return mininterval; }
+  /** 返回发送RTCP数据包之间的最小时间间隔（默认为5秒）。 */
+  RTPTime GetMinimumRTCPTransmissionInterval() const { return mininterval; }
 
-	/** If \c usehalf is set to \c true, the session will only wait half of the calculated RTCP 
-	 *  interval before sending its first RTCP packet.
-	 */
-	void SetUseHalfRTCPIntervalAtStartup(bool usehalf)			{ usehalfatstartup = usehalf; }
+  /** 如果 \c usehalf 设置为 \c true，会话将只等待计算的RTCP间隔的一半
+   *  然后发送其第一个RTCP数据包。
+   */
+  void SetUseHalfRTCPIntervalAtStartup(bool usehalf) {
+    usehalfatstartup = usehalf;
+  }
 
-	/** Returns whether the session will only wait half of the calculated RTCP interval before sending its
-	 *  first RTCP packet or not (default is \c true).
-	 */
-	bool GetUseHalfRTCPIntervalAtStartup() const				{ return usehalfatstartup; }
+  /** 返回会话是否只等待计算的RTCP间隔的一半然后发送其第一个RTCP数据包
+   *  （默认为 \c true）。
+   */
+  bool GetUseHalfRTCPIntervalAtStartup() const { return usehalfatstartup; }
 
-	/** If \c v is \c true, the session will send a BYE packet immediately if this is allowed. */
-	void SetRequestImmediateBYE(bool v) 						{ immediatebye = v; }
+  /** 如果 \c v 为 \c true，会话将在允许的情况下立即发送BYE数据包。 */
+  void SetRequestImmediateBYE(bool v) { immediatebye = v; }
 
-	/** Returns whether the session should send a BYE packet immediately (if allowed) or not (default is \c true). */
-	bool GetRequestImmediateBYE() const							{ return immediatebye; }
+  /** 返回会话是否应该立即发送BYE数据包（如果允许）（默认为 \c true）。 */
+  bool GetRequestImmediateBYE() const { return immediatebye; }
 
-	/** When sending a BYE packet, this indicates whether it will be part of an RTCP compound packet 
-	 *  that begins with a sender report (if allowed) or a receiver report.
-	 */
-	void SetSenderReportForBYE(bool v)							{ SR_BYE = v; }
+  /** 发送BYE数据包时，这指示它是否将成为以发送者报告（如果允许）或接收者报告
+   *  开头的RTCP复合数据包的一部分。
+   */
+  void SetSenderReportForBYE(bool v) { SR_BYE = v; }
 
-	/** Returns \c true if a BYE packet will be sent in an RTCP compound packet which starts with a 
-	 *  sender report; if a receiver report will be used, the function returns \c false (default is \c true).
-	 */
-	bool GetSenderReportForBYE() const							{ return SR_BYE; }
-	
-	/** Sets the multiplier to be used when timing out senders. */
-	void SetSenderTimeoutMultiplier(double m)					{ sendermultiplier = m; }
+  /** 如果BYE数据包将在以发送者报告开头的RTCP复合数据包中发送则返回 \c true；
+   *  如果使用接收者报告，函数返回 \c false（默认为 \c true）。
+   */
+  bool GetSenderReportForBYE() const { return SR_BYE; }
 
-	/** Returns the multiplier to be used when timing out senders (default is 2). */
-	double GetSenderTimeoutMultiplier() const					{ return sendermultiplier; }
+  /** 设置用于超时发送者的乘数。 */
+  void SetSenderTimeoutMultiplier(double m) { sendermultiplier = m; }
 
-	/** Sets the multiplier to be used when timing out members. */
-	void SetSourceTimeoutMultiplier(double m)					{ generaltimeoutmultiplier = m; }
+  /** 返回用于超时发送者的乘数（默认为2）。 */
+  double GetSenderTimeoutMultiplier() const { return sendermultiplier; }
 
-	/** Returns the multiplier to be used when timing out members (default is 5). */
-	double GetSourceTimeoutMultiplier() const					{ return generaltimeoutmultiplier; }
+  /** 设置用于超时成员的乘数。 */
+  void SetSourceTimeoutMultiplier(double m) { generaltimeoutmultiplier = m; }
 
-	/** Sets the multiplier to be used when timing out a member after it has sent a BYE packet. */
-	void SetBYETimeoutMultiplier(double m)						{ byetimeoutmultiplier = m; }
+  /** 返回用于超时成员的乘数（默认为5）。 */
+  double GetSourceTimeoutMultiplier() const { return generaltimeoutmultiplier; }
 
-	/** Returns the multiplier to be used when timing out a member after it has sent a BYE packet (default is 1). */
-	double GetBYETimeoutMultiplier() const						{ return byetimeoutmultiplier; }
+  /** 设置用于在成员发送BYE数据包后超时该成员的乘数。 */
+  void SetBYETimeoutMultiplier(double m) { byetimeoutmultiplier = m; }
 
-	/** Sets the multiplier to be used when timing out entries in the collision table. */
-	void SetCollisionTimeoutMultiplier(double m)				{ collisionmultiplier = m; }
+  /** 返回用于在成员发送BYE数据包后超时该成员的乘数（默认为1）。 */
+  double GetBYETimeoutMultiplier() const { return byetimeoutmultiplier; }
 
-	/** Returns the multiplier to be used when timing out entries in the collision table (default is 10). */
-	double GetCollisionTimeoutMultiplier() const				{ return collisionmultiplier; }
+  /** 设置用于超时冲突表中条目的乘数。 */
+  void SetCollisionTimeoutMultiplier(double m) { collisionmultiplier = m; }
 
-	/** Sets the multiplier to be used when timing out SDES NOTE information. */
-	void SetNoteTimeoutMultiplier(double m)						{ notemultiplier = m; }
+  /** 返回用于超时冲突表中条目的乘数（默认为10）。 */
+  double GetCollisionTimeoutMultiplier() const { return collisionmultiplier; }
 
-	/** Returns the multiplier to be used when timing out SDES NOTE information (default is 25). */
-	double GetNoteTimeoutMultiplier() const						{ return notemultiplier; }
+  /** 设置用于超时SDES NOTE信息的乘数。 */
+  void SetNoteTimeoutMultiplier(double m) { notemultiplier = m; }
 
-	/** Sets a flag which indicates if a predefined SSRC identifier should be used. */
-	void SetUsePredefinedSSRC(bool f)							{ usepredefinedssrc = f; }
+  /** 返回用于超时SDES NOTE信息的乘数（默认为25）。 */
+  double GetNoteTimeoutMultiplier() const { return notemultiplier; }
 
-	/** Returns a flag indicating if a predefined SSRC should be used. */
-	bool GetUsePredefinedSSRC() const							{ return usepredefinedssrc; }
+  /** 设置一个标志，指示是否应该使用预定义的SSRC标识符。 */
+  void SetUsePredefinedSSRC(bool f) { usepredefinedssrc = f; }
 
-	/** Sets the SSRC which will be used if RTPSessionParams::GetUsePredefinedSSRC returns true. */
-	void SetPredefinedSSRC(uint32_t ssrc)						{ predefinedssrc = ssrc; }
-	
-	/** Returns the SSRC which will be used if RTPSessionParams::GetUsePredefinedSSRC returns true. */
-	uint32_t GetPredefinedSSRC() const							{ return predefinedssrc; }
+  /** 返回一个标志，指示是否应该使用预定义的SSRC。 */
+  bool GetUsePredefinedSSRC() const { return usepredefinedssrc; }
 
-	/** Forces this string to be used as the CNAME identifier. */
-	void SetCNAME(const std::string &s)							{ cname = s; }
+  /** 设置如果RTPSessionParams::GetUsePredefinedSSRC返回true时将使用的SSRC。 */
+  void SetPredefinedSSRC(uint32_t ssrc) { predefinedssrc = ssrc; }
 
-	/** Returns the currently set CNAME, is blank when this will be generated automatically (the default). */
-	std::string GetCNAME() const								{ return cname; }
+  /** 返回如果RTPSessionParams::GetUsePredefinedSSRC返回true时将使用的SSRC。 */
+  uint32_t GetPredefinedSSRC() const { return predefinedssrc; }
 
-	/** Returns `true` if thread safety was requested using RTPSessionParams::SetNeedThreadSafety. */
-	bool NeedThreadSafety() const								{ return m_needThreadSafety; }
+  /** 强制使用此字符串作为CNAME标识符。 */
+  void SetCNAME(const std::string &s) { cname = s; }
+
+  /** 返回当前设置的CNAME，当这将自动生成时为空白（默认）。 */
+  std::string GetCNAME() const { return cname; }
+
+  /** 如果使用RTPSessionParams::SetNeedThreadSafety请求了线程安全则返回 `true`。
+   */
+  bool NeedThreadSafety() const { return m_needThreadSafety; }
+
 private:
-	bool acceptown;
-	bool usepollthread;
-	size_t maxpacksize;
-	double owntsunit;
-	RTPTransmitter::ReceiveMode receivemode;
-	bool resolvehostname;
+  bool acceptown;
+  bool usepollthread;
+  size_t maxpacksize;
+  double owntsunit;
+  RTPTransmitter::ReceiveMode receivemode;
+  bool resolvehostname;
 #ifdef RTP_SUPPORT_PROBATION
-	RTPSources::ProbationType probationtype;
+  RTPSources::ProbationType probationtype;
 #endif // RTP_SUPPORT_PROBATION
-	
-	double sessionbandwidth;
-	double controlfrac;
-	double senderfrac;
-	RTPTime mininterval;
-	bool usehalfatstartup;
-	bool immediatebye;
-	bool SR_BYE;
 
-	double sendermultiplier;
-	double generaltimeoutmultiplier;
-	double byetimeoutmultiplier;
-	double collisionmultiplier;
-	double notemultiplier;
+  double sessionbandwidth;
+  double controlfrac;
+  double senderfrac;
+  RTPTime mininterval;
+  bool usehalfatstartup;
+  bool immediatebye;
+  bool SR_BYE;
 
-	bool usepredefinedssrc;
-	uint32_t predefinedssrc;
+  double sendermultiplier;
+  double generaltimeoutmultiplier;
+  double byetimeoutmultiplier;
+  double collisionmultiplier;
+  double notemultiplier;
 
-	std::string cname;
-	bool m_needThreadSafety;
+  bool usepredefinedssrc;
+  uint32_t predefinedssrc;
+
+  std::string cname;
+  bool m_needThreadSafety;
 };
 
 #endif // RTPSESSIONPARAMS_H
-
