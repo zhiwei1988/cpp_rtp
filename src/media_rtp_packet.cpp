@@ -1,4 +1,4 @@
-#include "rtppacket.h"
+#include "media_rtp_packet.h"
 #include "rtpstructs.h"
 #include "rtpdefines.h"
 #include "rtperrors.h"

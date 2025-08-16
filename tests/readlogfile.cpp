@@ -1,7 +1,7 @@
 #include "rtperrors.h"
 #include "rtpsession.h"
 #include "rtpsessionparams.h"
-#include "rtpendpoint.h"
+#include "media_rtp_endpoint.h"
 #include "media_rtcp_packet_factory.h"
 #include <stdio.h>
 #include <stdlib.h>

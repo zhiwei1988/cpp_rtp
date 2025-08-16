@@ -8,7 +8,7 @@
 
 #include "media_rtp_utils.h"
 #include "rtpconfig.h"
-#include "rtpendpoint.h"
+#include "media_rtp_endpoint.h"
 #include "rtpstructs.h"
 #include <cstdint>
 

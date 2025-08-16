@@ -2,7 +2,7 @@
 #include "rtpsources.h"
 #include "rtpdefines.h"
 #include "media_rtcp_packet_factory.h"
-#include "rtppacket.h"
+#include "media_rtp_packet.h"
 #include "rtpsourcedata.h"
 #include "media_rtp_utils.h"
 

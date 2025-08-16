@@ -4,9 +4,9 @@
 #include "rtpsessionparams.h"
 #include "rtperrors.h"
 #include "rtpsourcedata.h"
-#include "rtpendpoint.h"
+#include "media_rtp_endpoint.h"
 #include "media_rtp_tcp_transmitter.h"
-#include "rtppacket.h"
+#include "media_rtp_packet.h"
 #include <string.h>
 #include <stdlib.h>
 #include <iostream>

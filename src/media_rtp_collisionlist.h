@@ -7,7 +7,7 @@
 #define RTPCOLLISIONLIST_H
 
 #include "rtpconfig.h"
-#include "rtpendpoint.h"
+#include "media_rtp_endpoint.h"
 #include "media_rtp_utils.h"
 #include <list>
 

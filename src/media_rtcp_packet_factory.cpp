@@ -6,7 +6,7 @@
 #include "media_rtcp_packet_factory.h"
 #include "rtprawpacket.h"
 #include "rtpsources.h"
-#include "rtppacketbuilder.h"
+#include "media_rtp_packet_builder.h"
 #include "media_rtcp_scheduler.h"
 #include "rtpsourcedata.h"
 #include <cstring>

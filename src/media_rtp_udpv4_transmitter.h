@@ -1,8 +1,8 @@
 #pragma once
 
-#include "rtpabortdescriptors.h"
+#include "media_rtp_abort_descriptors.h"
 #include "rtpconfig.h"
-#include "rtpendpoint.h"
+#include "media_rtp_endpoint.h"
 #include "media_rtp_transmitter.h"
 #include <list>
 #include <unordered_map>

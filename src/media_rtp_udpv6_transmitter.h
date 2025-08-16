@@ -4,8 +4,8 @@
 
 #ifdef RTP_SUPPORT_IPV6
 
-#include "rtpabortdescriptors.h"
-#include "rtpendpoint.h"
+#include "media_rtp_abort_descriptors.h"
+#include "media_rtp_endpoint.h"
 #include "media_rtp_transmitter.h"
 #include <list>
 #include <string.h>

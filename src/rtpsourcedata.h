@@ -8,11 +8,11 @@
 
 #include "rtpconfig.h"
 #include "media_rtp_utils.h"
-#include "rtppacket.h"
+#include "media_rtp_packet.h"
 #include "rtperrors.h"
 #include <cstdint>
 #include "rtpsources.h"
-#include "rtpendpoint.h"
+#include "media_rtp_endpoint.h"
 #include <list>
 #include <string>
 

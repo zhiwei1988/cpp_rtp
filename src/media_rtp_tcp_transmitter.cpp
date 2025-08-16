@@ -1,6 +1,6 @@
 #include "media_rtp_tcp_transmitter.h"
 #include "rtprawpacket.h"
-#include "rtpendpoint.h"
+#include "media_rtp_endpoint.h"
 #include "media_rtp_utils.h"
 #include "rtpdefines.h"
 #include "rtpstructs.h"

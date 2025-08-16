@@ -8,9 +8,9 @@
 
 #include "media_rtcp_packet_factory.h"
 #include "media_rtcp_scheduler.h"
-#include "rtpcollisionlist.h"
+#include "media_rtp_collisionlist.h"
 #include "rtpconfig.h"
-#include "rtppacketbuilder.h"
+#include "media_rtp_packet_builder.h"
 #include "rtpsources.h"
 #include "media_rtp_utils.h"
 #include "media_rtp_transmitter.h"

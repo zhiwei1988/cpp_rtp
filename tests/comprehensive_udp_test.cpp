@@ -6,11 +6,11 @@
 #include "rtpsession.h"
 #include "media_rtp_udpv4_transmitter.h"
 #include "media_rtp_udpv6_transmitter.h"
-#include "rtpendpoint.h"
+#include "media_rtp_endpoint.h"
 #include "rtpsessionparams.h"
 #include "rtperrors.h"
 #include "rtpsourcedata.h"
-#include "rtppacket.h"
+#include "media_rtp_packet.h"
 #include <iostream>
 #include <string>
 #include <vector>

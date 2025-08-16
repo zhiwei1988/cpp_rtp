@@ -3,7 +3,7 @@
 #include "media_rtp_udpv4_transmitter.h"
 #include "rtperrors.h"
 #include "rtpsourcedata.h"
-#include "rtpendpoint.h"
+#include "media_rtp_endpoint.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>

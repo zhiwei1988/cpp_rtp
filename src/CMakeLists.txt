@@ -4,12 +4,12 @@ set (HEADERS
 	media_rtcp_packet_factory.h
 	media_rtcp_scheduler.h
 	media_rtcp_packet_factory.h
-	rtpcollisionlist.h
+	media_rtp_collisionlist.h
 	${PROJECT_BINARY_DIR}/src/rtpconfig.h
 	rtpdefines.h
 	rtperrors.h
-	rtppacket.h
-	rtppacketbuilder.h
+	media_rtp_packet.h
+	media_rtp_packet_builder.h
 	rtppollthread.h
 	media_rtp_utils.h
 	rtprawpacket.h
@@ -21,17 +21,17 @@ set (HEADERS
 	media_rtp_transmitter.h
 	media_rtp_udpv4_transmitter.h
 	media_rtp_udpv6_transmitter.h  
-	rtpendpoint.h
-	rtpabortdescriptors.h
+	media_rtp_endpoint.h
+	media_rtp_abort_descriptors.h
 	media_rtp_tcp_transmitter.h	
 )
 
 set(SOURCES
 	media_rtcp_packet_factory.cpp
 	media_rtcp_scheduler.cpp
-	rtpcollisionlist.cpp
-	rtppacket.cpp
-	rtppacketbuilder.cpp
+	media_rtp_collisionlist.cpp
+	media_rtp_packet.cpp
+	media_rtp_packet_builder.cpp
 	rtppollthread.cpp
 	media_rtp_utils.cpp
 	rtpsession.cpp
@@ -40,8 +40,8 @@ set(SOURCES
 	rtpsources.cpp
 	media_rtp_udpv4_transmitter.cpp
 	media_rtp_udpv6_transmitter.cpp 
-	rtpendpoint.cpp
-	rtpabortdescriptors.cpp
+	media_rtp_endpoint.cpp
+	media_rtp_abort_descriptors.cpp
 	media_rtp_tcp_transmitter.cpp
 )
 

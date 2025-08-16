@@ -13,11 +13,11 @@ using namespace std;
 
 #include "rtpsession.h"
 #include "media_rtp_udpv6_transmitter.h"
-#include "rtpendpoint.h"
+#include "media_rtp_endpoint.h"
 #include "rtpsessionparams.h"
 #include "rtperrors.h"
 #include "rtpsourcedata.h"
-#include "rtpabortdescriptors.h"
+#include "media_rtp_abort_descriptors.h"
 #include "media_rtp_utils.h"
 #include <stdlib.h>
 #include <stdio.h>

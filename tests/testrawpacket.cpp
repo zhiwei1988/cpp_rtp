@@ -1,6 +1,6 @@
 #include "rtpsession.h"
 #include "media_rtp_udpv4_transmitter.h"
-#include "rtpendpoint.h"
+#include "media_rtp_endpoint.h"
 #include "rtpsessionparams.h"
 #include "rtperrors.h"
 #include "rtpsourcedata.h"
