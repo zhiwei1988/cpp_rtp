@@ -2,10 +2,7 @@
 #include "rtpsession.h"
 #include "rtpsessionparams.h"
 #include "rtpendpoint.h"
-#include "rtcpcompoundpacket.h"
-#include "rtcpsrpacket.h"
-#include "rtcprrpacket.h"
-#include "rtcpbyepacket.h"
+#include "media_rtcp_packet_factory.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>

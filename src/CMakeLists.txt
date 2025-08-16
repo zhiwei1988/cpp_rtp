@@ -3,7 +3,7 @@ add_definitions(-DMEDIA_RTP_COMPILING)
 set (HEADERS
 	media_rtcp_packet_factory.h
 	media_rtcp_scheduler.h
-	rtcpsrpacket.h
+	media_rtcp_packet_factory.h
 	rtpcollisionlist.h
 	${PROJECT_BINARY_DIR}/src/rtpconfig.h
 	rtpdefines.h
@@ -29,7 +29,6 @@ set (HEADERS
 set(SOURCES
 	media_rtcp_packet_factory.cpp
 	media_rtcp_scheduler.cpp
-	rtcpsrpacket.cpp
 	rtpcollisionlist.cpp
 	rtppacket.cpp
 	rtppacketbuilder.cpp

@@ -9,7 +9,6 @@
 #include "rtppacketbuilder.h"
 #include "media_rtcp_scheduler.h"
 #include "rtpsourcedata.h"
-#include "rtcpsrpacket.h"
 #include <cstring>
 
 #ifdef RTP_SUPPORT_NETINET_IN
@@ -115,6 +114,39 @@ RTCPRRPacket::RTCPRRPacket(uint8_t *data,size_t datalength)
 	}
 
 	expectedlength = sizeof(RTCPCommonHeader)+sizeof(uint32_t);
+	expectedlength += sizeof(RTCPReceiverReport)*((int)hdr->count);
+
+	if (expectedlength != len)
+		return;
+	
+	knownformat = true;
+}
+
+// =============================================================================
+// RTCPSRPacket实现
+// =============================================================================
+
+RTCPSRPacket::RTCPSRPacket(uint8_t *data,size_t datalength)
+	: RTCPPacket(SR,data,datalength)
+{
+	knownformat = false;
+	
+	RTCPCommonHeader *hdr;
+	size_t len = datalength;
+	size_t expectedlength;
+	
+	hdr = (RTCPCommonHeader *)data;
+	if (hdr->padding)
+	{
+		uint8_t padcount = data[datalength-1];
+		if ((padcount & 0x03) != 0) // 不是 4 的倍数！（参见 rfc 3550 p 37）
+			return;
+		if (((size_t)padcount) >= len)
+			return;
+		len -= (size_t)padcount;
+	}
+
+	expectedlength = sizeof(RTCPCommonHeader)+sizeof(uint32_t)+sizeof(RTCPSenderReport);
 	expectedlength += sizeof(RTCPReceiverReport)*((int)hdr->count);
 
 	if (expectedlength != len)
@@ -1123,8 +1155,6 @@ int RTCPPacketBuilder::Init(size_t maxpacksize,double tsunit,const void *cname,s
 	maxpacketsize = maxpacksize;
 	timestampunit = tsunit;
 	
-	int status;
-	
 	// 设置 CNAME
 	own_cname.assign((const char*)cname, cnamelen);
 	
@@ -1536,16 +1566,12 @@ int RTCPPacketBuilder::FillInReportBlocks(RTCPCompoundPacketBuilder *rtcpcomppac
 }
 
 int RTCPPacketBuilder::FillInSDES(RTCPCompoundPacketBuilder *rtcpcomppack,bool *full,bool *processedall,int *added)
-{
-	int status;
-	uint8_t *data;
-	size_t datalen;
-	
+{	
 	*full = false;
 	*processedall = false;
 	*added = 0;
 
-			// 只处理 CNAME 项，不需要其他 SDES 项了
+	// 只处理 CNAME 项，不需要其他 SDES 项了
 
 	*processedall = true;
 	return 0;
