@@ -18,13 +18,13 @@ set (HEADERS
 	rtpsourcedata.h
 	rtpsources.h
 	rtpstructs.h
-	rtptransmitter.h
-	rtpudpv4transmitter.h
-	rtpudpv6transmitter.h  
+	media_rtp_transmitter.h
+	media_rtp_udpv4_transmitter.h
+	media_rtp_udpv6_transmitter.h  
 	rtpendpoint.h
 	rtpabortdescriptors.h
-	rtptcptransmitter.h
-	)
+	media_rtp_tcp_transmitter.h	
+)
 
 set(SOURCES
 	media_rtcp_packet_factory.cpp
@@ -38,12 +38,12 @@ set(SOURCES
 	rtpsessionparams.cpp
 	rtpsourcedata.cpp
 	rtpsources.cpp
-	rtpudpv4transmitter.cpp
-	rtpudpv6transmitter.cpp 
+	media_rtp_udpv4_transmitter.cpp
+	media_rtp_udpv6_transmitter.cpp 
 	rtpendpoint.cpp
 	rtpabortdescriptors.cpp
-	rtptcptransmitter.cpp
-	)
+	media_rtp_tcp_transmitter.cpp
+)
 
 
 #Temporarily disable warnings to test build

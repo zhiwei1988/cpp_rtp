@@ -5,7 +5,7 @@
 #include "media_rtp_utils.h"
 #include "rtpdefines.h"
 #include "media_rtcp_packet_factory.h"
-#include "rtptransmitter.h"
+#include "media_rtp_transmitter.h"
 #include "rtpsession.h"  // 需要完整定义来调用方法
 #include "media_rtcp_scheduler.h"  // 需要 RTCPScheduler 定义
 
@@ -930,7 +930,6 @@ void RTPSources::NoteTimeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 	for (auto& pair : sourcelist)
 	{
 		RTPSourceData *srcdat = pair.second;
-		size_t notelen;
 
         	// Note 项已删除，跳过此检查
 		
@@ -969,8 +968,6 @@ void RTPSources::MultipleTimeouts(const RTPTime &curtime,const RTPTime &senderti
 		RTPSourceData *srcdat = it->second;
 		bool deleted,issender,isactive;
 		bool byetimeout,normaltimeout,notetimeout;
-		
-		size_t notelen;
 		
 		issender = srcdat->IsSender();
 		isactive = srcdat->IsActive();

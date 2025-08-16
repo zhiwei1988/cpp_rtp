@@ -13,7 +13,7 @@
 #include "rtppacketbuilder.h"
 #include "rtpsources.h"
 #include "media_rtp_utils.h"
-#include "rtptransmitter.h"
+#include "media_rtp_transmitter.h"
 #include <list>
 
 #include <mutex>

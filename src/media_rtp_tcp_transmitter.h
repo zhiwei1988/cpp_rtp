@@ -1,13 +1,7 @@
-/**
- * \file rtptcptransmitter.h
- */
-
-#ifndef RTPTCPTRANSMITTER_H
-
-#define RTPTCPTRANSMITTER_H
+#pragma once
 
 #include "rtpconfig.h"
-#include "rtptransmitter.h"
+#include "media_rtp_transmitter.h"
 #include "rtpabortdescriptors.h"
 #include <map>
 #include <list>
@@ -166,6 +160,4 @@ private:
 
 inline void RTPTCPTransmitter::OnSendError(int) { }
 inline void RTPTCPTransmitter::OnReceiveError(int) { }
-
-#endif // RTPTCPTRANSMITTER_H
 

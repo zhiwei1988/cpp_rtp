@@ -1,5 +1,5 @@
 /**
- * \file rtptransmitter.h
+ * \file media_rtp_transmitter.h
  */
 
 #ifndef RTPTRANSMITTER_H

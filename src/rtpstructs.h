@@ -11,15 +11,6 @@
 
 struct RTPHeader
 {
-#ifdef RTP_BIG_ENDIAN
-	uint8_t version:2;
-	uint8_t padding:1;
-	uint8_t extension:1;
-	uint8_t csrccount:4;
-	
-	uint8_t marker:1;
-	uint8_t payloadtype:7;
-#else // little endian
 	uint8_t csrccount:4;
 	uint8_t extension:1;
 	uint8_t padding:1;
@@ -27,7 +18,6 @@ struct RTPHeader
 	
 	uint8_t payloadtype:7;
 	uint8_t marker:1;
-#endif // RTP_BIG_ENDIAN
 	
 	uint16_t sequencenumber;
 	uint32_t timestamp;
@@ -47,15 +37,9 @@ struct RTPSourceIdentifier
 
 struct RTCPCommonHeader
 {
-#ifdef RTP_BIG_ENDIAN
-	uint8_t version:2;
-	uint8_t padding:1;
-	uint8_t count:5;
-#else // little endian
 	uint8_t count:5;
 	uint8_t padding:1;
 	uint8_t version:2;
-#endif // RTP_BIG_ENDIAN
 
 	uint8_t packettype;
 	uint16_t length;

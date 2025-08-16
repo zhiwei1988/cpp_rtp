@@ -4,8 +4,8 @@
  */
 
 #include "rtpsession.h"
-#include "rtpudpv4transmitter.h"
-#include "rtpudpv6transmitter.h"
+#include "media_rtp_udpv4_transmitter.h"
+#include "media_rtp_udpv6_transmitter.h"
 #include "rtpendpoint.h"
 #include "rtpsessionparams.h"
 #include "rtperrors.h"

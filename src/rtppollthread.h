@@ -8,7 +8,7 @@
 
 #include "rtpconfig.h"
 
-#include "rtptransmitter.h"
+#include "media_rtp_transmitter.h"
 
 #include <thread>
 #include <mutex>

@@ -3,7 +3,7 @@
 #include "rtpabortdescriptors.h"
 #include "rtpconfig.h"
 #include "rtpendpoint.h"
-#include "rtptransmitter.h"
+#include "media_rtp_transmitter.h"
 #include <list>
 #include <unordered_map>
 #include <unordered_set>
