@@ -1,9 +1,9 @@
 #include "media_rtcp_scheduler.h"
-#include "rtpsources.h"
-#include "rtpdefines.h"
+#include "media_rtp_sources.h"
+#include "media_rtp_defines.h"
 #include "media_rtcp_packet_factory.h"
 #include "media_rtp_packet.h"
-#include "rtpsourcedata.h"
+#include "media_rtp_source_data.h"
 #include "media_rtp_utils.h"
 
 #define RTCPSCHED_MININTERVAL						1.0

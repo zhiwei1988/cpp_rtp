@@ -8,8 +8,8 @@
 
 #include "media_rtp_utils.h"
 #include "rtpconfig.h"
-#include "rtpdefines.h"
-#include "rtperrors.h"
+#include "media_rtp_defines.h"
+#include "media_rtp_errors.h"
 #include <cstdint>
 
 class RTPSources;

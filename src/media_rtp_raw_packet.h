@@ -2,14 +2,14 @@
  * \file rtprawpacket.h
  */
 
-#ifndef RTPRAWPACKET_H
+#ifndef MEDIA_RTP_RAW_PACKET_H
 
-#define RTPRAWPACKET_H
+#define MEDIA_RTP_RAW_PACKET_H
 
 #include "media_rtp_utils.h"
 #include "rtpconfig.h"
 #include "media_rtp_endpoint.h"
-#include "rtpstructs.h"
+#include "media_rtp_structs.h"
 #include <cstdint>
 
 /** 此类由传输组件用于存储传入的RTP和RTCP数据。 */
@@ -144,4 +144,4 @@ inline void RTPRawPacket::SetSenderAddress(RTPEndpoint *address) {
   senderaddress = address;
 }
 
-#endif // RTPRAWPACKET_H
+#endif // MEDIA_RTP_RAW_PACKET_H

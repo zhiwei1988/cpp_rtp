@@ -2,16 +2,16 @@
  * \file rtpsession.h
  */
 
-#ifndef RTPSESSION_H
+#ifndef MEDIA_RTP_SESSION_H
 
-#define RTPSESSION_H
+#define MEDIA_RTP_SESSION_H
 
 #include "media_rtcp_packet_factory.h"
 #include "media_rtcp_scheduler.h"
 #include "media_rtp_collisionlist.h"
 #include "rtpconfig.h"
 #include "media_rtp_packet_builder.h"
-#include "rtpsources.h"
+#include "media_rtp_sources.h"
 #include "media_rtp_utils.h"
 #include "media_rtp_transmitter.h"
 #include <list>
@@ -540,4 +540,4 @@ inline bool RTPSession::OnChangeIncomingData(RTPRawPacket *) { return true; }
 inline void RTPSession::OnValidatedRTPPacket(RTPSourceData *, RTPPacket *, bool,
                                              bool *) {}
 
-#endif // RTPSESSION_H
+#endif // MEDIA_RTP_SESSION_H

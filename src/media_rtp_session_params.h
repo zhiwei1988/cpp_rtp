@@ -2,13 +2,13 @@
  * \file rtpsessionparams.h
  */
 
-#ifndef RTPSESSIONPARAMS_H
+#ifndef MEDIA_RTP_SESSION_PARAMS_H
 
-#define RTPSESSIONPARAMS_H
+#define MEDIA_RTP_SESSION_PARAMS_H
 
 #include "media_rtp_utils.h"
 #include "rtpconfig.h"
-#include "rtpsources.h"
+#include "media_rtp_sources.h"
 #include "media_rtp_transmitter.h"
 #include <cstdint>
 #include <string>
@@ -221,4 +221,4 @@ private:
   bool m_needThreadSafety;
 };
 
-#endif // RTPSESSIONPARAMS_H
+#endif // MEDIA_RTP_SESSION_PARAMS_H

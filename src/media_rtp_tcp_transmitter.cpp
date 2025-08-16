@@ -1,10 +1,10 @@
 #include "media_rtp_tcp_transmitter.h"
-#include "rtprawpacket.h"
+#include "media_rtp_raw_packet.h"
 #include "media_rtp_endpoint.h"
 #include "media_rtp_utils.h"
-#include "rtpdefines.h"
-#include "rtpstructs.h"
-#include "rtperrors.h"
+#include "media_rtp_defines.h"
+#include "media_rtp_structs.h"
+#include "media_rtp_errors.h"
 #include <stdio.h>
 #include <assert.h>
 #include <vector>

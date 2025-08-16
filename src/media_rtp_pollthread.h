@@ -2,9 +2,9 @@
  * \file rtppollthread.h
  */
 
-#ifndef RTPPOLLTHREAD_H
+#ifndef MEDIA_RTP_POLLTHREAD_H
 
-#define RTPPOLLTHREAD_H
+#define MEDIA_RTP_POLLTHREAD_H
 
 #include "rtpconfig.h"
 
@@ -37,4 +37,4 @@ private:
 	RTCPScheduler &rtcpsched;
 };
 
-#endif // RTPPOLLTHREAD_H
+#endif // MEDIA_RTP_POLLTHREAD_H

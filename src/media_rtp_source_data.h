@@ -2,16 +2,16 @@
  * \file rtpsourcedata.h
  */
 
-#ifndef RTPSOURCEDATA_H
+#ifndef MEDIA_RTP_SOURCE_DATA_H
 
-#define RTPSOURCEDATA_H
+#define MEDIA_RTP_SOURCE_DATA_H
 
 #include "rtpconfig.h"
 #include "media_rtp_utils.h"
 #include "media_rtp_packet.h"
-#include "rtperrors.h"
+#include "media_rtp_errors.h"
 #include <cstdint>
-#include "rtpsources.h"
+#include "media_rtp_sources.h"
 #include "media_rtp_endpoint.h"
 #include <list>
 #include <string>
@@ -469,5 +469,5 @@ inline int RTPSourceData::SetRTCPDataAddress(const RTPEndpoint *a)
 	return 0;
 }
 
-#endif // RTPSOURCEDATA_H
+#endif // MEDIA_RTP_SOURCE_DATA_H
 

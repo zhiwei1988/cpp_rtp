@@ -2,9 +2,9 @@
  * \file rtpstructs.h
  */
 
-#ifndef RTPSTRUCTS_H
+#ifndef MEDIA_RTP_STRUCTS_H
 
-#define RTPSTRUCTS_H
+#define MEDIA_RTP_STRUCTS_H
 
 #include "rtpconfig.h"
 #include <cstdint>
@@ -71,5 +71,5 @@ struct RTCPSDESHeader
 	uint8_t length;
 };
 
-#endif // RTPSTRUCTS
+#endif // MEDIA_RTP_STRUCTS_H
 

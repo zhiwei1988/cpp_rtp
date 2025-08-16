@@ -1,8 +1,8 @@
-#include "rtppollthread.h"
-#include "rtpsession.h"
+#include "media_rtp_pollthread.h"
+#include "media_rtp_session.h"
 #include "media_rtcp_scheduler.h"
-#include "rtperrors.h"
-#include "rtprawpacket.h"
+#include "media_rtp_errors.h"
+#include "media_rtp_raw_packet.h"
 #include <time.h>
 #include <iostream>
 

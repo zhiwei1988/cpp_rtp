@@ -4,11 +4,11 @@
  */
 
 #include "media_rtcp_packet_factory.h"
-#include "rtprawpacket.h"
-#include "rtpsources.h"
+#include "media_rtp_raw_packet.h"
+#include "media_rtp_sources.h"
 #include "media_rtp_packet_builder.h"
 #include "media_rtcp_scheduler.h"
-#include "rtpsourcedata.h"
+#include "media_rtp_source_data.h"
 #include <cstring>
 
 #ifdef RTP_SUPPORT_NETINET_IN

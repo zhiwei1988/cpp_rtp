@@ -17,9 +17,9 @@
 #pragma once
 
 #include "rtpconfig.h"
-#include "rtpdefines.h"
-#include "rtperrors.h"
-#include "rtpstructs.h"
+#include "media_rtp_defines.h"
+#include "media_rtp_errors.h"
+#include "media_rtp_structs.h"
 #include "media_rtp_utils.h"
 #include <cstddef>
 #include <cstdint>

@@ -1,8 +1,8 @@
 #include "media_rtp_packet.h"
-#include "rtpstructs.h"
-#include "rtpdefines.h"
-#include "rtperrors.h"
-#include "rtprawpacket.h"
+#include "media_rtp_structs.h"
+#include "media_rtp_defines.h"
+#include "media_rtp_errors.h"
+#include "media_rtp_raw_packet.h"
 #ifdef RTP_SUPPORT_NETINET_IN
 	#include <netinet/in.h>
 #endif // RTP_SUPPORT_NETINET_IN

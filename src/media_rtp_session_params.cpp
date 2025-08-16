@@ -1,7 +1,7 @@
 #include "rtpconfig.h"
-#include "rtpsessionparams.h"
-#include "rtpdefines.h"
-#include "rtperrors.h"
+#include "media_rtp_session_params.h"
+#include "media_rtp_defines.h"
+#include "media_rtp_errors.h"
 
 
 

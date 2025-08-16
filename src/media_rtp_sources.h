@@ -2,9 +2,9 @@
  * \file rtpsources.h
  */
 
-#ifndef RTPSOURCES_H
+#ifndef MEDIA_RTP_SOURCES_H
 
-#define RTPSOURCES_H
+#define MEDIA_RTP_SOURCES_H
 
 #include "rtpconfig.h"
 #include <unordered_map>
@@ -309,5 +309,5 @@ private:
 };
 
 
-#endif // RTPSOURCES_H
+#endif // MEDIA_RTP_SOURCES_H
 

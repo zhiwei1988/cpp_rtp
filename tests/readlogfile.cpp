@@ -1,6 +1,6 @@
-#include "rtperrors.h"
-#include "rtpsession.h"
-#include "rtpsessionparams.h"
+#include "media_rtp_errors.h"
+#include "media_rtp_session.h"
+#include "media_rtp_session_params.h"
 #include "media_rtp_endpoint.h"
 #include "media_rtcp_packet_factory.h"
 #include <stdio.h>

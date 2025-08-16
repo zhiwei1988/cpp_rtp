@@ -11,12 +11,12 @@ using namespace std;
 
 #if defined(RTP_SUPPORT_IPV6)
 
-#include "rtpsession.h"
+#include "media_rtp_session.h"
 #include "media_rtp_udpv6_transmitter.h"
 #include "media_rtp_endpoint.h"
-#include "rtpsessionparams.h"
-#include "rtperrors.h"
-#include "rtpsourcedata.h"
+#include "media_rtp_session_params.h"
+#include "media_rtp_errors.h"
+#include "media_rtp_source_data.h"
 #include "media_rtp_abort_descriptors.h"
 #include "media_rtp_utils.h"
 #include <stdlib.h>

@@ -1,7 +1,7 @@
 #include "media_rtp_packet_builder.h"
-#include "rtperrors.h"
+#include "media_rtp_errors.h"
 #include "media_rtp_packet.h"
-#include "rtpsources.h"
+#include "media_rtp_sources.h"
 #include "media_rtp_utils.h"
 #include <time.h>
 #include <stdlib.h>

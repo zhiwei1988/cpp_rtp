@@ -4,10 +4,10 @@
 
 #ifdef RTP_SUPPORT_IPV6
 
-#include "rtprawpacket.h"
+#include "media_rtp_raw_packet.h"
 #include "media_rtp_utils.h"
-#include "rtpdefines.h"
-#include "rtperrors.h"
+#include "media_rtp_defines.h"
+#include "media_rtp_errors.h"
 #include <stdio.h>
 
 #define RTPUDPV6TRANS_MAXPACKSIZE							65535
