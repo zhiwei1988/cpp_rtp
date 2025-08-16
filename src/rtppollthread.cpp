@@ -1,6 +1,6 @@
 #include "rtppollthread.h"
 #include "rtpsession.h"
-#include "rtcpscheduler.h"
+#include "media_rtcp_scheduler.h"
 #include "rtperrors.h"
 #include "rtprawpacket.h"
 #include <time.h>

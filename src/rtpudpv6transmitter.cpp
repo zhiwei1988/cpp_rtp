@@ -5,7 +5,7 @@
 #ifdef RTP_SUPPORT_IPV6
 
 #include "rtprawpacket.h"
-#include "rtp_protocol_utils.h"
+#include "media_rtp_utils.h"
 #include "rtpdefines.h"
 #include "rtperrors.h"
 #include <stdio.h>

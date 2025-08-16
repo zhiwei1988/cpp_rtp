@@ -6,7 +6,7 @@
 
 #define RTPSESSIONPARAMS_H
 
-#include "rtp_protocol_utils.h"
+#include "media_rtp_utils.h"
 #include "rtpconfig.h"
 #include "rtpsources.h"
 #include "rtptransmitter.h"

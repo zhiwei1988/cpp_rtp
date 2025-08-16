@@ -7,7 +7,7 @@
 #define RTPSOURCEDATA_H
 
 #include "rtpconfig.h"
-#include "rtp_protocol_utils.h"
+#include "media_rtp_utils.h"
 #include "rtppacket.h"
 #include "rtperrors.h"
 #include <cstdint>

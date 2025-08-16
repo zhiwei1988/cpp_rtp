@@ -8,9 +8,9 @@
 #include "rtpdefines.h"
 #include "rtprawpacket.h"
 #include "rtppacket.h"
-#include "rtp_protocol_utils.h"
+#include "media_rtp_utils.h"
 #ifdef RTP_SUPPORT_SENDAPP
-	#include "rtcpcompoundpacket.h"
+	#include "media_rtcp_packet_factory.h"
 #endif // RTP_SUPPORT_SENDAPP
 #include <cstring>
 #include <unistd.h>

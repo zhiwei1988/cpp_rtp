@@ -5,7 +5,7 @@
 #include "rtperrors.h"
 #include "rtpsourcedata.h"
 #include "rtprawpacket.h"
-#include "rtcpcompoundpacket.h"
+#include "media_rtcp_packet_factory.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>

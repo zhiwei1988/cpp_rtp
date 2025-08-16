@@ -6,14 +6,13 @@
 
 #define RTPSESSION_H
 
-#include "rtcpcompoundpacketbuilder.h"
-#include "rtcppacketbuilder.h"
-#include "rtcpscheduler.h"
+#include "media_rtcp_packet_factory.h"
+#include "media_rtcp_scheduler.h"
 #include "rtpcollisionlist.h"
 #include "rtpconfig.h"
 #include "rtppacketbuilder.h"
 #include "rtpsources.h"
-#include "rtp_protocol_utils.h"
+#include "media_rtp_utils.h"
 #include "rtptransmitter.h"
 #include <list>
 

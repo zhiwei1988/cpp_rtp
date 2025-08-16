@@ -1,17 +1,9 @@
 add_definitions(-DMEDIA_RTP_COMPILING)
 
 set (HEADERS
-	rtcpapppacket.h
-	rtcpbyepacket.h
-	rtcpcompoundpacket.h
-	rtcpcompoundpacketbuilder.h
-	rtcppacket.h
-	rtcppacketbuilder.h
-	rtcprrpacket.h
-	rtcpscheduler.h
-	rtcpsdespacket.h
+	media_rtcp_packet_factory.h
+	media_rtcp_scheduler.h
 	rtcpsrpacket.h
-	rtcpunknownpacket.h
 	rtpcollisionlist.h
 	${PROJECT_BINARY_DIR}/src/rtpconfig.h
 	rtpdefines.h
@@ -19,14 +11,13 @@ set (HEADERS
 	rtppacket.h
 	rtppacketbuilder.h
 	rtppollthread.h
-	rtp_protocol_utils.h
+	media_rtp_utils.h
 	rtprawpacket.h
 	rtpsession.h
 	rtpsessionparams.h
 	rtpsourcedata.h
 	rtpsources.h
 	rtpstructs.h
-	rtp_protocol_utils.h
 	rtptransmitter.h
 	rtpudpv4transmitter.h
 	rtpudpv6transmitter.h  
@@ -36,21 +27,14 @@ set (HEADERS
 	)
 
 set(SOURCES
-	rtcpapppacket.cpp
-	rtcpbyepacket.cpp
-	rtcpcompoundpacket.cpp
-	rtcpcompoundpacketbuilder.cpp
-	rtcppacket.cpp
-	rtcppacketbuilder.cpp
-	rtcprrpacket.cpp
-	rtcpscheduler.cpp
-	rtcpsdespacket.cpp
+	media_rtcp_packet_factory.cpp
+	media_rtcp_scheduler.cpp
 	rtcpsrpacket.cpp
 	rtpcollisionlist.cpp
 	rtppacket.cpp
 	rtppacketbuilder.cpp
 	rtppollthread.cpp
-	rtp_protocol_utils.cpp
+	media_rtp_utils.cpp
 	rtpsession.cpp
 	rtpsessionparams.cpp
 	rtpsourcedata.cpp

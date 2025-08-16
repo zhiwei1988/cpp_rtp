@@ -6,7 +6,7 @@
 
 #define RTPRAWPACKET_H
 
-#include "rtp_protocol_utils.h"
+#include "media_rtp_utils.h"
 #include "rtpconfig.h"
 #include "rtpendpoint.h"
 #include "rtpstructs.h"

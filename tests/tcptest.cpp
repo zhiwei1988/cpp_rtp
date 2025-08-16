@@ -1,5 +1,5 @@
 #include "rtpconfig.h"
-#include "rtp_protocol_utils.h"
+#include "media_rtp_utils.h"
 #include "rtpsession.h"
 #include "rtpsessionparams.h"
 #include "rtperrors.h"

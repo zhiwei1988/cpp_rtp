@@ -6,8 +6,8 @@
 
 #define RTCPSRPACKET_H
 
-#include "rtcppacket.h"
-#include "rtp_protocol_utils.h"
+#include "media_rtcp_packet_factory.h"
+#include "media_rtp_utils.h"
 #include "rtpconfig.h"
 #include "rtpstructs.h"
 #ifdef RTP_SUPPORT_NETINET_IN
