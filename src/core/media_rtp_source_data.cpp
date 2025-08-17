@@ -1,6 +1,6 @@
 #include "media_rtp_source_data.h"
 #include "media_rtp_defines.h"
-#include "media_rtp_packet.h"
+#include "media_rtp_packet_factory.h"
 #include <string.h>
 #ifdef RTP_SUPPORT_NETINET_IN
 	#include <netinet/in.h>

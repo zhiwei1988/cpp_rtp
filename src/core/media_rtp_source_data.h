@@ -8,7 +8,7 @@
 
 #include "rtpconfig.h"
 #include "media_rtp_utils.h"
-#include "media_rtp_packet.h"
+#include "media_rtp_packet_factory.h"
 #include "media_rtp_errors.h"
 #include <cstdint>
 #include "media_rtp_sources.h"

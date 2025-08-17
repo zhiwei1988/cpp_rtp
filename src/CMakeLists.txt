@@ -15,7 +15,6 @@ set(CORE_HEADERS
 set(PACKETS_HEADERS
 	packets/media_rtcp_packet_factory.h
 	packets/media_rtp_packet_factory.h
-	packets/media_rtp_packet.h
 )
 
 # 传输器头文件
@@ -60,7 +59,6 @@ set(CORE_SOURCES
 set(PACKETS_SOURCES
 	packets/media_rtcp_packet_factory.cpp
 	packets/media_rtp_packet_factory.cpp
-	packets/media_rtp_packet_builder.cpp
 )
 
 # 传输器源文件

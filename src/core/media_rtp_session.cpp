@@ -7,7 +7,6 @@
 #include "media_rtp_session_params.h"
 #include "media_rtp_defines.h"
 #include "media_rtp_packet_factory.h"
-#include "media_rtp_packet.h"
 #include "media_rtp_utils.h"
 #ifdef RTP_SUPPORT_SENDAPP
 	#include "media_rtcp_packet_factory.h"
