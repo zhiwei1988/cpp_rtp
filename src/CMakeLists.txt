@@ -1,48 +1,45 @@
 add_definitions(-DMEDIA_RTP_COMPILING)
 
 set (HEADERS
-	media_rtcp_packet_factory.h
-	media_rtcp_scheduler.h
-	media_rtcp_packet_factory.h
-	media_rtp_collisionlist.h
-	${PROJECT_BINARY_DIR}/src/rtpconfig.h
-	media_rtp_defines.h
-	media_rtp_errors.h
-	media_rtp_packet.h
-	media_rtp_packet_builder.h
-	media_rtp_pollthread.h
-	media_rtp_utils.h
-	media_rtp_raw_packet.h
-	media_rtp_session.h
-	media_rtp_session_params.h
-	media_rtp_source_data.h
-	media_rtp_sources.h
-	media_rtp_structs.h
-	media_rtp_transmitter.h
-	media_rtp_udpv4_transmitter.h
-	media_rtp_udpv6_transmitter.h  
-	media_rtp_endpoint.h
-	media_rtp_abort_descriptors.h
-	media_rtp_tcp_transmitter.h	
+    packets/media_rtcp_packet_factory.h
+    core/media_rtcp_scheduler.h
+    core/media_rtp_collisionlist.h
+    ${PROJECT_BINARY_DIR}/src/rtpconfig.h
+    utils/media_rtp_defines.h
+    utils/media_rtp_errors.h
+    packets/media_rtp_packet.h
+    packets/media_rtp_packet_factory.h
+    utils/media_rtp_pollthread.h
+    utils/media_rtp_utils.h
+    core/media_rtp_session.h
+    core/media_rtp_session_params.h
+    core/media_rtp_source_data.h
+    core/media_rtp_sources.h
+    utils/media_rtp_structs.h
+    transmitters/media_rtp_transmitter.h
+    transmitters/media_rtp_udpv4_transmitter.h
+    transmitters/media_rtp_udpv6_transmitter.h  
+    utils/media_rtp_endpoint.h
+    core/media_rtp_abort_descriptors.h
+    transmitters/media_rtp_tcp_transmitter.h 
 )
 
 set(SOURCES
-	media_rtcp_packet_factory.cpp
-	media_rtcp_scheduler.cpp
-	media_rtp_collisionlist.cpp
-	media_rtp_packet.cpp
-	media_rtp_packet_builder.cpp
-	media_rtp_pollthread.cpp
-	media_rtp_utils.cpp
-	media_rtp_session.cpp
-	media_rtp_session_params.cpp
-	media_rtp_source_data.cpp
-	media_rtp_sources.cpp
-	media_rtp_udpv4_transmitter.cpp
-	media_rtp_udpv6_transmitter.cpp 
-	media_rtp_endpoint.cpp
-	media_rtp_abort_descriptors.cpp
-	media_rtp_tcp_transmitter.cpp
+    packets/media_rtcp_packet_factory.cpp
+    core/media_rtcp_scheduler.cpp
+    core/media_rtp_collisionlist.cpp
+    packets/media_rtp_packet_factory.cpp
+    utils/media_rtp_pollthread.cpp
+    utils/media_rtp_utils.cpp
+    core/media_rtp_session.cpp
+    core/media_rtp_session_params.cpp
+    core/media_rtp_source_data.cpp
+    core/media_rtp_sources.cpp
+    transmitters/media_rtp_udpv4_transmitter.cpp
+    transmitters/media_rtp_udpv6_transmitter.cpp 
+    utils/media_rtp_endpoint.cpp
+    core/media_rtp_abort_descriptors.cpp
+    transmitters/media_rtp_tcp_transmitter.cpp
 )
 
 

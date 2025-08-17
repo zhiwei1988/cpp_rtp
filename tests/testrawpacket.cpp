@@ -4,7 +4,7 @@
 #include "media_rtp_session_params.h"
 #include "media_rtp_errors.h"
 #include "media_rtp_source_data.h"
-#include "media_rtp_raw_packet.h"
+#include "media_rtp_packet_factory.h"
 #include "media_rtcp_packet_factory.h"
 #include <stdlib.h>
 #include <stdio.h>

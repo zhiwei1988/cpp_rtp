@@ -4,7 +4,7 @@
 
 #ifdef RTP_SUPPORT_IPV6
 
-#include "media_rtp_raw_packet.h"
+#include "media_rtp_packet_factory.h"
 #include "media_rtp_utils.h"
 #include "media_rtp_defines.h"
 #include "media_rtp_errors.h"

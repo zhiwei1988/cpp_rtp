@@ -10,7 +10,7 @@
 #include "media_rtcp_scheduler.h"
 #include "media_rtp_collisionlist.h"
 #include "rtpconfig.h"
-#include "media_rtp_packet_builder.h"
+#include "media_rtp_packet_factory.h"
 #include "media_rtp_sources.h"
 #include "media_rtp_utils.h"
 #include "media_rtp_transmitter.h"
