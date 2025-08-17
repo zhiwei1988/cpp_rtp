@@ -117,9 +117,9 @@ set(RTP_WINSOCK_HEADERS "")
 
 # Linux - no import/export decoration needed (removed unused macros)
 
-configure_file("${PROJECT_SOURCE_DIR}/src/rtpconfig.h.in" "${PROJECT_BINARY_DIR}/src/rtpconfig.h")
+configure_file("${PROJECT_SOURCE_DIR}/src/utils/rtpconfig.h.in" "${PROJECT_BINARY_DIR}/src/utils/rtpconfig.h")
 
-save_paths(MEDIA_RTP_INTERNAL_INCLUDES "${PROJECT_SOURCE_DIR}/src" "${PROJECT_BINARY_DIR}/src")
+save_paths(MEDIA_RTP_INTERNAL_INCLUDES "${PROJECT_SOURCE_DIR}/src" "${PROJECT_BINARY_DIR}/src" "${PROJECT_BINARY_DIR}/src/utils")
 
 add_subdirectory(src)
 
