@@ -1,6 +1,6 @@
 #include "media_rtp_sources.h"
 #include "media_rtp_errors.h"
-#include "media_rtp_raw_packet.h"
+#include "media_rtp_packet_factory.h"
 #include "media_rtp_source_data.h"
 #include "media_rtp_utils.h"
 #include "media_rtp_defines.h"

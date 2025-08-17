@@ -2,7 +2,7 @@
 #include "media_rtp_session.h"
 #include "media_rtcp_scheduler.h"
 #include "media_rtp_errors.h"
-#include "media_rtp_raw_packet.h"
+#include "media_rtp_packet_factory.h"
 #include <time.h>
 #include <iostream>
 

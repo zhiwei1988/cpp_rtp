@@ -1,16 +1,18 @@
+#include "media_rtp_packet_factory.h"
 #include "media_rtp_packet.h"
 #include "media_rtp_structs.h"
 #include "media_rtp_defines.h"
 #include "media_rtp_errors.h"
-#include "media_rtp_raw_packet.h"
+#include "media_rtp_sources.h"
+#include "media_rtp_utils.h"
 #ifdef RTP_SUPPORT_NETINET_IN
 	#include <netinet/in.h>
 #endif // RTP_SUPPORT_NETINET_IN
 #include <string.h>
+#include <time.h>
+#include <stdlib.h>
 
-
-
-
+// ===================== RTPPacket implementation (moved from media_rtp_packet.cpp) =====================
 
 void RTPPacket::Clear()
 {
@@ -281,5 +283,4 @@ int RTPPacket::BuildPacket(uint8_t payloadtype,const void *payloaddata,size_t pa
 	return 0;
 }
 
-
-
+// ===================== End of RTPPacket implementation =====================

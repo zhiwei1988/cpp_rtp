@@ -2,10 +2,10 @@ add_definitions(-DMEDIA_RTP_COMPILING)
 
 # 核心会话管理头文件
 set(CORE_HEADERS
-	core/media_rtp_session.h
 	core/media_rtcp_scheduler.h
 	core/media_rtp_abort_descriptors.h
 	core/media_rtp_collisionlist.h
+	core/media_rtp_session.h
 	core/media_rtp_session_params.h
 	core/media_rtp_source_data.h
 	core/media_rtp_sources.h
@@ -14,9 +14,8 @@ set(CORE_HEADERS
 # 数据包处理头文件
 set(PACKETS_HEADERS
 	packets/media_rtcp_packet_factory.h
-	packets/media_rtp_packet_builder.h
+	packets/media_rtp_packet_factory.h
 	packets/media_rtp_packet.h
-	packets/media_rtp_raw_packet.h
 )
 
 # 传输器头文件
@@ -60,8 +59,8 @@ set(CORE_SOURCES
 # 数据包处理源文件
 set(PACKETS_SOURCES
 	packets/media_rtcp_packet_factory.cpp
+	packets/media_rtp_packet_factory.cpp
 	packets/media_rtp_packet_builder.cpp
-	packets/media_rtp_packet.cpp
 )
 
 # 传输器源文件
