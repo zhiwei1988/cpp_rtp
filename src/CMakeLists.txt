@@ -33,7 +33,7 @@ set(UTILS_HEADERS
 	utils/media_rtp_structs.h
 	utils/media_rtp_endpoint.h
 	utils/media_rtp_pollthread.h
-	${PROJECT_BINARY_DIR}/src/utils/rtpconfig.h
+	${PROJECT_BINARY_DIR}/src/rtpconfig.h
 )
 
 # 合并所有头文件
@@ -121,4 +121,3 @@ apply_include_paths("${MEDIA_RTP_EXTERNAL_INCLUDES}")
 
 install(FILES ${HEADERS} DESTINATION include/media_rtp)
 install(TARGETS ${MEDIA_RTP_INSTALLTARGETS} DESTINATION ${LIBRARY_INSTALL_DIR})
-

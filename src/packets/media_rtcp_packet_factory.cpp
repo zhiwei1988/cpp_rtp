@@ -1515,7 +1515,14 @@ int RTCPPacketBuilder::FillInReportBlocks(RTCPCompoundPacketBuilder *rtcpcomppac
 	*added = addedcount;
 	*skipped = skippedcount;
 	*full = filled;
-	
+
+	// 如果源表为空，避免后续对当前源的解引用
+	if (sources.GetTotalCount() == 0)
+	{
+		*atendoflist = true;
+		return 0;
+	}
+
 			if (!atend) // 搜索可用源
 	{
 		bool shouldprocess = false;
